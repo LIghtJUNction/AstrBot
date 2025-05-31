@@ -1,8 +1,8 @@
 import click
 
-@click.command()
-@click.option("--all", "-a", is_flag=True, help="列出未安装的插件")
-def list(all: bool):
+@click.command("list")
+@click.option("--all", "-a" , "show_all" , is_flag=True, help="列出未安装的插件")
+def list_impl(show_all: bool):
     """列出插件"""
     from ..utils import (
         get_astrbot_root,
@@ -36,11 +36,11 @@ def list(all: bool):
     not_installed_plugins = [
         p for p in plugins if p["status"] == PluginStatus.NOT_INSTALLED
     ]
-    if not_installed_plugins and all:
+    if not_installed_plugins and show_all:
         display_plugins(not_installed_plugins, "未安装的插件", "blue")
 
     if (
         not any([not_published_plugins, need_update_plugins, installed_plugins])
-        and not all
+        and not show_all
     ):
         click.echo(click.style("未安装任何插件", fg="yellow"))
