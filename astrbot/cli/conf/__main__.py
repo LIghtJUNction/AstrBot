@@ -63,7 +63,7 @@ def conf(ctx, timezone: str, log_level: str, dashboard_port: int, dashboard_user
         else:
             # 显示帮助信息
             click.echo(click.style("AstrBot 配置管理", fg="blue", bold=True))
-            click.echo()
+            click.echo(click.style("=" * 30, fg="green"))
             click.echo("可用的配置命令:")
             click.echo(f"  {click.style('set', fg='magenta')}    设置配置项")
             click.echo(f"  {click.style('get', fg='magenta')}    获取配置项")

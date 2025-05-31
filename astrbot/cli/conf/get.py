@@ -16,7 +16,7 @@ def get(key: str = None, format: str = 'simple', show_type: bool = False, all: b
     
     示例:
     \b
-    astrbot conf get                    # 显示已知配置项
+    astrbot conf get                    # 显示所有的已知配置项
     astrbot conf get --all              # 显示所有配置项
     astrbot conf get log_level          # 获取特定配置
     astrbot conf get --format json     # JSON格式输出

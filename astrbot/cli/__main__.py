@@ -26,7 +26,7 @@ def cli() -> None:
     click.echo(click.style(logo_tmpl, fg="cyan"))
     click.echo(click.style("Welcome to AstrBot CLI!", fg="cyan", bold=True))
     click.echo(f"AstrBot CLI version: {click.style(__version__, fg='yellow')}")
-    click.echo()
+    click.echo(click.style("=" * 30, fg="red"))
     click.echo(click.style("Available commands:", fg="white", bold=True))
     click.echo(f"  {click.style('Command Groups | 命令组:', fg='blue', bold=True)}")
     click.echo(f"    {click.style('conf', fg='blue')} - Configuration management | 配置管理")
@@ -35,7 +35,7 @@ def cli() -> None:
     click.echo(f"    {click.style('init', fg='green')} - Initialize AstrBot | 初始化 AstrBot")
     click.echo(f"    {click.style('run', fg='green')} - Run AstrBot | 运行 AstrBot")
     click.echo(f"    {click.style('help', fg='green')} - Show help information | 显示帮助信息")
-    click.echo()
+    click.echo(click.style("=" * 30, fg="red"))
     click.echo(f"Use {click.style('astrbot --help / help', fg='yellow')} for detailed help information.")
 
 # 拓展帮助指令 当然直接使用 --help也是可以看帮助信息的

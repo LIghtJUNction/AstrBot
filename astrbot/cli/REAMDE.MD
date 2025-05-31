@@ -28,3 +28,6 @@ uv tool install -p 3.10 -e .
 如果版本为3.12/3.13直接使用uv tool install -e .会报错
 此时需要使用-p参数指定python版本为3.10
 
+
+
+
