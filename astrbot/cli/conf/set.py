@@ -1,4 +1,4 @@
-from typing import Callable, Any
+from typing import Any
 import click
 import json
 import re
