@@ -73,7 +73,7 @@ def _display_single_value(key: str, value, format: str, show_type: bool):
 
 def _display_known_config(config: dict, format: str, show_type: bool):
     """显示已知配置项"""
-    from .utils import CONFIG_VALIDATORS
+    from .utils import CONFIG_VALIDATORS,get_nested_item
     
     if format == 'json':
         output = {}
