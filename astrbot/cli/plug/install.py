@@ -20,6 +20,6 @@ def install(name: str, proxy: str | None):
     )
 
     if not plugin:
-        raise click.ClickException(f"未找到可安装的插件 {name}，可能是不存在或已安装")
+        raise click.ClickException(click.style(f"未找到可安装的插件 {name}，可能是不存在或已安装", fg="red"))
 
     manage_plugin(plugin, plug_path, is_update=False, proxy=proxy)

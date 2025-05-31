@@ -43,4 +43,4 @@ def list(all: bool):
         not any([not_published_plugins, need_update_plugins, installed_plugins])
         and not all
     ):
-        click.echo("未安装任何插件")
+        click.echo(click.style("未安装任何插件", fg="yellow"))

@@ -18,15 +18,27 @@ logo_tmpl = r"""
 """
 
 
-@click.group()
+@click.group(invoke_without_command=True, no_args_is_help=False)
 @click.version_option(__version__, prog_name="AstrBot")
 def cli() -> None:
     """The AstrBot CLI"""
-    click.echo(logo_tmpl)
-    click.echo("Welcome to AstrBot CLI!")
-    click.echo(f"AstrBot CLI version: {__version__}")
+    # Display colored logo and welcome message
+    click.echo(click.style(logo_tmpl, fg="cyan"))
+    click.echo(click.style("Welcome to AstrBot CLI!", fg="cyan", bold=True))
+    click.echo(f"AstrBot CLI version: {click.style(__version__, fg='yellow')}")
+    click.echo()
+    click.echo(click.style("Available commands:", fg="white", bold=True))
+    click.echo(f"  {click.style('Command Groups | 命令组:', fg='blue', bold=True)}")
+    click.echo(f"    {click.style('conf', fg='blue')} - Configuration management | 配置管理")
+    click.echo(f"    {click.style('plug', fg='blue')} - Plugin management | 插件管理")
+    click.echo(f"  {click.style('Individual Commands | 可用的命令:', fg='green', bold=True)}")
+    click.echo(f"    {click.style('init', fg='green')} - Initialize AstrBot | 初始化 AstrBot")
+    click.echo(f"    {click.style('run', fg='green')} - Run AstrBot | 运行 AstrBot")
+    click.echo(f"    {click.style('help', fg='green')} - Show help information | 显示帮助信息")
+    click.echo()
+    click.echo(f"Use {click.style('astrbot --help / help', fg='yellow')} for detailed help information.")
 
-
+# 拓展帮助指令 当然直接使用 --help也是可以看帮助信息的
 @cli.command()
 @click.argument("command_name", required=False, type=str)
 def help(command_name: str | None) -> None:
@@ -41,12 +53,15 @@ def help(command_name: str | None) -> None:
         command = cli.get_command(ctx, command_name)
         if command:
             # 显示特定命令的帮助信息
+            click.echo(click.style(f"Help for command '{command_name}':", fg="green", bold=True))
             click.echo(command.get_help(ctx))
         else:
-            click.echo(f"Unknown command: {command_name}")
+            click.echo(click.style(f"Unknown command: {command_name}", fg="red", bold=True))
             sys.exit(1)
     else:
         # 显示通用帮助信息
+        click.echo(click.style("AstrBot CLI Help", fg="cyan", bold=True))
+        click.echo("=" * 20)
         click.echo(cli.get_help(ctx))
 
 #region cli.command

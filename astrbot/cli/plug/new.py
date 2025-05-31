@@ -11,24 +11,24 @@ def new(name: str):
     plug_path = base_path / "plugins" / name
 
     if plug_path.exists():
-        raise click.ClickException(f"插件 {name} 已存在")
+        raise click.ClickException(click.style(f"插件 {name} 已存在", fg="red"))
 
     author = click.prompt("请输入插件作者", type=str)
     desc = click.prompt("请输入插件描述", type=str)
     version = click.prompt("请输入插件版本", type=str)
     if not re.match(r"^\d+\.\d+(\.\d+)?$", version.lower().lstrip("v")):
-        raise click.ClickException("版本号必须为 x.y 或 x.y.z 格式")
+        raise click.ClickException(click.style("版本号必须为 x.y 或 x.y.z 格式", fg="red"))
     repo = click.prompt("请输入插件仓库：", type=str)
     if not repo.startswith("http"):
-        raise click.ClickException("仓库地址必须以 http 开头")
+        raise click.ClickException(click.style("仓库地址必须以 http 开头", fg="red"))
 
-    click.echo("下载插件模板...")
+    click.echo(click.style("正在下载插件模板...", fg="cyan"))
     get_git_repo(
         "https://github.com/Soulter/helloworld",
         plug_path,
     )
 
-    click.echo("重写插件信息...")
+    click.echo(click.style("正在重写插件信息...", fg="yellow"))
     # 重写 metadata.yaml
     with open(plug_path / "metadata.yaml", "w", encoding="utf-8") as f:
         f.write(
@@ -55,4 +55,4 @@ def new(name: str):
     with open(plug_path / "main.py", "w", encoding="utf-8") as f:
         f.write(new_content)
 
-    click.echo(f"插件 {name} 创建成功")
+    click.echo(click.style(f"✓ 插件 {name} 创建成功", fg="green", bold=True))

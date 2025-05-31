@@ -44,7 +44,7 @@ def run(reload: bool, port: str) -> None:
             os.environ["DASHBOARD_PORT"] = port
 
         if reload:
-            click.echo("启用插件自动重载")
+            click.echo(click.style("✓ 启用插件自动重载", fg="cyan"))
             os.environ["ASTRBOT_RELOAD"] = "1"
 
         lock_file = astrbot_root / "astrbot.lock"
@@ -52,8 +52,8 @@ def run(reload: bool, port: str) -> None:
         with lock.acquire():
             asyncio.run(run_astrbot(astrbot_root))
     except KeyboardInterrupt:
-        click.echo("AstrBot 已关闭...")
+        click.echo(click.style("AstrBot 已关闭...", fg="red"))
     except Timeout:
-        raise click.ClickException("无法获取锁文件，请检查是否有其他实例正在运行")
+        raise click.ClickException(click.style("无法获取锁文件，请检查是否有其他实例正在运行", fg="red"))
     except Exception as e:
-        raise click.ClickException(f"运行时出现错误: {e}\n{traceback.format_exc()}")
+        raise click.ClickException(click.style(f"运行时出现错误: {e}\n{traceback.format_exc()}", fg="red"))

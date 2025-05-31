@@ -13,6 +13,7 @@ from .valutils import (
     validate_callback_api_base,
     validate_timezone,
 )
+from .display import display_plugins
 
 
 __all__ = [
@@ -30,4 +31,5 @@ __all__ = [
     "validate_dashboard_password",
     "validate_callback_api_base",
     "validate_timezone",
+    "display_plugins",
 ]

@@ -1,6 +1,24 @@
 import json
 import click
-from typing import Any
+from typing import Any, Callable
+from ..utils import (
+    validate_timezone,
+    validate_log_level,
+    validate_dashboard_port,
+    validate_dashboard_username,
+    validate_dashboard_password,
+    validate_callback_api_base,
+)
+
+# 可通过CLI设置的配置项，配置键到验证器函数的映射
+CONFIG_VALIDATORS: dict[str, Callable[[str], Any]] = {
+    "timezone": validate_timezone,
+    "log_level": validate_log_level,
+    "dashboard.port": validate_dashboard_port,
+    "dashboard.username": validate_dashboard_username,
+    "dashboard.password": validate_dashboard_password,
+    "callback_api_base": validate_callback_api_base,
+}
 
 def load_config() -> dict[str, Any]:
     """加载或初始化配置文件"""

@@ -22,7 +22,7 @@ def update(name: str, proxy: str | None):
         )
 
         if not plugin:
-            raise click.ClickException(f"插件 {name} 不需要更新或无法更新")
+            raise click.ClickException(click.style(f"插件 {name} 不需要更新或无法更新", fg="red"))
 
         manage_plugin(plugin, plug_path, is_update=True, proxy=proxy)
     else:
@@ -31,11 +31,11 @@ def update(name: str, proxy: str | None):
         ]
 
         if not need_update_plugins:
-            click.echo("没有需要更新的插件")
+            click.echo(click.style("没有需要更新的插件", fg="green"))
             return
 
-        click.echo(f"发现 {len(need_update_plugins)} 个插件需要更新")
+        click.echo(click.style(f"发现 {len(need_update_plugins)} 个插件需要更新", fg="cyan", bold=True))
         for plugin in need_update_plugins:
             plugin_name = plugin["name"]
-            click.echo(f"正在更新插件 {plugin_name}...")
+            click.echo(click.style(f"正在更新插件 {plugin_name}...", fg="yellow"))
             manage_plugin(plugin, plug_path, is_update=True, proxy=proxy)

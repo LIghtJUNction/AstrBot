@@ -18,7 +18,7 @@ def search(query: str):
     ]
 
     if not matched_plugins:
-        click.echo(f"未找到匹配 '{query}' 的插件")
+        click.echo(click.style(f"未找到匹配 '{query}' 的插件", fg="yellow"))
         return
 
     display_plugins(matched_plugins, f"搜索结果: '{query}'", "cyan")
