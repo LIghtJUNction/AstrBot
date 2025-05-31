@@ -29,5 +29,16 @@ uv tool install -p 3.10 -e .
 此时需要使用-p参数指定python版本为3.10
 
 
+ASTRBOT_ROOT环境变量！指定ASTRBOT根目录!
 
+设置指南：
+直接按下win键搜索 环境变量
+点击 编辑系统环境变量 - > 按N 或者点击编辑环境变量按钮
+新建变量名为ASTRBOT_ROOT，变量值为astrbot根目录路径即可（空目录即可）
+# 例如：C:\Users\Administrator\Desktop\astrbot
+
+默认是 ~/.astrbot/
+
+特殊的
+如果使用astrbot init --root cwd将使用当前目录作为astrbot根目录！
 
