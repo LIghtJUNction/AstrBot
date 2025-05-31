@@ -73,6 +73,7 @@ def conf(ctx, timezone: str, log_level: str, dashboard_port: int, dashboard_user
             click.echo("也可以通过选项快速设置配置:")
             click.echo("  astrbot conf --timezone Asia/Tokyo")
             click.echo("  astrbot conf --dashboard-port 9090")
+            click.echo(" astrbot conf --help 或者 astrbot help conf 查看支持哪些快捷配置")
         return
         
     ctx.ensure_object(dict)
