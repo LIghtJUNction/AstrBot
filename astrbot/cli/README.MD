@@ -7,11 +7,12 @@
 ```组织结构：
 cli
 ├── __init__.py
+|—— __main__.py 
 ├── init.py 附属于cli根命令组，负责初始化astrbot 根目录结构
 └── run.py 附属于cli根命令组 ，负责启动astrbot
-|————conf 子命令组
-├── __init__.py 附属于cli.conf命令组，负责导出子命令组conf
-├── __main__.py 附属于cli.conf命令组，命令组入口，需采用绝对导入
+   |————conf 子命令组
+   ├── __init__.py 附属于cli.conf命令组，负责导出子命令组conf
+   ├── __main__.py 附属于cli.conf命令组，命令组入口，需采用绝对导入
 ```
 
 1. 命令组对应一个文件夹
