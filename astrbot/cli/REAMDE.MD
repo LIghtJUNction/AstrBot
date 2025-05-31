@@ -21,3 +21,10 @@ conf文件夹对应conf 子命令组
 
 4. 命令.py：以命令名命名
 
+使用以下命令安装测试
+uv tool install -p 3.10 -e .
+
+> tips
+如果版本为3.12/3.13直接使用uv tool install -e .会报错
+此时需要使用-p参数指定python版本为3.10
+

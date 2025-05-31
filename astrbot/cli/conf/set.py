@@ -1,10 +1,10 @@
 from typing import Callable , Any
 import click
 
-@click.command()
+@click.command("set")
 @click.argument("key")
 @click.argument("value")
-def set(key: str, value: str):
+def set_config(key: str, value: str):
     """设置配置项的值"""
     from .utils import load_config, save_config, get_nested_item, set_nested_item
     from ..utils import (

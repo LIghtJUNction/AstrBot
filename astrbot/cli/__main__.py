@@ -4,8 +4,9 @@ AstrBot CLI入口
 
 import click
 import sys
-from astrbot import __version__
-from astrbot.cli import init , run
+from astrbot.cli import __version__
+from astrbot.cli.init import init
+from astrbot.cli.run import run
 
 logo_tmpl = r"""
      ___           _______.___________..______      .______     ______   .___________.
