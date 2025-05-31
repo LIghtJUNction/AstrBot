@@ -3,7 +3,7 @@ import asyncio
 import click
 from filelock import FileLock, Timeout
 
-from ..utils import check_dashboard, get_astrbot_root
+from .utils import check_dashboard, get_astrbot_root
 
 
 async def initialize_astrbot(astrbot_root) -> None:

@@ -1,21 +1,16 @@
 import os
 import sys
 from pathlib import Path
-
 import click
 import asyncio
 import traceback
-
 from filelock import FileLock, Timeout
-
-from ..utils import check_dashboard, check_astrbot_root, get_astrbot_root
-
 
 async def run_astrbot(astrbot_root: Path):
     """运行 AstrBot"""
-    from astrbot.core import logger, LogManager, LogBroker, db_helper
-    from astrbot.core.initial_loader import InitialLoader
-
+    from ..core import logger, LogManager, LogBroker, db_helper
+    from ..core.initial_loader import InitialLoader
+    from .utils import check_dashboard
     await check_dashboard(astrbot_root / "data")
 
     log_broker = LogBroker()
@@ -32,6 +27,7 @@ async def run_astrbot(astrbot_root: Path):
 @click.command()
 def run(reload: bool, port: str) -> None:
     """运行 AstrBot"""
+    from .utils import check_astrbot_root, get_astrbot_root
     try:
         os.environ["ASTRBOT_CLI"] = "1"
         astrbot_root = get_astrbot_root()
