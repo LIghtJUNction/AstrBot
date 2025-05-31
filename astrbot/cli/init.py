@@ -1,6 +1,5 @@
 import asyncio
 import datetime
-from email.policy import default
 from pathlib import Path
 
 import click
@@ -31,7 +30,7 @@ async def initialize_astrbot(astrbot_root) -> None:
             metadata["version"] = __version__
 
             import toml
-        
+
             with open(dot_astrbot,"w") as f:
                 toml.dump(metadata,f)
 
@@ -47,8 +46,8 @@ async def initialize_astrbot(astrbot_root) -> None:
 
     for name, path in paths.items():
         path.mkdir(parents=True, exist_ok=True)
-        status = 'Created' if not path.exists() else 'Directory exists'
-        status_color = 'green' if status == 'Created' else 'cyan'
+        status = "Created" if not path.exists() else "Directory exists"
+        status_color = "green" if status == "Created" else "cyan"
         click.echo(f"{click.style(status, fg=status_color)}: {click.style(str(path), fg='yellow')}")
 
     await check_dashboard(astrbot_root / "data")
@@ -64,7 +63,7 @@ def init(root: str) -> None:
         astrbot_root = Path(root)
 
     click.echo(click.style("Initializing AstrBot...", fg="green", bold=True))
-    
+
     lock_file = astrbot_root / "astrbot.lock"
     lock = FileLock(lock_file, timeout=5)
 

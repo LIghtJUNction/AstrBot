@@ -6,9 +6,9 @@ import re
 @click.command("set")
 @click.argument("key")
 @click.argument("value")
-@click.option("--type", "-t", 
-              type=click.Choice(['str', 'int', 'float', 'bool', 'json']), 
-              default='auto',
+@click.option("--type", "-t",
+              type=click.Choice(["str", "int", "float", "bool", "json"]),
+              default="auto",
               help="指定值的类型 (auto/str/int/float/bool/json)")
 @click.option("--force", "-f", is_flag=True, help="强制设置，跳过验证器")
 @click.option("--create", "-c", is_flag=True, help="如果键不存在则创建")
@@ -27,13 +27,13 @@ def set_config(key: str, value: str, type: str, force: bool, create: bool):
     \b
     astrbot conf set custom.data '{"key": "value"}' --type json --create\n    """
     from .utils import load_config, save_config, get_nested_item, set_nested_item, CONFIG_VALIDATORS
-    
+
     # 避免与内置type函数冲突
     value_type = type
-    
+
     # 解析和转换值
     parsed_value = _parse_value(value, value_type)
-    
+
     config = load_config()
 
     # 检查是否为已知配置项
@@ -78,7 +78,7 @@ def set_config(key: str, value: str, type: str, force: bool, create: bool):
             click.echo(click.style(f"✓ 新配置项已创建: {key}", fg="green", bold=True))
         else:
             click.echo(click.style(f"✓ 配置已更新: {key}", fg="green", bold=True))
-        
+
         if key == "dashboard.password":
             if not is_new_key:
                 click.echo(click.style("  原值: ********", fg="yellow"))
@@ -96,24 +96,24 @@ def set_config(key: str, value: str, type: str, force: bool, create: bool):
 
 def _parse_value(value: str, value_type: str) -> Any:
     """解析和转换值到指定类型"""
-    if value_type == 'auto':
+    if value_type == "auto":
         # 自动检测类型
         return _auto_parse_value(value)
-    elif value_type == 'str':
+    elif value_type == "str":
         return value
-    elif value_type == 'int':
+    elif value_type == "int":
         try:
             return int(value)
         except ValueError:
             raise click.ClickException(click.style(f"无法将 '{value}' 转换为整数", fg="red"))
-    elif value_type == 'float':
+    elif value_type == "float":
         try:
             return float(value)
         except ValueError:
             raise click.ClickException(click.style(f"无法将 '{value}' 转换为浮点数", fg="red"))
-    elif value_type == 'bool':
+    elif value_type == "bool":
         return _parse_bool(value)
-    elif value_type == 'json':
+    elif value_type == "json":
         try:
             return json.loads(value)
         except json.JSONDecodeError as e:
@@ -125,33 +125,33 @@ def _parse_value(value: str, value_type: str) -> Any:
 def _auto_parse_value(value: str) -> Any:
     """自动检测并解析值的类型"""
     # 尝试布尔值
-    if value.lower() in ('true', 'false', 'yes', 'no', 'on', 'off', '1', '0'):
+    if value.lower() in ("true", "false", "yes", "no", "on", "off", "1", "0"):
         return _parse_bool(value)
-    
+
     # 尝试整数
-    if re.match(r'^-?\d+$', value):
+    if re.match(r"^-?\d+$", value):
         return int(value)
-    
+
     # 尝试浮点数
-    if re.match(r'^-?\d*\.\d+$', value):
+    if re.match(r"^-?\d*\.\d+$", value):
         return float(value)
-    
+
     # 尝试JSON（数组或对象）
-    if value.startswith(('[', '{')):
+    if value.startswith(("[", "{")):
         try:
             return json.loads(value)
         except json.JSONDecodeError:
             pass
-    
+
     # 默认为字符串
     return value
 
 
 def _parse_bool(value: str) -> bool:
     """解析布尔值"""
-    true_values = ('true', 'yes', 'on', '1', 'enable', 'enabled')
-    false_values = ('false', 'no', 'off', '0', 'disable', 'disabled')
-    
+    true_values = ("true", "yes", "on", "1", "enable", "enabled")
+    false_values = ("false", "no", "off", "0", "disable", "disabled")
+
     value_lower = value.lower()
     if value_lower in true_values:
         return True
@@ -168,7 +168,7 @@ def _parse_bool(value: str) -> bool:
 def _format_display_value(value: Any) -> str:
     """格式化显示值"""
     if isinstance(value, (dict, list)):
-        return json.dumps(value, ensure_ascii=False, separators=(',', ':'))
+        return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
     elif isinstance(value, str) and len(value) > 50:
         return value[:47] + "..."
     else:

@@ -3,13 +3,13 @@ import json
 
 @click.command()
 @click.argument("key", required=False)
-@click.option("--format", "-f", 
-              type=click.Choice(['simple', 'json', 'yaml']), 
-              default='simple',
+@click.option("--format", "-f",
+              type=click.Choice(["simple", "json", "yaml"]),
+              default="simple",
               help="输出格式")
 @click.option("--show-type", "-t", is_flag=True, help="显示值的类型")
 @click.option("--all", "-a", is_flag=True, help="显示所有配置项（包括未在验证器中的）")
-def get(key: str = None, format: str = 'simple', show_type: bool = False, all: bool = False):    
+def get(key: str = None, format: str = "simple", show_type: bool = False, all: bool = False):
     """获取配置项的值
     
     不提供key则显示所有可配置项，使用 --all 显示完整配置
@@ -22,7 +22,7 @@ def get(key: str = None, format: str = 'simple', show_type: bool = False, all: b
     astrbot conf get --format json     # JSON格式输出
     """
 
-    from .utils import load_config, get_nested_item, CONFIG_VALIDATORS
+    from .utils import load_config, get_nested_item
     config = load_config()
 
     if key:
@@ -57,12 +57,12 @@ def _display_single_value(key: str, value, format: str, show_type: bool):
     else:
         display_value = value
 
-    if format == 'json':
+    if format == "json":
         output = {key: display_value}
         if show_type:
             output[f"{key}_type"] = type(value).__name__
         click.echo(json.dumps(output, ensure_ascii=False, indent=2))
-    elif format == 'yaml':
+    elif format == "yaml":
         click.echo(f"{key}: {_format_yaml_value(display_value)}")
         if show_type:
             click.echo(f"{key}_type: {type(value).__name__}")
@@ -74,8 +74,8 @@ def _display_single_value(key: str, value, format: str, show_type: bool):
 def _display_known_config(config: dict, format: str, show_type: bool):
     """显示已知配置项"""
     from .utils import CONFIG_VALIDATORS,get_nested_item
-    
-    if format == 'json':
+
+    if format == "json":
         output = {}
         for key in CONFIG_VALIDATORS.keys():
             try:
@@ -89,7 +89,7 @@ def _display_known_config(config: dict, format: str, show_type: bool):
                 if show_type:
                     output[f"{key}_type"] = "null"
         click.echo(json.dumps(output, ensure_ascii=False, indent=2))
-    elif format == 'yaml':
+    elif format == "yaml":
         click.echo("# 已知配置项")
         for key in CONFIG_VALIDATORS.keys():
             try:
@@ -114,10 +114,10 @@ def _display_known_config(config: dict, format: str, show_type: bool):
 
 def _display_all_config(config: dict, format: str, show_type: bool):
     """显示所有配置项"""
-    if format == 'json':
+    if format == "json":
         output = _redact_passwords(config.copy())
         click.echo(json.dumps(output, ensure_ascii=False, indent=2))
-    elif format == 'yaml':
+    elif format == "yaml":
         _print_yaml_recursive(config, show_type)
     else:  # simple
         click.echo(click.style("完整配置:", fg="cyan", bold=True))
@@ -129,7 +129,7 @@ def _print_config_recursive(obj: dict, prefix: str = "", show_type: bool = False
     indent = "  " * level
     for key, value in obj.items():
         full_key = f"{prefix}.{key}" if prefix else key
-        
+
         if key == "password" and "dashboard" in prefix:
             display_value = "********"
         elif isinstance(value, dict):
@@ -161,7 +161,7 @@ def _print_yaml_recursive(obj: dict, show_type: bool = False, level: int = 0):
 def _format_yaml_value(value) -> str:
     """格式化YAML值"""
     if isinstance(value, str):
-        if '\n' in value or '"' in value or "'" in value:
+        if "\n" in value or '"' in value or "'" in value:
             return f'"{value}"'
         return value
     elif isinstance(value, bool):
@@ -191,12 +191,12 @@ def _find_similar_keys(config: dict, target_key: str) -> list[str]:
     """查找相似的配置键"""
     all_keys = _get_all_keys(config)
     target_lower = target_key.lower()
-    
+
     # 完全匹配
     exact_matches = [key for key in all_keys if key.lower() == target_lower]
     if exact_matches:
         return exact_matches
-    
+
     # 包含匹配
     contains_matches = [key for key in all_keys if target_lower in key.lower() or key.lower() in target_lower]
     return sorted(contains_matches)

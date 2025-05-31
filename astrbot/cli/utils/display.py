@@ -14,11 +14,11 @@ def display_plugins(plugins: list, title: str, color: str = "white"):
     """
     if not plugins:
         return
-    
+
     # Display colored title
     click.echo(f"\n{click.style(title, fg=color, bold=True)}")
     click.echo(click.style("=" * len(title), fg=color))
-    
+
     # Display plugins in a formatted table
     for plugin in plugins:
         name = plugin.get("name", "Unknown")
@@ -26,13 +26,13 @@ def display_plugins(plugins: list, title: str, color: str = "white"):
         version = plugin.get("version", "Unknown")
         author = plugin.get("author", "Unknown")
         status = plugin.get("status", "Unknown")
-        
+
         # Color the plugin name based on its status if available
-        if hasattr(status, 'value'):
+        if hasattr(status, "value"):
             status_str = status.value
         else:
             status_str = str(status)
-            
+
         name_color = "green"
         if "未安装" in status_str or "NOT_INSTALLED" in str(status):
             name_color = "blue"
@@ -40,7 +40,7 @@ def display_plugins(plugins: list, title: str, color: str = "white"):
             name_color = "yellow"
         elif "未发布" in status_str or "NOT_PUBLISHED" in str(status):
             name_color = "red"
-        
+
         # Display plugin information
         click.echo(f"  {click.style(name, fg=name_color, bold=True)} ({version}) - {author}")
         click.echo(f"    {desc}")

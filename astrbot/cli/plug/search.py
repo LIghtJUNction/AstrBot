@@ -5,7 +5,7 @@ import click
 def search(query: str):
     """搜索插件"""
     from ..utils import get_astrbot_root, build_plug_list, display_plugins
-    
+
     base_path = get_astrbot_root()
     plugins = build_plug_list(base_path / "plugins")
 
