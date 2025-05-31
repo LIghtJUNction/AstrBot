@@ -5,12 +5,12 @@ def get_cli():
     from .__main__ import cli
     return cli
 
-def __getattr__(name):
+def __getattr__(name: str): 
     if name == "cli":
         return get_cli()
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 __all__ = [
     "__version__",
-    "cli"
+    "cli" # type: ignore
 ]
