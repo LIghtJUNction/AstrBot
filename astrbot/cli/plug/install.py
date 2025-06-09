@@ -7,8 +7,8 @@ def install(name: str, proxy: str | None):
     """安装插件"""
     from ..utils import get_astrbot_root, build_plug_list, manage_plugin , PluginStatus
     base_path = get_astrbot_root()
-    plug_path = base_path / "plugins"
-    plugins = build_plug_list(base_path / "plugins")
+    plug_path = base_path / "data" / "plugins"
+    plugins = build_plug_list(base_path / "data" / "plugins")
 
     plugin = next(
         (

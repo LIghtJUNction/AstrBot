@@ -1,4 +1,4 @@
-#Astrbot.cli包
+# Astrbot.cli包
 
 ---
 
@@ -47,7 +47,7 @@ ASTRBOT_ROOT环境变量！指定ASTRBOT根目录!
 
 # 例如：C:\Users\Administrator\Desktop\astrbot
 
-默认是 ~/.astrbot/
+`astrbot init` 命令现在只支持将当前目录初始化为 AstrBot 根目录。
 
 > tips
-> 如果使用astrbot init --root cwd将使用当前目录作为astrbot根目录！
+> 使用 `astrbot init` 将当前目录初始化为 astrbot 根目录！

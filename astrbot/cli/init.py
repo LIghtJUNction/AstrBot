@@ -10,7 +10,7 @@ from . import __version__
 from .utils import check_dashboard
 
 
-async def initialize_astrbot(astrbot_root) -> None:
+async def initialize_astrbot(astrbot_root: Path) -> None:
     """执行 AstrBot 初始化逻辑"""
     dot_astrbot = astrbot_root / ".astrbot"
 
@@ -22,17 +22,16 @@ async def initialize_astrbot(astrbot_root) -> None:
         if click.confirm(
             f"请检查当前目录是否正确，确认正确请回车: {astrbot_root}",
             default=True,
-            abort=True,
-        ):
+            abort=True,        ):
             dot_astrbot.touch()
             metadata = {}
             metadata["last_update"] = datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
             metadata["version"] = __version__
 
-            import toml
+            import json
 
-            with open(dot_astrbot,"w") as f:
-                toml.dump(metadata,f)
+            with open(dot_astrbot, "w") as f:
+                json.dump(metadata, f)
 
 
             click.echo(f"Created {click.style(str(dot_astrbot), fg='green')}")
@@ -54,13 +53,9 @@ async def initialize_astrbot(astrbot_root) -> None:
 
 
 @click.command()
-@click.option("--root","-r",envvar="ASTRBOT_ROOT",required=True ,help="astrbot根目录，--root cwd表示使用当前目录",default=Path.home() / ".astrbot" )
-def init(root: str) -> None:
-    """初始化 AstrBot"""
-    if root == "cwd":
-        astrbot_root = Path.cwd()
-    else:
-        astrbot_root = Path(root)
+def init() -> None:
+    """初始化 AstrBot - 将当前目录作为 AstrBot 根目录"""
+    astrbot_root = Path.cwd()
 
     click.echo(click.style("Initializing AstrBot...", fg="green", bold=True))
 

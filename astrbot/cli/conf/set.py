@@ -10,9 +10,7 @@ import re
               type=click.Choice(["str", "int", "float", "bool", "json"]),
               default="auto",
               help="指定值的类型 (auto/str/int/float/bool/json)")
-@click.option("--force", "-f", is_flag=True, help="强制设置，跳过验证器")
-@click.option("--create", "-c", is_flag=True, help="如果键不存在则创建")
-def set_config(key: str, value: str, type: str, force: bool, create: bool):
+def set_config(key: str, value: str, type: str):
     """设置配置项的值
     
     支持多种值类型和灵活的键路径：
@@ -23,9 +21,10 @@ def set_config(key: str, value: str, type: str, force: bool, create: bool):
     \b
     astrbot conf set dashboard.port 8080 --type int\n
     \b
-    astrbot conf set new.feature.enabled true --type bool --create\n
+    astrbot conf set timezone Asia/Shanghai --type str\n
     \b
-    astrbot conf set custom.data '{"key": "value"}' --type json --create\n    """
+    astrbot conf set custom.data '{"key": "value"}' --type json\n
+    """
     from .utils import load_config, save_config, get_nested_item, set_nested_item, CONFIG_VALIDATORS
 
     # 避免与内置type函数冲突
@@ -34,32 +33,26 @@ def set_config(key: str, value: str, type: str, force: bool, create: bool):
     # 解析和转换值
     parsed_value = _parse_value(value, value_type)
 
-    config = load_config()
-
-    # 检查是否为已知配置项
+    config = load_config()    # 检查是否为已知配置项
     if key in CONFIG_VALIDATORS.keys():
         # 使用验证器验证已知配置项
-        if not force:
-            try:
-                validated_value = CONFIG_VALIDATORS[key](value)
-                parsed_value = validated_value
-            except Exception as e:
-                raise click.ClickException(
-                    click.style(f"配置验证失败: {str(e)}", fg="red")
-                )
+        try:
+            validated_value = CONFIG_VALIDATORS[key](value)
+            parsed_value = validated_value
+        except Exception as e:
+            raise click.ClickException(
+                click.style(f"配置验证失败: {str(e)}", fg="red")
+            )
     else:
-        # 处理未知配置项
-        if not create and not force:
-            # 检查键是否存在
-            try:
-                get_nested_item(config, key)
-            except KeyError:
-                supported_keys = ", ".join(CONFIG_VALIDATORS.keys())
-                raise click.ClickException(
-                    click.style(f"未知的配置项: {key}", fg="red") + "\n" +
-                    click.style(f"已知配置项: {supported_keys}", fg="cyan") + "\n" +
-                    click.style("使用 --create 创建新配置项或 --force 强制设置", fg="yellow")
-                )
+        # 处理未知配置项 - 检查键是否存在
+        try:
+            get_nested_item(config, key)
+        except KeyError:
+            supported_keys = ", ".join(CONFIG_VALIDATORS.keys())
+            raise click.ClickException(
+                click.style(f"未知的配置项: {key}", fg="red") + "\n" +
+                click.style(f"已知配置项: {supported_keys}", fg="cyan")
+            )
 
     try:
         # 获取旧值（如果存在）
