@@ -5,7 +5,8 @@ import click
 @click.option("--proxy", help="Github代理地址")
 def update(name: str, proxy: str | None):
     """更新插件"""
-    from ..utils import get_astrbot_root, build_plug_list, manage_plugin, PluginStatus    base_path = get_astrbot_root()
+    from ..utils import get_astrbot_root, build_plug_list, manage_plugin, PluginStatus    
+    base_path = get_astrbot_root()
     plug_path = base_path / "data" / "plugins"
     plugins = build_plug_list(base_path / "data" / "plugins")
 

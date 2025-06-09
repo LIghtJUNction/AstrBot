@@ -2,7 +2,7 @@ import click
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-def plug(ctx):
+def plug(ctx: click.Context):
     """插件管理子命令组"""
     if ctx.invoked_subcommand is None:
         click.echo(click.style("Plugin Management | 插件管理", fg="blue", bold=True))
