@@ -9,7 +9,8 @@ def list_impl(show_all: bool):
         build_plug_list,
         display_plugins,
         PluginStatus
-    )    base_path = get_astrbot_root()
+    )    
+    base_path = get_astrbot_root()
     plugins = build_plug_list(base_path / "data" / "plugins")
 
     # 未发布的插件
