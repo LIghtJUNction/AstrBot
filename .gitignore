@@ -15,8 +15,6 @@ cookies.json
 logs/
 addons/plugins
 .coverage
-uv.lock
-
 tests/astrbot_plugin_openai
 chroma
 dashboard/node_modules/
