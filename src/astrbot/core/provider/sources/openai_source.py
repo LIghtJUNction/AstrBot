@@ -180,11 +180,14 @@ class ProviderOpenAIOfficial(Provider):
 
         if len(completion.choices) == 0:
             raise Exception("API 返回的 completion 为空。")
-        choice = completion.choices[0]
-
+        choice = completion.choices[0]        
         if choice.message.content:
             # text completion
             completion_text = str(choice.message.content).strip()
+            llm_response.result_chain = MessageChain().message(completion_text)
+        elif hasattr(choice.message, 'reasoning_content') and choice.message.reasoning_content:
+            # 处理推理内容（如豆包等模型的推理模式）
+            completion_text = f"<thinking>{str(choice.message.reasoning_content).strip()}<thinking/>{choice.message.content}"
             llm_response.result_chain = MessageChain().message(completion_text)
 
         if choice.message.tool_calls:
