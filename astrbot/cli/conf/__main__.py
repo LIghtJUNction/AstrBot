@@ -21,7 +21,7 @@ def conf():
     pass
 
 from astrbot.cli.conf.set import set_config
-conf.add_command(set_config) # conf set 
+conf.add_command(set_config) # conf set
 
 from astrbot.cli.conf.get import get
 conf.add_command(get) # conf get
