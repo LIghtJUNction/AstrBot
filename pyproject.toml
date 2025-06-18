@@ -10,6 +10,7 @@ dependencies = [
     "aiohttp>=3.11.18",
     "aiosqlite>=0.21.0",
     "anthropic>=0.51.0",
+    "anyio>=4.9.0",
     "apscheduler>=3.11.0",
     "beautifulsoup4>=4.13.4",
     "certifi>=2025.4.26",
@@ -62,10 +63,6 @@ exclude = [
 ]
 line-length = 88
 lint.ignore = [
-    "F403", 
-    "F405", 
-    "E501",
-    "ASYNC230" # TODO: handle ASYNC230 in AstrBot
 ]
 lint.select = [
   "F", # Pyflakes
