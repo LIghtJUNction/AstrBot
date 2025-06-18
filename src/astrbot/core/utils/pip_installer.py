@@ -1,5 +1,6 @@
 import logging
 import asyncio
+import sys
 
 logger = logging.getLogger("astrbot")
 
@@ -31,6 +32,7 @@ class PipInstaller:
         logger.info(f"Pip 包管理器: pip {' '.join(args)}")
         try:
             process = await asyncio.create_subprocess_exec(
+                sys.executable, "-m",
                 "pip", *args,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.STDOUT,

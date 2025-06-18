@@ -113,6 +113,7 @@ anyio==4.9.0 \
     --hash=sha256:9f76d541cad6e36af7beb62e978876f3b41e3e04f2c1fbf0884604c0a9c4d93c
     # via
     #   anthropic
+    #   astrbot
     #   google-genai
     #   httpx
     #   mcp
@@ -158,7 +159,7 @@ certifi==2025.6.15 \
     #   httpcore
     #   httpx
     #   requests
-cffi==1.17.1 \
+cffi==1.17.1 ; platform_python_implementation != 'PyPy' \
     --hash=sha256:045d61c734659cc045141be4bae381a41d89b741f795af1dd018bfb532fd0df8 \
     --hash=sha256:0984a4925a435b1da406122d4d7968dd861c1385afe3b45ba82b750f229811e2 \
     --hash=sha256:0f048dcf80db46f0098ccac01132761580d28e28bc0f78ae0d58048063317e15 \
@@ -206,9 +207,7 @@ cffi==1.17.1 \
     --hash=sha256:f75c7ab1f9e4aca5414ed4d8e5c0e303a34f4421f8a0d47a4d019ceff0ab6af4 \
     --hash=sha256:f79fc4fc25f1c8698ff97788206bb3c2598949bfe0fef03d299eb1b5356ada99 \
     --hash=sha256:fc48c783f9c87e60831201f2cce7f3b2e4846bf4d8728eabe54d60700b318a0b
-    # via
-    #   cryptography
-    #   silk-python
+    # via cryptography
 chardet==5.2.0 \
     --hash=sha256:1b3b6ff479a8c414bc3fa2c0852995695c4a026dcd6d0633b2dd092ca39c1cf7 \
     --hash=sha256:e1cf59446890a00105fe7b7912492ea04b6e6f06d4b742b2c788469e34c82970
@@ -1246,7 +1245,7 @@ pyasn1-modules==0.4.2 \
     --hash=sha256:29253a9207ce32b64c3ac6600edc75368f98473906e8fd1043bd6b5b1de2c14a \
     --hash=sha256:677091de870a80aae844b1ca6134f54652fa2c8c5a52aa396440ac3106e941e6
     # via google-auth
-pycparser==2.22 \
+pycparser==2.22 ; platform_python_implementation != 'PyPy' \
     --hash=sha256:491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6 \
     --hash=sha256:c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc
     # via cffi
@@ -1469,38 +1468,7 @@ rsa==4.9.1 \
     --hash=sha256:68635866661c6836b8d39430f97a996acbd61bfa49406748ea243539fe239762 \
     --hash=sha256:e7bdbfdb5497da4c07dfd35530e1a902659db6ff241e39d9953cad06ebd0ae75
     # via google-auth
-silk-python==0.2.6 \
-    --hash=sha256:054b6c18aa1e1ce261807c6aaa3f4e2aef995aa73d0e4d15f4fc25b5e3956860 \
-    --hash=sha256:0977deb3194f403fb471292968c3b120e6ac6b2f01ccefc1c79d44c2cc88c391 \
-    --hash=sha256:10d740b8476b33b72c459d59d11b27a35528585097a43df4002474aadb5ffac7 \
-    --hash=sha256:1a4bbac41dd0927ae7eb9ac3b32dfafdfc07e228a61e493533220dee0b9f07c4 \
-    --hash=sha256:2a376dfa465669dac52932eaeac9509ae375238bc8786a6b25f5ed5387f20349 \
-    --hash=sha256:334581b9a910072f9039e7d9fa7354740e77ba030a3224877b464fcfef844a07 \
-    --hash=sha256:3439401987b2df334adfe4cf81e46c6391902332e3a201421937e9ac3707a50f \
-    --hash=sha256:37737ce32b16e0ba1fdf91a30fefd7ca5dbb10d326c41ff4a6a8800519c22813 \
-    --hash=sha256:3ffceba8c5bb9853066799a06f4b0296882f8827484d6f79db9deee7ece8ad4e \
-    --hash=sha256:428233b54f41e5291ba2974fc6ad59873552abf1d3e50fcccf3d0c4dea1901f3 \
-    --hash=sha256:62ed0322a7508fb6ea44281765f8f4f7beea8c1ec749c17f7efa57a38c6b5034 \
-    --hash=sha256:6564d3a73ec386c7042c94adc38fecd15644d57c76e91603e0e9ad1ae444c4f2 \
-    --hash=sha256:6a33113583becb341f3d51520e8b8bd5304e297685a2d151efcfc4b48aab7993 \
-    --hash=sha256:6b0f2534b37246cb65b6dcbb7ced640656e7e3cb438c4a5ba0d1f95d5d6050fa \
-    --hash=sha256:6c811e19f7f9f68eba1c8a7ac1cc8063f9f7598a4b714b6bffc4dd39ff636f0d \
-    --hash=sha256:89ef89a52ce9ff1132e38a5ff794eab138bfbdc03595628e32a29f63416a7bc6 \
-    --hash=sha256:9644893b795c5012b51825fe6175f93c461dd509098703b179227b7fb1774dcb \
-    --hash=sha256:96537e1c918c8a626e9e84c877be0782036eb8b0df3563cd35b8c15a14e56c32 \
-    --hash=sha256:97fa555296c69fed4616d3daac49d9c08ea58deb43e16120538b6ae62ba391e9 \
-    --hash=sha256:a1c8bb085bb3b43203aa13f3a03f0507ed521e66c57969f45fa8653533b6522c \
-    --hash=sha256:a4892c547c3671a7094120d52cd8b1a7e0e1d58146f73d8d982b10815992dd73 \
-    --hash=sha256:ad4f3dd15d777163674523dc6c12074b8515bcb3a1b4673225ec02edfd2492bb \
-    --hash=sha256:d3636ea8e1b59d04a6fe6cb4ba5ab83ff26c39a5544a6b60c2b0ec78ea8d41e9 \
-    --hash=sha256:dc93d2614be46424e08f6f384408d8b851268d73864e0af8cc55f33fb5baebde \
-    --hash=sha256:e34539b78308407d604dc73ffbfe4967b6835966ab85cd0ecdd69752822c332a \
-    --hash=sha256:e46e859b03c107ac8b347f1d806989175de446ba012cb7a33edcc40b9d41ca5c \
-    --hash=sha256:ec8837c5b292780febfa392ce0975edd7aaa7d5728b8a72a21abdb414e31cbec \
-    --hash=sha256:ecb8df4e31a1630af730554d2fe26add02fc0d4d6ec97b58e27948d001d88409 \
-    --hash=sha256:f9a6c725168da66b1bf391c0b869af1b20b77c7990c8ccb2fad256a29ae9f8ae \
-    --hash=sha256:fdc07d617cd51e7b3779c0c2eb34231a5c56278e2d3a6d1ea6e1c24cb61ca105 \
-    --hash=sha256:fe8a2300deabcfa2276b10bcf6d5eba75411b5e77bb2c8d3f025e8f2907ef8c9
+silk-python @ git+https://github.com/synodriver/pysilk.git@6666723883dd597da3a14bb694e10d2dd47c2581
     # via astrbot
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \

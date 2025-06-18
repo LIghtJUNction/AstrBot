@@ -50,7 +50,7 @@ dependencies = [
 ]
 
 [project.scripts]
-astrbot = "astrbot.cli.__main__:cli"
+astrbot = "astrbot.cli:cli"
 
 [build-system]
 requires = ["hatchling", "uv-dynamic-versioning"]
@@ -61,10 +61,12 @@ exclude = [
   "astrbot/core/utils/t2i/local_strategy.py",
   "astrbot/api/all.py",
 ]
-line-length = 88
+line-length = 88 
 
 target-version = "py310"
 
 [tool.uv.sources]
 silk-python = { git = "https://github.com/synodriver/pysilk.git" }
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/astrbot"]
