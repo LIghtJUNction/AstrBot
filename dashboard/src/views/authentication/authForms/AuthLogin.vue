@@ -23,6 +23,8 @@ async function validate(values: any, { setErrors }: any) {
   }
 
   const authStore = useAuthStore();
+  // @ts-ignore
+  authStore.returnUrl = new URLSearchParams(window.location.search).get('redirect');
   return authStore.login(username.value, password_).then((res) => {
     console.log(res);
     loading.value = false;
@@ -64,21 +66,18 @@ async function validate(values: any, { setErrors }: any) {
       prepend-inner-icon="mdi-lock"
       :disabled="loading"
     ></v-text-field>
-
-    <v-label :style="{color: useCustomizerStore().uiTheme === 'PurpleTheme' ? '#000000aa' : '#ffffffcc'}" class="mt-1 mb-5">
-      <small>默认用户名和密码为 astrbot</small>
-    </v-label>
     
     <v-btn 
       color="secondary" 
       :loading="isSubmitting || loading" 
       block 
-      class="login-btn" 
+      class="login-btn mt-8" 
       variant="flat" 
       size="large" 
       :disabled="valid"
       type="submit"
       elevation="2"
+
     >
       <span class="login-btn-text">登录</span>
     </v-btn>
@@ -148,6 +147,7 @@ async function validate(values: any, { setErrors }: any) {
     height: 48px;
     transition: all 0.3s ease;
     letter-spacing: 0.5px;
+    border-radius: 8px !important;
     
     &:hover {
       transform: translateY(-2px);

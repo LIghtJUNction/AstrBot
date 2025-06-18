@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import {ref} from 'vue';
+import {ref, computed} from 'vue';
 import {useCustomizerStore} from '@/stores/customizer';
 import axios from 'axios';
+import Logo from '@/components/shared/Logo.vue';
 import {md5} from 'js-md5';
 import {useAuthStore} from '@/stores/auth';
 import {useCommonStore} from '@/stores/common';
@@ -11,6 +12,7 @@ const customizer = useCustomizerStore();
 let dialog = ref(false);
 let accountWarning = ref(false)
 let updateStatusDialog = ref(false);
+const username = localStorage.getItem('user');
 let password = ref('');
 let newPassword = ref('');
 let newUsername = ref('');
@@ -23,7 +25,7 @@ let dashboardHasNewVersion = ref(false);
 let dashboardCurrentVersion = ref('');
 let version = ref('');
 let releases = ref([]);
-let devCommits = ref([]); // 新增的 ref
+let devCommits = ref([]);
 
 let installLoading = ref(false);
 
@@ -37,12 +39,38 @@ let releasesHeader = [
   {title: '操作', key: 'switch'}
 ];
 
+// Form validation
+const formValid = ref(true);
+const passwordRules = [
+  (v: string) => !!v || '请输入密码',
+  (v: string) => v.length >= 8 || '密码长度至少 8 位'
+];
+const usernameRules = [
+  (v: string) => !v || v.length >= 3 || '用户名长度至少3位'
+];
+
+// 显示密码相关
+const showPassword = ref(false);
+const showNewPassword = ref(false);
+
+// 账户修改状态
+const accountEditStatus = ref({
+  loading: false,
+  success: false,
+  error: false,
+  message: ''
+});
+
 const open = (link: string) => {
   window.open(link, '_blank');
 };
 
 // 账户修改
 function accountEdit() {
+  accountEditStatus.value.loading = true;
+  accountEditStatus.value.error = false;
+  accountEditStatus.value.success = false;
+
   // md5加密
   // @ts-ignore
   if (password.value != '') {
@@ -54,27 +82,33 @@ function accountEdit() {
   axios.post('/api/auth/account/edit', {
     password: password.value,
     new_password: newPassword.value,
-    new_username: newUsername.value
+    new_username: newUsername.value ? newUsername.value : username
   })
       .then((res) => {
         if (res.data.status == 'error') {
-          status.value = res.data.message;
+          accountEditStatus.value.error = true;
+          accountEditStatus.value.message = res.data.message;
           password.value = '';
           newPassword.value = '';
           return;
         }
-        dialog.value = !dialog.value;
-        status.value = res.data.message;
+        accountEditStatus.value.success = true;
+        accountEditStatus.value.message = res.data.message;
         setTimeout(() => {
+          dialog.value = !dialog.value;
           const authStore = useAuthStore();
           authStore.logout();
-        }, 1000);
+        }, 2000);
       })
       .catch((err) => {
         console.log(err);
-        status.value = err
+        accountEditStatus.value.error = true;
+        accountEditStatus.value.message = typeof err === 'string' ? err : '修改失败，请重试';
         password.value = '';
         newPassword.value = '';
+      })
+      .finally(() => {
+        accountEditStatus.value.loading = false;
       });
 }
 
@@ -83,6 +117,14 @@ function getVersion() {
       .then((res) => {
         botCurrVersion.value = "v" + res.data.data.version;
         dashboardCurrentVersion.value = res.data.data?.dashboard_version;
+        let change_pwd_hint = res.data.data?.change_pwd_hint;
+        if (change_pwd_hint) {
+          dialog.value = true;
+          accountWarning.value = true;
+          localStorage.setItem('change_pwd_hint', 'true');
+        } else {
+          localStorage.removeItem('change_pwd_hint');
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -118,8 +160,6 @@ function checkUpdate() {
 function getReleases() {
   axios.get('/api/update/releases')
       .then((res) => {
-        // releases.value = res.data.data;
-        // 更新 published_at 的时间为本地时间
         releases.value = res.data.data.map((item: any) => {
           item.published_at = new Date(item.published_at).toLocaleString();
           return item;
@@ -201,13 +241,6 @@ const commonStore = useCommonStore();
 commonStore.createEventSource(); // log
 commonStore.getStartTime();
 
-
-if (localStorage.getItem('change_pwd_hint') != null && localStorage.getItem('change_pwd_hint') == 'true') {
-  dialog.value = true;
-  accountWarning.value = true;
-  localStorage.removeItem('change_pwd_hint');
-}
-
 </script>
 
 <template>
@@ -221,7 +254,7 @@ if (localStorage.getItem('change_pwd_hint') != null && localStorage.getItem('cha
            variant="flat" @click.stop="customizer.SET_MINI_SIDEBAR(!customizer.mini_sidebar)" size="small">
       <v-icon>mdi-menu</v-icon>
     </v-btn>
-    <v-btn v-if="useCustomizerStore().uiTheme==='PurpleTheme'" class="hidden-lg-and-up text-secondary ms-3" color="lightsecondary" icon rounded="sm" variant="flat"
+    <v-btn v-if="useCustomizerStore().uiTheme==='PurpleTheme'" class="hidden-lg-and-up ms-3" color="lightsecondary" icon rounded="sm" variant="flat"
            @click.stop="customizer.SET_SIDEBAR_DRAWER" size="small">
       <v-icon>mdi-menu</v-icon>
     </v-btn>
@@ -230,15 +263,15 @@ if (localStorage.getItem('change_pwd_hint') != null && localStorage.getItem('cha
       <v-icon>mdi-menu</v-icon>
     </v-btn>
 
-    <div style="margin-left: 16px; display: flex; align-items: center; gap: 8px;">
-      <span style=" font-size: 24px; font-weight: 1000;">Astr<span style="font-weight: normal;">Bot</span>
-      </span>
-      <span style="font-size: 12px; color: var(--v-theme-secondaryText);">{{ botCurrVersion }}</span>
+    <div class="logo-container" :class="{'mobile-logo': $vuetify.display.xs}">
+      <span class="logo-text">Astr<span class="logo-text-light">Bot</span></span>
+      <span class="version-text hidden-xs">{{ botCurrVersion }}</span>
     </div>
 
     <v-spacer/>
 
-    <div class="mr-4">
+    <!-- 版本提示信息 - 在手机上隐藏 -->
+    <div class="mr-4 hidden-xs">
       <small v-if="hasNewVersion">
         AstrBot 有新版本！
       </small>
@@ -247,24 +280,28 @@ if (localStorage.getItem('change_pwd_hint') != null && localStorage.getItem('cha
       </small>
     </div>
 
-    <v-btn size="small" @click="toggleDarkMode();" class="text-primary mr-2" color="var(--v-theme-surface)"
-           variant="flat" rounded="sm">
-      <!-- 明暗主题切换按钮 -->
+    <!-- 主题切换按钮 -->
+    <v-btn size="small" @click="toggleDarkMode();" class="action-btn" 
+           color="var(--v-theme-surface)" variant="flat" rounded="sm">
       <v-icon v-if="useCustomizerStore().uiTheme === 'PurpleThemeDark'">mdi-weather-night</v-icon>
       <v-icon v-else>mdi-white-balance-sunny</v-icon>
     </v-btn>
 
-    <v-dialog v-model="updateStatusDialog" width="1000">
+    <!-- 更新对话框 -->
+    <v-dialog v-model="updateStatusDialog" :width="$vuetify.display.smAndDown ? '100%' : '1000'" :fullscreen="$vuetify.display.xs">
       <template v-slot:activator="{ props }">
-        <v-btn size="small" @click="checkUpdate(); getReleases(); getDevCommits();" class="text-primary mr-2"
-               color="var(--v-theme-surface)"
-               variant="flat" rounded="sm" v-bind="props">
-          更新
+        <v-btn size="small" @click="checkUpdate(); getReleases(); getDevCommits();" class="action-btn"
+               color="var(--v-theme-surface)" variant="flat" rounded="sm" v-bind="props">
+          <v-icon class="hidden-sm-and-up">mdi-update</v-icon>
+          <span class="hidden-xs">更新</span>
         </v-btn>
       </template>
       <v-card>
-        <v-card-title>
+        <v-card-title class="mobile-card-title">
           <span class="text-h5">更新 AstrBot</span>
+          <v-btn v-if="$vuetify.display.xs" icon @click="updateStatusDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
         </v-card-title>
         <v-card-text>
           <v-container>
@@ -275,10 +312,9 @@ if (localStorage.getItem('change_pwd_hint') != null && localStorage.getItem('cha
               <small style="margin-left: 4px;">{{ updateStatus }}</small>
             </div>
 
-            <div
+            <div v-if="releaseMessage"
                 style="background-color: #646cff24; padding: 16px; border-radius: 10px; font-size: 14px; max-height: 400px; overflow-y: auto;"
                 v-html="marked(releaseMessage)" class="markdown-content">
-
             </div>
 
             <div class="mb-4 mt-4">
@@ -389,46 +425,119 @@ if (localStorage.getItem('change_pwd_hint') != null && localStorage.getItem('cha
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="dialog" persistent width="700">
+    <!-- 账户对话框 -->
+    <v-dialog v-model="dialog" persistent :max-width="$vuetify.display.xs ? '90%' : '500'">
       <template v-slot:activator="{ props }">
-        <v-btn size="small" class="text-primary mr-4" color="var(--v-theme-surface)" variant="flat" rounded="sm" v-bind="props">
-          账户
+        <v-btn size="small" class="action-btn mr-4" color="var(--v-theme-surface)" variant="flat" rounded="sm" v-bind="props">
+          <v-icon>mdi-account</v-icon>
+          <span class="hidden-xs ml-1">账户</span>
         </v-btn>
       </template>
-      <v-card>
-        <v-card-title>
-          <span class="text-h5">账户</span>
-        </v-card-title>
-        <v-card-text>
-          <v-container>
-            <v-row>
-              <v-col cols="12">
+      <v-card class="account-dialog">
+        <v-card-text class="py-6">
+          <div class="d-flex flex-column align-center mb-6">
+            <logo title="AstrBot 仪表盘" subtitle="修改账户"></logo>
+          </div>
+          <v-alert 
+            v-if="accountWarning" 
+            type="warning"
+            variant="tonal"
+            border="start"
+            class="mb-4"
+          >
+            <strong>安全提醒:</strong> 请修改默认密码以确保账户安全
+          </v-alert>
 
-                <v-alert v-if="accountWarning" color="warning" style="margin-bottom: 16px;">
-                  <div>为了安全，请务必修改默认密码。</div>
-                </v-alert>
+          <v-alert
+            v-if="accountEditStatus.success"
+            type="success"
+            variant="tonal"
+            border="start"
+            class="mb-4"
+          >
+            {{ accountEditStatus.message }}
+          </v-alert>
 
-                <v-text-field label="原密码*" type="password" v-model="password" required
-                              variant="outlined"></v-text-field>
+          <v-alert
+            v-if="accountEditStatus.error"
+            type="error"
+            variant="tonal"
+            border="start"
+            class="mb-4"
+          >
+            {{ accountEditStatus.message }}
+          </v-alert>
 
-                <v-text-field label="新用户名" v-model="newUsername" required variant="outlined"></v-text-field>
+          <v-form v-model="formValid" @submit.prevent="accountEdit">
+            <v-text-field
+              v-model="password"
+              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+              :type="showPassword ? 'text' : 'password'"
+              label="当前密码"
+              variant="outlined"
+              required
+              clearable
+              @click:append-inner="showPassword = !showPassword"
+              prepend-inner-icon="mdi-lock-outline"
+              hide-details="auto"
+              class="mb-4"
+            ></v-text-field>
 
-                <v-text-field label="新密码" type="password" v-model="newPassword" required
-                              variant="outlined"></v-text-field>
-              </v-col>
-            </v-row>
-          </v-container>
-          <small>默认用户名和密码是 astrbot。</small>
-          <br>
-          <small>{{ status }}</small>
+            <v-text-field
+              v-model="newPassword"
+              :append-inner-icon="showNewPassword ? 'mdi-eye-off' : 'mdi-eye'"
+              :type="showNewPassword ? 'text' : 'password'"
+              :rules="passwordRules"
+              label="新密码"
+              variant="outlined"
+              required
+              clearable
+              @click:append-inner="showNewPassword = !showNewPassword"
+              prepend-inner-icon="mdi-lock-plus-outline"
+              hint="密码长度至少 8 位"
+              persistent-hint
+              class="mb-4"
+            ></v-text-field>
+
+            <v-text-field
+              v-model="newUsername"
+              :rules="usernameRules"
+              label="新用户名 (可选)"
+              variant="outlined"
+              clearable
+              prepend-inner-icon="mdi-account-edit-outline"
+              hint="留空表示不修改用户名"
+              persistent-hint
+              class="mb-3"
+            ></v-text-field>
+          </v-form>
+          
+          <div class="text-caption text-medium-emphasis mt-2">
+            默认用户名和密码均为 astrbot
+          </div>
         </v-card-text>
-        <v-card-actions>
+        
+        <v-divider></v-divider>
+        
+        <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn v-if="!accountWarning" color="blue-darken-1" variant="text" @click="dialog = false">
-            关闭
+          <v-btn
+            v-if="!accountWarning"
+            variant="tonal"
+            color="secondary"
+            @click="dialog = false"
+            :disabled="accountEditStatus.loading"
+          >
+            取消
           </v-btn>
-          <v-btn color="blue-darken-1" variant="text" @click="accountEdit">
-            提交
+          <v-btn
+            color="primary"
+            @click="accountEdit"
+            :loading="accountEditStatus.loading"
+            :disabled="!formValid"
+            prepend-icon="mdi-content-save"
+          >
+            保存修改
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -453,5 +562,92 @@ if (localStorage.getItem('change_pwd_hint') != null && localStorage.getItem('cha
   /* Adds indentation to unordered lists */
   margin-top: 8px;
   margin-bottom: 8px;
+}
+
+.account-dialog .v-card-text {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.account-dialog .v-alert {
+  margin-bottom: 20px;
+}
+
+.account-dialog .v-btn {
+  text-transform: none;
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+.account-dialog .v-avatar {
+  transition: transform 0.3s ease;
+}
+
+.account-dialog .v-avatar:hover {
+  transform: scale(1.05);
+}
+
+/* 响应式布局样式 */
+.logo-container {
+  margin-left: 16px; 
+  display: flex; 
+  align-items: center; 
+  gap: 8px;
+}
+
+.mobile-logo {
+  margin-left: 8px;
+  gap: 4px;
+}
+
+.logo-text {
+  font-size: 24px; 
+  font-weight: 1000;
+}
+
+.logo-text-light {
+  font-weight: normal;
+}
+
+.version-text {
+  font-size: 12px; 
+  color: var(--v-theme-secondaryText);
+}
+
+.action-btn {
+  margin-right: 6px;
+}
+
+/* 移动端对话框标题样式 */
+.mobile-card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 移动端样式优化 */
+@media (max-width: 600px) {
+  .logo-text {
+    font-size: 20px;
+  }
+  
+  .action-btn {
+    margin-right: 4px;
+    min-width: 32px !important;
+    width: 32px;
+  }
+
+  .v-card-title {
+    padding: 12px 16px;
+  }
+  
+  .v-card-text {
+    padding: 16px;
+  }
+  
+  .v-tabs .v-tab {
+    padding: 0 10px;
+    font-size: 0.9rem;
+  }
 }
 </style>
