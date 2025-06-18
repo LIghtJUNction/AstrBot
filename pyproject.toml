@@ -40,7 +40,7 @@ dependencies = [
     "qq-botpy>=1.2.1",
     "quart>=0.20.0",
     "readability-lxml>=0.8.4.1",
-    "silk-python>=0.2.6",
+    "silk-python",
     "telegramify-markdown>=0.5.1",
     "toml>=0.10.2",
     "watchfiles>=1.0.5",
@@ -76,3 +76,7 @@ lint.select = [
   "Q", # flake8-quotes
 ]
 target-version = "py310"
+
+[tool.uv.sources]
+silk-python = { git = "https://github.com/synodriver/pysilk.git" }
+
