@@ -1,14 +1,16 @@
 import asyncio
+import base64
 import json
 import os
+import traceback
 import time
 from typing import Optional
 
 import aiohttp
+import anyio
 import websockets
-
 from astrbot import logger
-from astrbot.api.message_components import Plain, Image
+from astrbot.api.message_components import Plain, Image, At, Record
 from astrbot.api.platform import Platform, PlatformMetadata
 from astrbot.core.message.message_event_result import MessageChain
 from astrbot.core.platform.astrbot_message import (
@@ -21,6 +23,13 @@ from astrbot.core.platform.astr_message_event import MessageSesion
 
 from ...register import register_platform_adapter
 from .wechatpadpro_message_event import WeChatPadProMessageEvent
+
+try:
+    from .xml_data_parser import GeweDataParser
+except ImportError as e:
+    logger.warning(
+        f"警告: 可能未安装 defusedxml 依赖库，将导致无法解析微信的 表情包、引用 类型的消息: {str(e)}"
+    )
 
 
 @register_platform_adapter("wechatpadpro", "WeChatPadPro 消息平台适配器")
@@ -58,6 +67,18 @@ class WeChatPadProAdapter(Platform):
             get_astrbot_data_path(), "wechatpadpro_credentials.json"
         )  # 持久化文件路径
         self.ws_handle_task = None
+
+        # 添加图片消息缓存，用于引用消息处理
+        self.cached_images = {}
+        """缓存图片消息。key是NewMsgId (对应引用消息的svrid)，value是图片的base64数据"""
+        # 设置缓存大小限制，避免内存占用过大
+        self.max_image_cache = 50
+
+        # 添加文本消息缓存，用于引用消息处理
+        self.cached_texts = {}
+        """缓存文本消息。key是NewMsgId (对应引用消息的svrid)，value是消息文本内容"""
+        # 设置文本缓存大小限制
+        self.max_text_cache = 100
 
     async def run(self) -> None:
         """
@@ -138,7 +159,6 @@ class WeChatPadProAdapter(Platform):
             os.makedirs(data_dir, exist_ok=True)
             with open(self.credentials_file, "w") as f:
                 json.dump(credentials, f)
-            logger.info("成功保存 WeChatPadPro 凭据。")
         except Exception as e:
             logger.error(f"保存 WeChatPadPro 凭据失败: {e}")
 
@@ -146,6 +166,8 @@ class WeChatPadProAdapter(Platform):
         """
         检查 WeChatPadPro 设备是否在线。
         """
+        if not self.auth_key:
+            return False
         url = f"{self.base_url}/login/GetLoginStatus"
         params = {"key": self.auth_key}
 
@@ -161,20 +183,18 @@ class WeChatPadProAdapter(Platform):
                             return True
                         # login_state == 3 为离线状态
                         elif login_state == 3:
-                            logger.info(
-                                "WeChatPadPro 设备不在线。"
-                            )
+                            logger.info("WeChatPadPro 设备不在线。")
                             return False
                         else:
-                            logger.error(
-                                f"未知的在线状态: {login_state:}"
-                            )
+                            logger.error(f"未知的在线状态: {response_data}")
                             return False
                     # Code == 300 为微信退出状态。
                     elif response.status == 200 and response_data.get("Code") == 300:
-                        logger.info(
-                            "WeChatPadPro 设备已退出。"
-                        )
+                        logger.info("WeChatPadPro 设备已退出。")
+                        return False
+                    elif response.status == 200 and response_data.get("Code") == -2:
+                        # 该链接不存在
+                        self.auth_key = None
                         return False
                     else:
                         logger.error(
@@ -187,6 +207,7 @@ class WeChatPadProAdapter(Platform):
                 return False
             except Exception as e:
                 logger.error(f"检查在线状态时发生错误: {e}")
+                logger.error(traceback.format_exc())
                 return False
 
     async def generate_auth_key(self):
@@ -210,7 +231,7 @@ class WeChatPadProAdapter(Platform):
                             and len(response_data["Data"]) > 0
                         ):
                             self.auth_key = response_data["Data"][0]
-                            logger.info("成功获取授权码")
+                            logger.info(f"成功获取授权码 {self.auth_key[:8]}...")
                         else:
                             logger.error(
                                 f"生成授权码成功但未找到授权码: {response_data}"
@@ -236,7 +257,6 @@ class WeChatPadProAdapter(Platform):
             try:
                 async with session.post(url, params=params, json=payload) as response:
                     response_data = await response.json()
-                    # 修正成功判断条件和数据提取路径
                     if response.status == 200 and response_data.get("Code") == 200:
                         # 二维码地址在 Data.QrCodeUrl 字段中
                         if response_data.get("Data") and response_data["Data"].get(
@@ -248,6 +268,13 @@ class WeChatPadProAdapter(Platform):
                                 f"获取登录二维码成功但未找到二维码地址: {response_data}"
                             )
                             return None
+                    elif "该 key 无效" in response_data.get("Text"):
+                        logger.error(
+                            "授权码无效，已经清除。请重新启动 AstrBot 或者本消息适配器。原因也可能是 WeChatPadPro 的 MySQL 服务没有启动成功，请检查 WeChatPadPro 服务的日志。"
+                        )
+                        self.auth_key = None
+                        self.save_credentials()
+                        return None
                     else:
                         logger.error(
                             f"获取登录二维码失败: {response.status}, {response_data}"
@@ -340,7 +367,7 @@ class WeChatPadProAdapter(Platform):
         while True:
             try:
                 async with websockets.connect(ws_url) as websocket:
-                    logger.info("WebSocket 连接成功。")
+                    logger.debug("WebSocket 连接成功。")
                     # 设置空闲超时重连
                     wait_time = (
                         self.active_message_poll_interval
@@ -355,7 +382,7 @@ class WeChatPadProAdapter(Platform):
                             # logger.debug(message) # 不显示原始消息内容
                             asyncio.create_task(self.handle_websocket_message(message))
                         except asyncio.TimeoutError:
-                            logger.warning(f"WebSocket 连接空闲超过 {wait_time} s")
+                            logger.debug(f"WebSocket 连接空闲超过 {wait_time} s")
                             break
                         except websockets.exceptions.ConnectionClosedOK:
                             logger.info("WebSocket 连接正常关闭。")
@@ -364,7 +391,9 @@ class WeChatPadProAdapter(Platform):
                             logger.error(f"处理 WebSocket 消息时发生错误: {e}")
                             break
             except Exception as e:
-                logger.error(f"WebSocket 连接失败: {e}, 请检查WeChatPadPro服务状态，或尝试重启WeChatPadPro适配器。")
+                logger.error(
+                    f"WebSocket 连接失败: {e}, 请检查WeChatPadPro服务状态，或尝试重启WeChatPadPro适配器。"
+                )
                 await asyncio.sleep(5)
 
     async def handle_websocket_message(self, message: str):
@@ -457,6 +486,7 @@ class WeChatPadProAdapter(Platform):
         """
         if from_user_name == "weixin":
             return False
+        at_me = False
         if "@chatroom" in from_user_name:
             abm.type = MessageType.GROUP_MESSAGE
             abm.group_id = from_user_name
@@ -475,9 +505,17 @@ class WeChatPadProAdapter(Platform):
 
             # 对于群聊，session_id 可以是群聊 ID 或发送者 ID + 群聊 ID (如果 unique_session 为 True)
             if self.unique_session:
-                abm.session_id = f"{from_user_name}_{to_user_name}"
+                abm.session_id = f"{from_user_name}#{abm.sender.user_id}"
             else:
                 abm.session_id = from_user_name
+
+            msg_source = raw_message.get("msg_source", "")
+            if self.wxid in msg_source:
+                at_me = True
+            if "在群聊中@了你" in raw_message.get("push_content", ""):
+                at_me = True
+            if at_me:
+                abm.message.insert(0, At(qq=abm.self_id, name=""))
         else:
             abm.type = MessageType.FRIEND_MESSAGE
             abm.group_id = ""
@@ -558,6 +596,32 @@ class WeChatPadProAdapter(Platform):
                 logger.error(f"下载图片时发生错误: {e}")
                 return None
 
+    async def download_voice(
+        self, to_user_name: str, new_msg_id: str, bufid: str, length: int
+    ):
+        """下载原始音频。"""
+        url = f"{self.base_url}/message/GetMsgVoice"
+        params = {"key": self.auth_key}
+        payload = {
+            "Bufid": bufid,
+            "ToUserName": to_user_name,
+            "NewMsgId": new_msg_id,
+            "Length": length,
+        }
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.post(url, params=params, json=payload) as response:
+                    if response.status == 200:
+                        return await response.json()
+                    logger.error(f"下载音频失败: {response.status}")
+                    return None
+            except aiohttp.ClientConnectorError as e:
+                logger.error(f"连接到 WeChatPadPro 服务失败: {e}")
+                return None
+            except Exception as e:
+                logger.error(f"下载音频时发生错误: {e}")
+                return None
+
     async def _process_message_content(
         self, abm: AstrBotMessage, raw_message: dict, msg_type: int, content: str
     ):
@@ -569,12 +633,82 @@ class WeChatPadProAdapter(Platform):
             if abm.type == MessageType.GROUP_MESSAGE:
                 parts = content.split(":\n", 1)
                 if len(parts) == 2:
-                    abm.message_str = parts[1]
-                    abm.message.append(Plain(abm.message_str))
+                    message_content = parts[1]
+                    abm.message_str = message_content
+
+                    # 检查是否@了机器人，参考 gewechat 的实现方式
+                    # 微信大部分客户端在@用户昵称后面，紧接着是一个\u2005字符（四分之一空格）
+                    at_me = False
+
+                    # 检查 msg_source 中是否包含机器人的 wxid
+                    # wechatpadpro 的格式: <atuserlist>wxid</atuserlist>
+                    # gewechat 的格式: <atuserlist><![CDATA[wxid]]></atuserlist>
+                    msg_source = raw_message.get("msg_source", "")
+                    if (
+                        f"<atuserlist>{abm.self_id}</atuserlist>" in msg_source
+                        or f"<atuserlist>{abm.self_id}," in msg_source
+                        or f",{abm.self_id}</atuserlist>" in msg_source
+                    ):
+                        at_me = True
+
+                    # 也检查 push_content 中是否有@提示
+                    push_content = raw_message.get("push_content", "")
+                    if "在群聊中@了你" in push_content:
+                        at_me = True
+
+                    if at_me:
+                        # 被@了，在消息开头插入At组件（参考gewechat的做法）
+                        bot_nickname = await self._get_group_member_nickname(
+                            abm.group_id, abm.self_id
+                        )
+                        abm.message.insert(
+                            0, At(qq=abm.self_id, name=bot_nickname or abm.self_id)
+                        )
+
+                        # 只有当消息内容不仅仅是@时才添加Plain组件
+                        if "\u2005" in message_content:
+                            # 检查@之后是否还有其他内容
+                            parts = message_content.split("\u2005")
+                            if len(parts) > 1 and any(
+                                part.strip() for part in parts[1:]
+                            ):
+                                abm.message.append(Plain(message_content))
+                        else:
+                            # 检查是否只包含@机器人
+                            is_pure_at = False
+                            if (
+                                bot_nickname
+                                and message_content.strip() == f"@{bot_nickname}"
+                            ):
+                                is_pure_at = True
+                            if not is_pure_at:
+                                abm.message.append(Plain(message_content))
+                    else:
+                        # 没有@机器人，作为普通文本处理
+                        abm.message.append(Plain(message_content))
                 else:
                     abm.message.append(Plain(abm.message_str))
             else:  # 私聊消息
                 abm.message.append(Plain(abm.message_str))
+
+            # 缓存文本消息，以便引用消息可以查找
+            try:
+                # 获取msg_id作为缓存的key
+                new_msg_id = raw_message.get("new_msg_id")
+                if new_msg_id:
+                    # 限制缓存大小
+                    if (
+                        len(self.cached_texts) >= self.max_text_cache
+                        and self.cached_texts
+                    ):
+                        # 删除最早的一条缓存
+                        oldest_key = next(iter(self.cached_texts))
+                        self.cached_texts.pop(oldest_key)
+
+                    logger.debug(f"缓存文本消息，new_msg_id={new_msg_id}")
+                    self.cached_texts[str(new_msg_id)] = content
+            except Exception as e:
+                logger.error(f"缓存文本消息失败: {e}")
         elif msg_type == 3:
             # 图片消息
             from_user_name = raw_message.get("from_user_name", {}).get("str", "")
@@ -588,15 +722,87 @@ class WeChatPadProAdapter(Platform):
             )
             if image_bs64_data:
                 abm.message.append(Image.fromBase64(image_bs64_data))
+                # 缓存图片，以便引用消息可以查找
+                try:
+                    # 获取msg_id作为缓存的key
+                    new_msg_id = raw_message.get("new_msg_id")
+                    if new_msg_id:
+                        # 限制缓存大小
+                        if (
+                            len(self.cached_images) >= self.max_image_cache
+                            and self.cached_images
+                        ):
+                            # 删除最早的一条缓存
+                            oldest_key = next(iter(self.cached_images))
+                            self.cached_images.pop(oldest_key)
+
+                        logger.debug(f"缓存图片消息，new_msg_id={new_msg_id}")
+                        self.cached_images[str(new_msg_id)] = image_bs64_data
+                except Exception as e:
+                    logger.error(f"缓存图片消息失败: {e}")
         elif msg_type == 47:
             # 视频消息 (注意：表情消息也是 47，需要区分)
-            logger.warning("收到视频消息，待实现。")
+            data_parser = GeweDataParser(
+                content=content,
+                is_private_chat=(abm.type != MessageType.GROUP_MESSAGE),
+                raw_message=raw_message,
+            )
+            emoji_message = data_parser.parse_emoji()
+            if emoji_message is not None:
+                abm.message.append(emoji_message)
         elif msg_type == 50:
-            # 语音/视频
             logger.warning("收到语音/视频消息，待实现。")
+        elif msg_type == 34:
+            # 语音消息
+            bufid = 0
+            to_user_name = raw_message.get("to_user_name", {}).get("str", "")
+            new_msg_id = raw_message.get("new_msg_id")
+            data_parser = GeweDataParser(
+                content=content,
+                is_private_chat=(abm.type != MessageType.GROUP_MESSAGE),
+                raw_message=raw_message,
+            )
+
+            voicemsg = data_parser._format_to_xml().find("voicemsg")
+            bufid = voicemsg.get("bufid") or "0"
+            length = int(voicemsg.get("length") or 0)
+            voice_resp = await self.download_voice(
+                to_user_name=to_user_name,
+                new_msg_id=new_msg_id,
+                bufid=bufid,
+                length=length,
+            )
+            voice_bs64_data = voice_resp.get("Data", {}).get("Base64", None)
+            if voice_bs64_data:
+                voice_bs64_data = base64.b64decode(voice_bs64_data)
+                temp_dir = os.path.join(get_astrbot_data_path(), "temp")
+                file_path = os.path.join(
+                    temp_dir, f"wechatpadpro_voice_{abm.message_id}.silk"
+                )
+
+                async with await anyio.open_file(file_path, "wb") as f:
+                    await f.write(voice_bs64_data)
+                abm.message.append(Record(file=file_path, url=file_path))
         elif msg_type == 49:
-            # 引用消息
-            logger.warning("收到引用消息，待实现。")
+            try:
+                parser = GeweDataParser(
+                    content=content,
+                    is_private_chat=(abm.type != MessageType.GROUP_MESSAGE),
+                    cached_texts=self.cached_texts,
+                    cached_images=self.cached_images,
+                    raw_message=raw_message,
+                    downloader=self._download_raw_image,
+                )
+                components = await parser.parse_mutil_49()
+                if components:
+                    abm.message.extend(components)
+                    abm.message_str = "\n".join(
+                        c.text for c in components if isinstance(c, Plain)
+                    )
+            except Exception as e:
+                logger.warning(f"msg_type 49 处理失败: {e}")
+                abm.message.append(Plain("[XML 消息处理失败]"))
+                abm.message_str = "[XML 消息处理失败]"
         else:
             logger.warning(f"收到未处理的消息类型: {msg_type}。")
 
@@ -626,7 +832,10 @@ class WeChatPadProAdapter(Platform):
         # 根据 session_id 判断消息类型
         if "@chatroom" in session.session_id:
             dummy_message_obj.type = MessageType.GROUP_MESSAGE
-            dummy_message_obj.group_id = session.session_id
+            if "#" in session.session_id:
+                dummy_message_obj.group_id = session.session_id.split("#")[0]
+            else:
+                dummy_message_obj.group_id = session.session_id
             dummy_message_obj.sender = MessageMember(user_id="", nickname="")
         else:
             dummy_message_obj.type = MessageType.FRIEND_MESSAGE

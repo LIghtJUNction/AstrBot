@@ -32,6 +32,7 @@ class RespondStage(Stage):
         Comp.Node: lambda comp: bool(comp.content),  # 转发节点
         Comp.Nodes: lambda comp: bool(comp.nodes),  # 多个转发节点
         Comp.File: lambda comp: bool(comp.file_ or comp.url),
+        Comp.WechatEmoji: lambda comp: comp.md5 is not None,  # 微信表情
     }
 
     async def initialize(self, ctx: PipelineContext):
@@ -190,6 +191,7 @@ class RespondStage(Stage):
                     await asyncio.sleep(i)
                     try:
                         await event.send(MessageChain([*decorated_comps, comp]))
+                        decorated_comps = []  # 清空已发送的装饰组件
                     except Exception as e:
                         logger.error(f"发送消息失败: {e} chain: {result.chain}")
                         break

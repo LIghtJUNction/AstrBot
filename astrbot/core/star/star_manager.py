@@ -451,11 +451,11 @@ class PluginManager:
                             metadata.repo = metadata_yaml.repo
                     except Exception:
                         pass
-
+                    metadata.config = plugin_config
                     if path not in inactivated_plugins:
                         # 只有没有禁用插件时才实例化插件类
                         if plugin_config:
-                            metadata.config = plugin_config
+                            # metadata.config = plugin_config
                             try:
                                 metadata.star_cls = metadata.star_cls_type(
                                     context=self.context, config=plugin_config
@@ -652,7 +652,11 @@ class PluginManager:
 
         plugin_info = None
         if plugin:
-            plugin_info = {"repo": plugin.repo, "readme": cleaned_content}
+            plugin_info = {
+                "repo": plugin.repo,
+                "readme": cleaned_content,
+                "name": plugin.name,
+            }
 
         return plugin_info
 
@@ -847,6 +851,10 @@ class PluginManager:
 
         plugin_info = None
         if plugin:
-            plugin_info = {"repo": plugin.repo, "readme": readme_content}
+            plugin_info = {
+                "repo": plugin.repo,
+                "readme": readme_content,
+                "name": plugin.name,
+            }
 
         return plugin_info

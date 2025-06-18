@@ -154,6 +154,7 @@ class ConfigRoute(Route):
     ) -> None:
         super().__init__(context)
         self.core_lifecycle = core_lifecycle
+        self.config: AstrBotConfig = core_lifecycle.astrbot_config
         self.routes = {
             "/config/get": ("GET", self.get_configs),
             "/config/astrbot/update": ("POST", self.post_astrbot_configs),
@@ -167,6 +168,16 @@ class ConfigRoute(Route):
             "/config/llmtools": ("GET", self.get_llm_tools),
             "/config/provider/check_status": ("GET", self.check_all_providers_status),
             "/config/provider/list": ("GET", self.get_provider_config_list),
+            "/config/provider/get_session_seperate": (
+                "GET",
+                lambda: Response()
+                .ok({"enable": self.config["provider_settings"]["separate_provider"]})
+                .__dict__,
+            ),
+            "/config/provider/set_session_seperate": (
+                "POST",
+                self.post_session_seperate,
+            ),
         }
         self.register_routes()
 
@@ -174,48 +185,75 @@ class ConfigRoute(Route):
         """辅助函数：测试单个 provider 的可用性"""
         meta = provider.meta()
         provider_name = provider.provider_config.get("id", "Unknown Provider")
+        logger.debug(f"Got provider meta: {meta}")
         if not provider_name and meta:
             provider_name = meta.id
         elif not provider_name:
             provider_name = "Unknown Provider"
         status_info = {
-            "id": meta.id if meta else "Unknown ID",
-            "model": meta.model if meta else "Unknown Model",
-            "type": meta.type if meta else "Unknown Type",
+            "id": getattr(meta, "id", "Unknown ID"),
+            "model": getattr(meta, "model", "Unknown Model"),
+            "type": getattr(meta, "type", "Unknown Type"),
             "name": provider_name,
-            "status": "unavailable", # 默认为不可用
+            "status": "unavailable",  # 默认为不可用
             "error": None,
         }
-        logger.debug(f"Attempting to check provider: {status_info['name']} (ID: {status_info['id']}, Type: {status_info['type']}, Model: {status_info['model']})")
+        logger.debug(
+            f"Attempting to check provider: {status_info['name']} (ID: {status_info['id']}, Type: {status_info['type']}, Model: {status_info['model']})"
+        )
         try:
             logger.debug(f"Sending 'Ping' to provider: {status_info['name']}")
-            response = await asyncio.wait_for(provider.text_chat(prompt="Ping"), timeout=20.0) # 超时 20 秒
+            response = await asyncio.wait_for(
+                provider.text_chat(prompt="REPLY `PONG` ONLY"), timeout=45.0
+            )
             logger.debug(f"Received response from {status_info['name']}: {response}")
             # 只要 text_chat 调用成功返回一个 LLMResponse 对象 (即 response 不为 None)，就认为可用
             if response is not None:
                 status_info["status"] = "available"
                 response_text_snippet = ""
                 if hasattr(response, "completion_text") and response.completion_text:
-                    response_text_snippet = response.completion_text[:70] + "..." if len(response.completion_text) > 70 else response.completion_text
+                    response_text_snippet = (
+                        response.completion_text[:70] + "..."
+                        if len(response.completion_text) > 70
+                        else response.completion_text
+                    )
                 elif hasattr(response, "result_chain") and response.result_chain:
                     try:
-                        response_text_snippet = response.result_chain.get_plain_text()[:70] + "..." if len(response.result_chain.get_plain_text()) > 70 else response.result_chain.get_plain_text()
-                    except:
+                        response_text_snippet = (
+                            response.result_chain.get_plain_text()[:70] + "..."
+                            if len(response.result_chain.get_plain_text()) > 70
+                            else response.result_chain.get_plain_text()
+                        )
+                    except Exception as _:
                         pass
-                logger.info(f"Provider {status_info['name']} (ID: {status_info['id']}) is available. Response snippet: '{response_text_snippet}'")
+                logger.info(
+                    f"Provider {status_info['name']} (ID: {status_info['id']}) is available. Response snippet: '{response_text_snippet}'"
+                )
             else:
                 # 这个分支理论上不应该被走到，除非 text_chat 实现可能返回 None
-                status_info["error"] = "Test call returned None, but expected an LLMResponse object."
-                logger.warning(f"Provider {status_info['name']} (ID: {status_info['id']}) test call returned None.")
+                status_info["error"] = (
+                    "Test call returned None, but expected an LLMResponse object."
+                )
+                logger.warning(
+                    f"Provider {status_info['name']} (ID: {status_info['id']}) test call returned None."
+                )
 
         except asyncio.TimeoutError:
-            status_info["error"] = "Connection timed out after 10 seconds during test call."
-            logger.warning(f"Provider {status_info['name']} (ID: {status_info['id']}) timed out.")
+            status_info["error"] = (
+                "Connection timed out after 45 seconds during test call."
+            )
+            logger.warning(
+                f"Provider {status_info['name']} (ID: {status_info['id']}) timed out."
+            )
         except Exception as e:
             error_message = str(e)
             status_info["error"] = error_message
-            logger.warning(f"Provider {status_info['name']} (ID: {status_info['id']}) is unavailable. Error: {error_message}")
-            logger.debug(f"Traceback for {status_info['name']}:\n{traceback.format_exc()}")
+            logger.warning(
+                f"Provider {status_info['name']} (ID: {status_info['id']}) is unavailable. Error: {error_message}"
+            )
+            logger.debug(
+                f"Traceback for {status_info['name']}:\n{traceback.format_exc()}"
+            )
         return status_info
 
     async def check_all_providers_status(self):
@@ -224,7 +262,9 @@ class ConfigRoute(Route):
         """
         logger.info("API call received: /config/provider/check_status")
         try:
-            all_providers: typing.List = self.core_lifecycle.star_context.get_all_providers()
+            all_providers: typing.List = (
+                self.core_lifecycle.star_context.get_all_providers()
+            )
             logger.debug(f"Found {len(all_providers)} providers to check.")
 
             if not all_providers:
@@ -241,7 +281,9 @@ class ConfigRoute(Route):
         except Exception as e:
             logger.error(f"Critical error in check_all_providers_status: {str(e)}")
             logger.error(traceback.format_exc())
-            return Response().error(f"检查 Provider 状态时发生严重错误: {str(e)}").__dict__
+            return (
+                Response().error(f"检查 Provider 状态时发生严重错误: {str(e)}").__dict__
+            )
 
     async def get_configs(self):
         # plugin_name 为空时返回 AstrBot 配置
@@ -250,6 +292,21 @@ class ConfigRoute(Route):
         if not plugin_name:
             return Response().ok(await self._get_astrbot_config()).__dict__
         return Response().ok(await self._get_plugin_config(plugin_name)).__dict__
+
+    async def post_session_seperate(self):
+        """设置提供商会话隔离"""
+        post_config = await request.json
+        enable = post_config.get("enable", None)
+        if enable is None:
+            return Response().error("缺少参数 enable").__dict__
+
+        astrbot_config = self.core_lifecycle.astrbot_config
+        astrbot_config["provider_settings"]["separate_provider"] = enable
+        try:
+            astrbot_config.save_config()
+        except Exception as e:
+            return Response().error(str(e)).__dict__
+        return Response().ok(None, "设置成功~").__dict__
 
     async def get_provider_config_list(self):
         provider_type = request.args.get("provider_type", None)
