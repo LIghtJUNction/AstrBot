@@ -28,5 +28,3 @@ packages/python_interpreter/workplace
 .conda/
 .idea
 pytest.ini
-.astrbot
-/astrbot
