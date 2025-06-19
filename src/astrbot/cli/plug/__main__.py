@@ -1,4 +1,10 @@
 import click
+from astrbot.cli.plug.new import new
+from astrbot.cli.plug.search import search
+from astrbot.cli.plug.list import list_impl
+from astrbot.cli.plug.install import install
+from astrbot.cli.plug.update import update
+from astrbot.cli.plug.remove import remove
 
 @click.group(invoke_without_command=True)
 @click.pass_context
@@ -16,12 +22,6 @@ def plug(ctx: click.Context):
         click.echo(f"  {click.style('remove', fg='magenta')}  Remove a plugin | 删除插件")
         click.echo()
 
-from astrbot.cli.plug.new import new
-from astrbot.cli.plug.search import search
-from astrbot.cli.plug.list import list_impl
-from astrbot.cli.plug.install import install
-from astrbot.cli.plug.update import update
-from astrbot.cli.plug.remove import remove
 
 plug.add_command(new)
 plug.add_command(search)

@@ -10,7 +10,6 @@ from astrbot.core.message.message_event_result import (
     CommandResult,
     EventResultType,
 )
-from astrbot.core.platform import AstrMessageEvent
 
 # star register
 from astrbot.core.star.register import (
@@ -32,7 +31,7 @@ from astrbot.core.star.register import (
     register_star as register,  # 注册插件（Star）
 )
 from astrbot.core.star import Context, Star
-from astrbot.core.star.config import *
+from astrbot.core.star.config import *  # 过时 跳过检查 # noqa: F401,F403
 
 
 # provider
@@ -50,4 +49,102 @@ from astrbot.core.platform import (
 
 from astrbot.core.platform.register import register_platform_adapter
 
-from .message_components import *
+from .message_components import (
+    ComponentType,
+    BaseMessageComponent,
+    Plain,
+    Face,
+    Record,
+    Video,
+    At,
+    AtAll,
+    RPS,
+    Dice,
+    Shake,
+    Anonymous,
+    Share,
+    Contact,
+    Location,
+    Music,
+    Image,
+    Reply,
+    RedBag,
+    Poke,
+    Forward,
+    Node,
+    Nodes,
+    Xml,
+    Json,
+    CardImage,
+    TTS,
+    Unknown,
+    File,
+    WechatEmoji,
+    ComponentTypes
+)
+
+__all__ = [
+    "AstrBotConfig",
+    "logger",
+    "html_renderer",
+    "llm_tool",
+    "MessageEventResult",
+    "MessageChain",
+    "CommandResult",
+    "EventResultType",
+    "AstrMessageEvent",
+    "command",
+    "command_group",
+    "event_message_type",
+    "regex",
+    "platform_adapter_type",
+    "EventMessageTypeFilter",
+    "EventMessageType",
+    "PlatformAdapterTypeFilter",
+    "PlatformAdapterType",
+    "register",
+    "Context",
+    "Star",
+    "Provider",
+    "Personality",
+    "ProviderMetaData",
+    "Platform",
+    "AstrBotMessage",
+    "MessageMember",
+    "MessageType",
+    "PlatformMetadata",
+    "register_platform_adapter",
+    # from .message_components import *
+    "ComponentType",
+    "BaseMessageComponent",
+    "Plain",
+    "Face",
+    "Record",
+    "Video",
+    "At",
+    "AtAll",
+    "RPS",
+    "Dice",
+    "Shake",
+    "Anonymous",
+    "Share",
+    "Contact",
+    "Location",
+    "Music",
+    "Image",
+    "Reply",
+    "RedBag",
+    "Poke",
+    "Forward",
+    "Node",
+    "Nodes",
+    "Xml",
+    "Json",
+    "CardImage",
+    "TTS",
+    "Unknown",
+    "File",
+    "WechatEmoji",
+    "ComponentTypes",
+
+]
