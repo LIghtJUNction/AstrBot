@@ -7,6 +7,8 @@ import sys
 from astrbot.cli import __version__
 from astrbot.cli.init import init
 from astrbot.cli.run import run
+from astrbot.cli.conf import conf
+from astrbot.cli.plug import plug
 
 logo_tmpl = r"""
      ___           _______.___________..______      .______     ______   .___________.
@@ -69,12 +71,9 @@ cli.add_command(init)
 cli.add_command(run)
 
 #region cli.conf 子命令组
-from astrbot.cli.conf import conf
 cli.add_command(conf)
 
-
 #region cli.plug 子命令组
-from astrbot.cli.plug import plug
 cli.add_command(plug)
 
 

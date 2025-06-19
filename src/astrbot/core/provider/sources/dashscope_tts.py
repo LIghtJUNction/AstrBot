@@ -2,7 +2,7 @@ import os
 import dashscope
 import uuid
 import asyncio
-from dashscope.audio.tts_v2 import *
+from dashscope.audio.tts_v2 import SpeechSynthesizer, AudioFormat
 from ..provider import TTSProvider
 from ..entities import ProviderType
 from ..register import register_provider_adapter

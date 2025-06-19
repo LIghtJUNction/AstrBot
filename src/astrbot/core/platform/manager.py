@@ -2,7 +2,6 @@ import traceback
 import asyncio
 from astrbot.core.config.astrbot_config import AstrBotConfig
 from .platform import Platform
-from typing import List
 from asyncio import Queue
 from .register import platform_cls_map
 from astrbot.core import logger
@@ -11,7 +10,7 @@ from .sources.webchat.webchat_adapter import WebChatAdapter
 
 class PlatformManager:
     def __init__(self, config: AstrBotConfig, event_queue: Queue):
-        self.platform_insts: List[Platform] = []
+        self.platform_insts: list[Platform] = []
         """加载的 Platform 的实例"""
 
         self._inst_map = {}
@@ -44,43 +43,44 @@ class PlatformManager:
 
             logger.info(
                 f"载入 {platform_config['type']}({platform_config['id']}) 平台适配器 ..."
-            )
+            )        
             match platform_config["type"]:
                 case "aiocqhttp":
                     from .sources.aiocqhttp.aiocqhttp_platform_adapter import (
-                        AiocqhttpAdapter,  # noqa: F401
+                        AiocqhttpAdapter,  # noqa: F401 动态导入
                     )
                 case "qq_official":
                     from .sources.qqofficial.qqofficial_platform_adapter import (
-                        QQOfficialPlatformAdapter,  # noqa: F401
+                        QQOfficialPlatformAdapter,  # noqa: F401 动态导入
                     )
                 case "qq_official_webhook":
                     from .sources.qqofficial_webhook.qo_webhook_adapter import (
-                        QQOfficialWebhookPlatformAdapter,  # noqa: F401
+                        QQOfficialWebhookPlatformAdapter,  # noqa: F401 动态导入
                     )
                 case "gewechat":
                     from .sources.gewechat.gewechat_platform_adapter import (
-                        GewechatPlatformAdapter,  # noqa: F401
+                        GewechatPlatformAdapter,  # noqa: F401 动态导入
                     )
                 case "wechatpadpro":
                     from .sources.wechatpadpro.wechatpadpro_adapter import (
-                        WeChatPadProAdapter,  # noqa: F401
+                        WeChatPadProAdapter,  # noqa: F401 动态导入
                     )
                 case "lark":
                     from .sources.lark.lark_adapter import LarkPlatformAdapter  # noqa: F401
                 case "dingtalk":
                     from .sources.dingtalk.dingtalk_adapter import (
-                        DingtalkPlatformAdapter,  # noqa: F401
+                        DingtalkPlatformAdapter,  # noqa: F401 动态导入
                     )
                 case "telegram":
-                    from .sources.telegram.tg_adapter import TelegramPlatformAdapter  # noqa: F401
+                    from .sources.telegram.tg_adapter import TelegramPlatformAdapter  # noqa: F401 动态导入
                 case "wecom":
-                    from .sources.wecom.wecom_adapter import WecomPlatformAdapter  # noqa: F401
+                    from .sources.wecom.wecom_adapter import WecomPlatformAdapter  # noqa: F401 动态导入
                 case "weixin_official_account":
-                    from .sources.weixin_official_account.weixin_offacc_adapter import WeixinOfficialAccountPlatformAdapter # noqa
+                    from .sources.weixin_official_account.weixin_offacc_adapter import WeixinOfficialAccountPlatformAdapter  # noqa: F401 动态导入
         except (ImportError, ModuleNotFoundError) as e:
             logger.error(
-                f"加载平台适配器 {platform_config['type']} 失败，原因：{e}。请检查依赖库是否安装。提示：可以在 管理面板->控制台->安装Pip库 中安装依赖库。"
+                f"加载平台适配器 {platform_config['type']} 失败，原因：{e}。"
+                "请检查依赖库是否安装。提示：可以在 管理面板->控制台->安装Pip库 中安装依赖库。"
             )
         except Exception as e:
             logger.error(f"加载平台适配器 {platform_config['type']} 失败，原因：{e}。")
@@ -158,3 +158,10 @@ class PlatformManager:
 
     def get_insts(self):
         return self.platform_insts
+
+__all__ = [
+    "asyncio",
+    "logger",
+    "platform_cls_map",
+    "PlatformManager",
+]

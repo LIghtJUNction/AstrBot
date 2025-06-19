@@ -3,6 +3,12 @@ from astrbot.core.star.register import (
 )
 
 from astrbot.core.star import Context, Star, StarTools
-from astrbot.core.star.config import *
+from astrbot.core.star.config import * # 过时 跳过检查 # noqa: F401,F403
 
-__all__ = ["register", "Context", "Star", "StarTools"]
+__all__ = [
+    "register", 
+    "Context", 
+    "Star", 
+    "StarTools"
+
+]

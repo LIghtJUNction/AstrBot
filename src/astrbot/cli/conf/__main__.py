@@ -1,4 +1,6 @@
 import click
+from astrbot.cli.conf.set import set_config
+from astrbot.cli.conf.get import get
 
 @click.group()
 def conf():
@@ -20,10 +22,8 @@ def conf():
     """
     pass
 
-from astrbot.cli.conf.set import set_config
-conf.add_command(set_config) # conf set
 
-from astrbot.cli.conf.get import get
+conf.add_command(set_config) # conf set
 conf.add_command(get) # conf get
 
 if __name__ == "__main__":

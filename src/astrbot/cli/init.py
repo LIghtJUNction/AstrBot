@@ -43,7 +43,7 @@ async def initialize_astrbot(astrbot_root: Path) -> None:
         "temp": astrbot_root / "data" / "temp",
     }
 
-    for name, path in paths.items():
+    for _, path in paths.items():
         path.mkdir(parents=True, exist_ok=True)
         status = "Created" if not path.exists() else "Directory exists"
         status_color = "green" if status == "Created" else "cyan"
