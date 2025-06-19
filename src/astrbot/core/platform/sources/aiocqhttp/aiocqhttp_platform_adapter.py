@@ -13,10 +13,9 @@ from astrbot.api.platform import (
     PlatformMetadata,
 )
 from astrbot.api.event import MessageChain
-from .aiocqhttp_message_event import *  # noqa: F403
-from astrbot.api.message_components import *  # noqa: F403
-from astrbot.api import logger
 from .aiocqhttp_message_event import AiocqhttpMessageEvent
+from astrbot.api.message_components import Poke, File, Reply, At, ComponentTypes
+from astrbot.api import logger
 from astrbot.core.platform.astr_message_event import MessageSesion
 from ...register import register_platform_adapter
 from aiocqhttp.exceptions import ActionFailed

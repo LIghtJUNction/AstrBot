@@ -18,7 +18,11 @@ from .lark_event import LarkMessageEvent
 from ...register import register_platform_adapter
 from astrbot import logger
 import lark_oapi as lark
-from lark_oapi.api.im.v1 import *
+from lark_oapi.api.im.v1 import (
+    CreateMessageRequest,
+    CreateMessageRequestBody,
+    GetMessageResourceRequest,
+)
 
 
 @register_platform_adapter("lark", "飞书机器人官方 API 适配器")

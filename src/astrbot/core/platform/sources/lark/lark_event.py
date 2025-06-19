@@ -8,7 +8,12 @@ from typing import List
 from astrbot.api.event import AstrMessageEvent, MessageChain
 from astrbot.api.message_components import Plain, Image as AstrBotImage, At
 from astrbot.core.utils.io import download_image_by_url
-from lark_oapi.api.im.v1 import *
+from lark_oapi.api.im.v1 import (
+    CreateImageRequest,
+    CreateImageRequestBody,
+    ReplyMessageRequest,
+    ReplyMessageRequestBody,
+)
 from astrbot import logger
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 

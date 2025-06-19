@@ -8,14 +8,26 @@ from astrbot.core.config.default import VERSION
 from quart import Quart, request, jsonify, g
 from quart.logging import default_handler
 from astrbot.core.core_lifecycle import AstrBotCoreLifecycle
-from .routes import *
+from .routes import (
+    AuthRoute,
+    PluginRoute,
+    ConfigRoute,
+    UpdateRoute,
+    StatRoute,
+    LogRoute,
+    StaticFileRoute,
+    ChatRoute,
+    ToolsRoute,
+    ConversationRoute,
+    FileRoute,
+)
 from .routes.route import RouteContext, Response
 from astrbot.core import logger, WEBUI_SK
 from astrbot.core.db import BaseDatabase
 from astrbot.core.utils.io import get_local_ip_addresses
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
-APP: Quart = None
+APP: Quart | None = None
 
 
 class AstrBotDashboard:
