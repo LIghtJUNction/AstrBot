@@ -88,10 +88,6 @@ AstrBot 是一个松耦合、异步、支持多消息平台部署、具有易用
 
 首先，安装 uv：
 
-```bash
-pip install uv
-```
-
 [官网](https://docs.astral.sh/uv/)推荐的安装方式：
 
 linux / macos：
@@ -124,7 +120,7 @@ uv run main.py
 通过uv安装 Astrbot:
 
 ```bash
-uv tool install astrbot
+uv tool install astrbot # 不建议使用pip install astrbot 可能会导致意外情况
 ```
 
 初始化：
@@ -132,7 +128,6 @@ uv tool install astrbot
 ```bash
 mkdir astrbot && cd astrbot  # mkdir astrbot ; cd astrbot
 ```
-
 
 运行：
 
