@@ -4,20 +4,29 @@ import asyncio
 import os
 import socket
 import psutil
+
 from astrbot.core.config.default import VERSION
 from quart import Quart, request, jsonify, g
 from quart.logging import default_handler
 from astrbot.core.core_lifecycle import AstrBotCoreLifecycle
-from .routes import *
-from .routes.route import RouteContext, Response
+from astrbot.dashboard.routes import (
+    AuthRoute,
+    PluginRoute,
+    ConfigRoute,
+    UpdateRoute,
+    StatRoute,
+    LogRoute,
+    StaticFileRoute,
+    ChatRoute,
+    ToolsRoute,
+    ConversationRoute,
+    FileRoute,
+)
+from astrbot.dashboard.routes.route import RouteContext, Response
 from astrbot.core import logger, WEBUI_SK
 from astrbot.core.db import BaseDatabase
 from astrbot.core.utils.io import get_local_ip_addresses
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
-
-APP: Quart = None
-
-
 class AstrBotDashboard:
     def __init__(
         self,
@@ -29,7 +38,6 @@ class AstrBotDashboard:
         self.config = core_lifecycle.astrbot_config
         self.data_path = os.path.abspath(os.path.join(get_astrbot_data_path(), "dist"))
         self.app = Quart("dashboard", static_folder=self.data_path, static_url_path="/")
-        APP = self.app  # noqa
         self.app.config["MAX_CONTENT_LENGTH"] = (
             128 * 1024 * 1024
         )  # 将 Flask 允许的最大上传文件体大小设置为 128 MB

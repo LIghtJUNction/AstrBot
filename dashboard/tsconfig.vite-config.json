@@ -4,6 +4,7 @@
   "compilerOptions": {
     "composite": true,
     "allowJs": true,
-    "types": ["node"]
+    "types": ["node"],
+    "noEmit": false
   }
 }

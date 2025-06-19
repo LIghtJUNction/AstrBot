@@ -13,10 +13,9 @@ from astrbot.api.platform import (
     PlatformMetadata,
 )
 from astrbot.api.event import MessageChain
-from .aiocqhttp_message_event import *  # noqa: F403
-from astrbot.api.message_components import *  # noqa: F403
-from astrbot.api import logger
 from .aiocqhttp_message_event import AiocqhttpMessageEvent
+from astrbot.api.message_components import Poke, File, Reply, At, ComponentTypes
+from astrbot.api import logger
 from astrbot.core.platform.astr_message_event import MessageSesion
 from ...register import register_platform_adapter
 from aiocqhttp.exceptions import ActionFailed
@@ -170,7 +169,7 @@ class AiocqhttpAdapter(Platform):
             if event["sub_type"] == "poke" and "target_id" in event:
                 abm.message.append(
                     Poke(qq=str(event["target_id"]), type="poke")
-                )  # noqa: F405
+                ) 
 
         return abm
 
@@ -225,7 +224,7 @@ class AiocqhttpAdapter(Platform):
                     # 如果文本段为空，则跳过
                     continue
                 message_str += current_text
-                a = ComponentTypes[t](text=current_text)  # noqa: F405
+                a = ComponentTypes[t](text=current_text) 
                 abm.message.append(a)
 
             elif t == "file":
@@ -265,8 +264,7 @@ class AiocqhttpAdapter(Platform):
             elif t == "reply":
                 for m in m_group:
                     if not get_reply:
-                        a = ComponentTypes[t](**m["data"])  # noqa: F405
-                        abm.message.append(a)
+                        a = ComponentTypes[t](**m["data"])
                     else:
                         try:
                             reply_event_data = await self.bot.call_action(
@@ -291,7 +289,7 @@ class AiocqhttpAdapter(Platform):
                             abm.message.append(reply_seg)
                         except BaseException as e:
                             logger.error(f"获取引用消息失败: {e}。")
-                            a = ComponentTypes[t](**m["data"])  # noqa: F405
+                            a = ComponentTypes[t](**m["data"])
                             abm.message.append(a)
             elif t == "at":
                 first_at_self_processed = False
@@ -331,7 +329,7 @@ class AiocqhttpAdapter(Platform):
                         logger.error(f"获取 @ 用户信息失败: {e}，此消息段将被忽略。")
             else:
                 for m in m_group:
-                    a = ComponentTypes[t](**m["data"])  # noqa: F405
+                    a = ComponentTypes[t](**m["data"]) 
                     abm.message.append(a)
 
         abm.timestamp = int(time.time())
