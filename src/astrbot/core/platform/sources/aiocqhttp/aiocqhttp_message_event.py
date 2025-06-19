@@ -81,26 +81,32 @@ class AiocqhttpMessageEvent(AstrMessageEvent):
                         payload["user_id"] = self.get_sender_id()
                         await self.bot.call_action(
                             "send_private_forward_msg", **payload
-                        )
+                        )                
                 elif isinstance(seg, File):
                     d = await AiocqhttpMessageEvent._from_segment_to_dict(seg)
-                    await self.bot.send(
-                        self.message_obj.raw_message,
-                        [d],
-                    )
+                    # 根据消息类型使用对应的API方法发送文件
+                    if self.get_group_id():
+                        await self.bot.send_group_msg(group_id=int(self.get_group_id()), message=[d])
+                    else:
+                        await self.bot.send_private_msg(user_id=int(self.get_sender_id()), message=[d])
                 else:
-                    await self.bot.send(
-                        self.message_obj.raw_message,
-                        await AiocqhttpMessageEvent._parse_onebot_json(
-                            MessageChain([seg])
-                        ),
-                    )
+                    # 根据消息类型使用对应的API方法发送其他消息
+                    msg = await AiocqhttpMessageEvent._parse_onebot_json(MessageChain([seg]))
+                    if self.get_group_id():
+                        await self.bot.send_group_msg(group_id=int(self.get_group_id()), message=msg)
+                    else:
+                        await self.bot.send_private_msg(user_id=int(self.get_sender_id()), message=msg)
                     await asyncio.sleep(0.5)
+        
         else:
             ret = await AiocqhttpMessageEvent._parse_onebot_json(message)
             if not ret:
                 return
-            await self.bot.send(self.message_obj.raw_message, ret)
+              # 根据消息类型使用对应的API方法
+            if self.get_group_id():
+                await self.bot.send_group_msg(group_id=int(self.get_group_id()), message=ret)
+            else:
+                await self.bot.send_private_msg(user_id=int(self.get_sender_id()), message=ret)
 
         await super().send(message)
 

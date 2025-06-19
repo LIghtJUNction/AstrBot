@@ -205,7 +205,7 @@ class RespondStage(Stage):
                 try:
                     await event.send(MessageChain(non_record_comps))
                 except Exception as e:
-                    logger.error(traceback.format_exc())
+                    logger.error(traceback.format_exc(limit=20))
                     logger.error(f"发送消息失败: {e} chain: {result.chain}")
 
             await event._post_send()

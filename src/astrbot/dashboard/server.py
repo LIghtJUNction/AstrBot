@@ -27,6 +27,7 @@ from astrbot.core import logger, WEBUI_SK
 from astrbot.core.db import BaseDatabase
 from astrbot.core.utils.io import get_local_ip_addresses
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
+
 class AstrBotDashboard:
     def __init__(
         self,
