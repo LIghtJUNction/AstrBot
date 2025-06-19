@@ -1,7 +1,7 @@
 from __future__ import annotations
 import enum
 from dataclasses import dataclass, field
-from typing import Awaitable, List, Dict, TypeVar, Generic
+from typing import Any, Awaitable, TypeVar, Generic
 from .filter import HandlerFilter
 from .star import star_map
 
@@ -9,8 +9,8 @@ T = TypeVar("T", bound="StarHandlerMetadata")
 
 class StarHandlerRegistry(Generic[T]):
     def __init__(self):
-        self.star_handlers_map: Dict[str, StarHandlerMetadata] = {}
-        self._handlers: List[StarHandlerMetadata] = []
+        self.star_handlers_map: dict[str, StarHandlerMetadata] = {}
+        self._handlers: list[StarHandlerMetadata] = []
 
     def append(self, handler: StarHandlerMetadata):
         """添加一个 Handler，并保持按优先级有序"""
@@ -27,7 +27,7 @@ class StarHandlerRegistry(Generic[T]):
 
     def get_handlers_by_event_type(
         self, event_type: EventType, only_activated=True, platform_id=None
-    ) -> List[StarHandlerMetadata]:
+    ) -> list[StarHandlerMetadata]:
         handlers = []
         for handler in self._handlers:
             if handler.event_type != event_type:
@@ -42,12 +42,12 @@ class StarHandlerRegistry(Generic[T]):
             handlers.append(handler)
         return handlers
 
-    def get_handler_by_full_name(self, full_name: str) -> StarHandlerMetadata:
+    def get_handler_by_full_name(self, full_name: str) -> StarHandlerMetadata | None:
         return self.star_handlers_map.get(full_name, None)
 
     def get_handlers_by_module_name(
         self, module_name: str
-    ) -> List[StarHandlerMetadata]:
+    ) -> list[StarHandlerMetadata]:
         return [
             handler for handler in self._handlers
             if handler.handler_module_path == module_name
@@ -71,7 +71,9 @@ star_handlers_registry = StarHandlerRegistry()
 
 
 class EventType(enum.Enum):
-    """表示一个 AstrBot 内部事件的类型。如适配器消息事件、LLM 请求事件、发送消息前的事件等
+    """
+    表示一个 AstrBot 内部事件的类型。
+    如适配器消息事件、LLM 请求事件、发送消息前的事件等
 
     用于对 Handler 的职能分组。
     """
@@ -102,16 +104,16 @@ class StarHandlerMetadata:
     handler_module_path: str
     """Handler 所在的模块路径。"""
 
-    handler: Awaitable
+    handler: Awaitable[Any]
     """Handler 的函数对象，应当是一个异步函数"""
 
-    event_filters: List[HandlerFilter]
+    event_filters: list[HandlerFilter]
     """一个适配器消息事件过滤器，用于描述这个 Handler 能够处理、应该处理的适配器消息事件"""
 
     desc: str = ""
     """Handler 的描述信息"""
 
-    extras_configs: dict = field(default_factory=dict)
+    extras_configs: dict[str, Any] = field(default_factory=dict)
     """插件注册的一些其他的信息, 如 priority 等"""
 
     def __lt__(self, other: StarHandlerMetadata):

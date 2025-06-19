@@ -8,10 +8,11 @@ import inspect
 import json
 import logging
 import os
+from re import S
 import sys
 import traceback
 from types import ModuleType
-from typing import List
+from typing import Any
 
 import yaml
 
@@ -155,7 +156,7 @@ class PluginManager:
                     )
         return modules
 
-    def _get_plugin_modules(self) -> List[dict]:
+    def _get_plugin_modules(self) -> list[dict[str, Any]]:
         plugins = []
         if os.path.exists(self.plugin_store_path):
             plugins.extend(self._get_modules(self.plugin_store_path))
@@ -166,7 +167,7 @@ class PluginManager:
             plugins.extend(_p)
         return plugins
 
-    async def _check_plugin_dept_update(self, target_plugin: str = None):
+    async def _check_plugin_dept_update(self, target_plugin: str | None = None):
         """检查插件的依赖
         如果 target_plugin 为 None，则检查所有插件的依赖
         """
@@ -189,7 +190,7 @@ class PluginManager:
                 except Exception as e:
                     logger.error(f"更新插件 {p} 的依赖失败。Code: {str(e)}")
 
-    def _load_plugin_metadata(self, plugin_path: str, plugin_obj=None) -> StarMetadata:
+    def _load_plugin_metadata(self, plugin_path: str, plugin_obj: Any = None) -> StarMetadata:
         """v3.4.0 以前的方式载入插件元数据
 
         先寻找 metadata.yaml 文件，如果不存在，则使用插件对象的 info() 函数获取元数据。
@@ -357,7 +358,7 @@ class PluginManager:
 
         return True
 
-    async def load(self, specified_module_path=None, specified_dir_name=None):
+    async def load(self, specified_module_path: str | None = None, specified_dir_name: str | None = None):
         """载入插件。
         当 specified_module_path 或者 specified_dir_name 不为 None 时，只载入指定的插件。
 
@@ -603,11 +604,12 @@ class PluginManager:
 
         if not fail_rec:
             return True, None
+        
         else:
             self.failed_plugin_info = fail_rec
             return False, fail_rec
 
-    async def install_plugin(self, repo_url: str, proxy=""):
+    async def install_plugin(self, repo_url: str, proxy: str = ""):
         """从仓库 URL 安装插件
 
         从指定的仓库 URL 下载并安装插件，然后加载该插件到系统中
@@ -729,7 +731,7 @@ class PluginManager:
             root_dir_name=plugin.root_dir_name, is_reserved=plugin.reserved
         )
 
-    async def update_plugin(self, plugin_name: str, proxy=""):
+    async def update_plugin(self, plugin_name: str, proxy: str = ""):
         """升级一个插件"""
         plugin = self.context.get_registered_star(plugin_name)
         if not plugin:

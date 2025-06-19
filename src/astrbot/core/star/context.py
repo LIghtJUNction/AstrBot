@@ -1,5 +1,5 @@
 from asyncio import Queue
-from typing import List, Union
+from typing import Any, List, Union
 
 from astrbot.core import sp
 from astrbot.core.provider.provider import Provider, TTSProvider, STTProvider
@@ -29,33 +29,33 @@ class Context:
     暴露给插件的接口上下文。
     """
 
-    _event_queue: Queue = None
+    _event_queue: Queue[Any] | None = None
     """事件队列。消息平台通过事件队列传递消息事件。"""
 
-    _config: AstrBotConfig = None
+    _config: AstrBotConfig | None = None
     """AstrBot 配置信息"""
 
-    _db: BaseDatabase = None
+    _db: BaseDatabase | None = None
     """AstrBot 数据库"""
 
-    provider_manager: ProviderManager = None
+    provider_manager: ProviderManager | None = None
 
-    platform_manager: PlatformManager = None
+    platform_manager: PlatformManager | None = None
 
-    registered_web_apis: list = []
+    registered_web_apis: list[Any] = []
 
     # back compatibility
-    _register_tasks: List[Awaitable] = []
+    _register_tasks: list[Awaitable[Any]] = []
     _star_manager = None
 
     def __init__(
         self,
-        event_queue: Queue,
+        event_queue: Queue[Any],
         config: AstrBotConfig,
         db: BaseDatabase,
-        provider_manager: ProviderManager = None,
-        platform_manager: PlatformManager = None,
-        conversation_manager: ConversationManager = None,
+        provider_manager: ProviderManager | None = None,
+        platform_manager: PlatformManager | None = None,
+        conversation_manager: ConversationManager | None = None,
     ):
         self._event_queue = event_queue
         self._config = config
@@ -64,13 +64,14 @@ class Context:
         self.platform_manager = platform_manager
         self.conversation_manager = conversation_manager
 
-    def get_registered_star(self, star_name: str) -> StarMetadata:
+    def get_registered_star(self, star_name: str) -> StarMetadata | None:
         """根据插件名获取插件的 Metadata"""
         for star in star_registry:
             if star.name == star_name:
                 return star
+        return None
 
-    def get_all_stars(self) -> List[StarMetadata]:
+    def get_all_stars(self) -> list[StarMetadata]:
         """获取当前载入的所有插件 Metadata 的列表"""
         return star_registry
 
@@ -155,7 +156,7 @@ class Context:
                 return inst
         return self.provider_manager.curr_provider_inst
 
-    def get_using_tts_provider(self, umo: str = None) -> TTSProvider:
+    def get_using_tts_provider(self, umo: str | None = None) -> TTSProvider:
         """
         获取当前使用的用于 TTS 任务的 Provider。
 
@@ -169,7 +170,7 @@ class Context:
                 return inst
         return self.provider_manager.curr_tts_provider_inst
 
-    def get_using_stt_provider(self, umo: str = None) -> STTProvider:
+    def get_using_stt_provider(self, umo: str | None = None) -> STTProvider:
         """
         获取当前使用的用于 STT 任务的 Provider。
 
@@ -183,15 +184,15 @@ class Context:
                 return inst
         return self.provider_manager.curr_stt_provider_inst
 
-    def get_config(self) -> AstrBotConfig:
+    def get_config(self) -> AstrBotConfig | None:
         """获取 AstrBot 的配置。"""
         return self._config
 
-    def get_db(self) -> BaseDatabase:
+    def get_db(self) -> BaseDatabase | None:
         """获取 AstrBot 数据库。"""
         return self._db
 
-    def get_event_queue(self) -> Queue:
+    def get_event_queue(self) -> Queue[Any] | None:
         """
         获取事件队列。
         """
@@ -246,7 +247,7 @@ class Context:
     """
 
     def register_llm_tool(
-        self, name: str, func_args: list, desc: str, func_obj: Awaitable
+        self, name: str, func_args: list[Any], desc: str, func_obj: Awaitable
     ) -> None:
         """
         为函数调用（function-calling / tools-use）添加工具。
@@ -282,7 +283,7 @@ class Context:
         command_name: str,
         desc: str,
         priority: int,
-        awaitable: Awaitable,
+        awaitable: Awaitable[Any],
         use_regex=False,
         ignore_prefix=False,
     ):
@@ -315,14 +316,14 @@ class Context:
             )
         star_handlers_registry.append(md)
 
-    def register_task(self, task: Awaitable, desc: str):
+    def register_task(self, task: Awaitable[Any], desc: str):
         """
         注册一个异步任务。
         """
         self._register_tasks.append(task)
 
     def register_web_api(
-        self, route: str, view_handler: Awaitable, methods: list, desc: str
+        self, route: str, view_handler: Awaitable[Any], methods: list[Any], desc: str
     ):
         for idx, api in enumerate(self.registered_web_apis):
             if api[0] == route and methods == api[2]:
