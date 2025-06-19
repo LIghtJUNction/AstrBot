@@ -1,0 +1,22 @@
+[package]
+name = "astrbox"
+version = "3.5.15"
+edition = "2024"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "astrbox"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = "0.25.1"
+
+[profile.release]
+lto = true
+strip = true      
+opt-level = 3
+panic = "abort"
+
+[profile.dev]
+opt-level = 0
+panic = "unwind"
