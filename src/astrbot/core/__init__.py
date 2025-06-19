@@ -1,6 +1,6 @@
 import os
 import asyncio
-from .log import LogManager, LogBroker  # noqa
+from .log import LogManager, LogBroker  
 from astrbot.core.utils.t2i.renderer import HtmlRenderer
 from astrbot.core.utils.shared_preferences import SharedPreferences
 from astrbot.core.utils.pip_installer import PipInstaller
@@ -32,3 +32,16 @@ pip_installer = PipInstaller(
 web_chat_queue = asyncio.Queue(maxsize=32)
 web_chat_back_queue = asyncio.Queue(maxsize=32)
 
+__all__ = [
+    "logger",
+    "astrbot_config",
+    "t2i_base_url",
+    "html_renderer",
+    "db_helper",
+    "sp",
+    "file_token_service",
+    "pip_installer",
+    "web_chat_queue",
+    "web_chat_back_queue",
+    "LogBroker",
+]
