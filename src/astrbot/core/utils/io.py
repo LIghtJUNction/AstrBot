@@ -212,7 +212,7 @@ async def get_dashboard_version():
     return None
 
 
-async def download_dashboard(path: str = None, extract_path: str = "data"):
+async def download_dashboard(path: str | None = None, extract_path: str = "data"):
     """下载管理面板文件"""
     if path is None:
         path = os.path.join(get_astrbot_data_path(), "dashboard.zip")
