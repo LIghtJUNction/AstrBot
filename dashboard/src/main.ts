@@ -15,7 +15,7 @@ const app = createApp(App);
 app.use(router);
 app.use(createPinia());
 app.use(print);
-app.use(VueApexCharts);
+app.component('apexchart', VueApexCharts);
 app.use(vuetify);
 app.use(confirmPlugin);
 app.mount('#app');

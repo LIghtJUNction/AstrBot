@@ -2,12 +2,11 @@ import { defineStore } from 'pinia';
 import { router } from '@/router';
 import axios from 'axios';
 
-export const useAuthStore = defineStore({
-  id: 'auth',
+export const useAuthStore = defineStore('auth', {
   state: () => ({
     // @ts-ignore
     username: '',
-    returnUrl: null
+    returnUrl: null as string | null
   }),
   actions: {
     async login(username: string, password: string): Promise<void> {

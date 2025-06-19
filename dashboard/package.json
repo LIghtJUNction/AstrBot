@@ -51,11 +51,10 @@
     "eslint-plugin-vue": "10.2.0",
     "prettier": "3.5.3",
     "sass": "1.89.2",
-    "sass-loader": "16.0.5",
+    "sass-loader": "16.0.5",      
     "typescript": "5.8.3",
     "vite": "6.3.5",
     "vue-cli-plugin-vuetify": "2.5.8",
-    "vue-tsc": "2.2.10",
-    "vuetify-loader": "^2.0.0-alpha.9"
+    "vue-tsc": "2.2.10"
   }
 }
