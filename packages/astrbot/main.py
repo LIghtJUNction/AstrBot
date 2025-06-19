@@ -1039,7 +1039,7 @@ UID: {user_id} 此 ID 可用于设置管理员。
     @filter.permission_type(filter.PermissionType.ADMIN)
     @filter.command("persona")
     async def persona(self, message: AstrMessageEvent):
-        l = message.message_str.split(" ")  # noqa: E741
+        l = message.message_str.split(" ")  
 
         curr_persona_name = "无"
         cid = await self.context.conversation_manager.get_curr_conversation_id(
