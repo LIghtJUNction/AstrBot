@@ -68,7 +68,6 @@ class ComponentType(Enum):
 
     WechatEmoji = "WechatEmoji"  # Wechat 下的 emoji 表情包
 
-
 class BaseMessageComponent(BaseModel):
     type: ComponentType
 
@@ -105,8 +104,6 @@ class BaseMessageComponent(BaseModel):
     async def to_dict(self) -> dict:
         # 默认情况下，回退到旧的同步 toDict()
         return self.toDict()
-
-
 class Plain(BaseMessageComponent):
     type: ComponentType = "Plain"
     text: str
@@ -125,14 +122,12 @@ class Plain(BaseMessageComponent):
     def toDict(self):
         return {"type": "text", "data": {"text": self.text.strip()}}
 
-
 class Face(BaseMessageComponent):
     type: ComponentType = "Face"
     id: int
 
     def __init__(self, **_):
         super().__init__(**_)
-
 
 class Record(BaseMessageComponent):
     type: ComponentType = "Record"
@@ -231,8 +226,6 @@ class Record(BaseMessageComponent):
         logger.debug(f"已注册：{callback_host}/api/file/{token}")
 
         return f"{callback_host}/api/file/{token}"
-
-
 class Video(BaseMessageComponent):
     type: ComponentType = "Video"
     file: str
@@ -317,8 +310,6 @@ class Video(BaseMessageComponent):
                 "file": payload_file,
             },
         }
-
-
 class At(BaseMessageComponent):
     type: ComponentType = "At"
     qq: T.Union[int, str]  # 此处str为all时代表所有人
@@ -332,14 +323,11 @@ class At(BaseMessageComponent):
             "type": "at",
             "data": {"qq": str(self.qq)},
         }
-
-
 class AtAll(At):
     qq: str = "all"
 
     def __init__(self, **_):
         super().__init__(**_)
-
 
 class RPS(BaseMessageComponent):  # TODO
     type: ComponentType = "RPS"
@@ -347,20 +335,17 @@ class RPS(BaseMessageComponent):  # TODO
     def __init__(self, **_):
         super().__init__(**_)
 
-
 class Dice(BaseMessageComponent):  # TODO
     type: ComponentType = "Dice"
 
     def __init__(self, **_):
         super().__init__(**_)
 
-
 class Shake(BaseMessageComponent):  # TODO
     type: ComponentType = "Shake"
 
     def __init__(self, **_):
         super().__init__(**_)
-
 
 class Anonymous(BaseMessageComponent):  # TODO
     type: ComponentType = "Anonymous"
@@ -886,3 +871,38 @@ ComponentTypes = {
     "file": File,
     "WechatEmoji": WechatEmoji,
 }
+
+
+__all__ = [
+    "ComponentType",
+    "BaseMessageComponent",
+    "Plain",
+    "Face",
+    "Record",
+    "Video",
+    "At",
+    "AtAll",
+    "RPS",
+    "Dice",
+    "Shake",
+    "Anonymous",
+    "Share",
+    "Contact",
+    "Location",
+    "Music",
+    "Image",
+    "Reply",
+    "RedBag",
+    "Poke",
+    "Forward",
+    "Node",
+    "Nodes",
+    "Xml",
+    "Json",
+    "CardImage",
+    "TTS",
+    "Unknown",
+    "File",
+    "WechatEmoji",
+    "ComponentTypes",
+]
