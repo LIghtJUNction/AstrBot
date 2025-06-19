@@ -47,36 +47,36 @@ class PlatformManager:
             match platform_config["type"]:
                 case "aiocqhttp":
                     from .sources.aiocqhttp.aiocqhttp_platform_adapter import (
-                        AiocqhttpAdapter,  # noqa: F401
+                        AiocqhttpAdapter,  # noqa: F401 动态导入
                     )
                 case "qq_official":
                     from .sources.qqofficial.qqofficial_platform_adapter import (
-                        QQOfficialPlatformAdapter,  # noqa: F401
+                        QQOfficialPlatformAdapter,  # noqa: F401 动态导入
                     )
                 case "qq_official_webhook":
                     from .sources.qqofficial_webhook.qo_webhook_adapter import (
-                        QQOfficialWebhookPlatformAdapter,  # noqa: F401
+                        QQOfficialWebhookPlatformAdapter,  # noqa: F401 动态导入
                     )
                 case "gewechat":
                     from .sources.gewechat.gewechat_platform_adapter import (
-                        GewechatPlatformAdapter,  # noqa: F401
+                        GewechatPlatformAdapter,  # noqa: F401 动态导入
                     )
                 case "wechatpadpro":
                     from .sources.wechatpadpro.wechatpadpro_adapter import (
-                        WeChatPadProAdapter,  # noqa: F401
+                        WeChatPadProAdapter,  # noqa: F401 动态导入
                     )
                 case "lark":
                     from .sources.lark.lark_adapter import LarkPlatformAdapter  # noqa: F401
                 case "dingtalk":
                     from .sources.dingtalk.dingtalk_adapter import (
-                        DingtalkPlatformAdapter,  # noqa: F401
+                        DingtalkPlatformAdapter,  # noqa: F401 动态导入
                     )
                 case "telegram":
-                    from .sources.telegram.tg_adapter import TelegramPlatformAdapter  # noqa: F401
+                    from .sources.telegram.tg_adapter import TelegramPlatformAdapter  # noqa: F401 动态导入
                 case "wecom":
-                    from .sources.wecom.wecom_adapter import WecomPlatformAdapter  # noqa: F401
+                    from .sources.wecom.wecom_adapter import WecomPlatformAdapter  # noqa: F401 动态导入
                 case "weixin_official_account":
-                    from .sources.weixin_official_account.weixin_offacc_adapter import WeixinOfficialAccountPlatformAdapter  # noqa: F401
+                    from .sources.weixin_official_account.weixin_offacc_adapter import WeixinOfficialAccountPlatformAdapter  # noqa: F401 动态导入
         except (ImportError, ModuleNotFoundError) as e:
             logger.error(
                 f"加载平台适配器 {platform_config['type']} 失败，原因：{e}。"
