@@ -8,9 +8,6 @@ from astrbot.core import logger, LogManager, LogBroker
 from astrbot.core.config.default import VERSION
 from astrbot.core.utils.io import download_dashboard, get_dashboard_version
 
-# add parent path to sys.path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 logo_tmpl = r"""
      ___           _______.___________..______      .______     ______   .___________.
     /   \         /       |           ||   _  \     |   _  \   /  __  \  |           |
