@@ -15,7 +15,7 @@ from astrbot.core.db import BaseDatabase
 from astrbot.core.utils.io import get_local_ip_addresses
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
-APP: Quart = None
+APP: Quart | None = None
 
 
 class AstrBotDashboard:
