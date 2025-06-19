@@ -207,12 +207,14 @@ class ChatRoute(Route):
                         continue
 
                     if type == "update_title":
-                        continue
-
+                        continue                    
                     if result_text:
                         conversation = self.db.get_conversation_by_user_id(
                             username, cid
                         )
+                        if conversation is None:
+                            logger.warning(f"Conversation not found for user {username} and cid {cid}")
+                            continue
                         try:
                             history = json.loads(conversation.history)
                         except BaseException as e:

@@ -1,5 +1,3 @@
-@use '../variables' as vars;
-
 //
 // Light Buttons
 //
@@ -10,14 +8,14 @@
     &:active,
     &:focus {
       background-color: rgb(var(--v-theme-secondary)) !important;
-      color: vars.$white !important;
+      color: $white !important;
     }
   }
 }
 
 .v-btn {
   text-transform: capitalize;
-  letter-spacing: vars.$btn-letter-spacing;
+  letter-spacing: $btn-letter-spacing;
 }
 .v-btn--icon.v-btn--density-default {
   width: calc(var(--v-btn-height) + 6px);
