@@ -68,10 +68,6 @@ target-version = "py310"
 [tool.uv.sources]
 silk-python = { git = "https://github.com/synodriver/pysilk.git" }
 
-[tool.uv.workspace]
-members = [
-    "astrbot_plugin_test",
-]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/astrbot"]
