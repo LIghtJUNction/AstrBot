@@ -6,7 +6,8 @@ import click
 import sys
 from . import __version__
 from .commands import init, run, plug, conf
-
+from rich.traceback import install
+install(show_locals=True)
 logo_tmpl = r"""
      ___           _______.___________..______      .______     ______   .___________.
     /   \         /       |           ||   _  \     |   _  \   /  __  \  |           |
