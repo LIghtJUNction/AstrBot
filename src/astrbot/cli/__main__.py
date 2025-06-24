@@ -9,7 +9,8 @@ from astrbot.cli.init import init
 from astrbot.cli.run import run
 from astrbot.cli.conf import conf
 from astrbot.cli.plug import plug
-
+from rich.traceback import install
+install(show_locals=True)
 logo_tmpl = r"""
      ___           _______.___________..______      .______     ______   .___________.
     /   \         /       |           ||   _  \     |   _  \   /  __  \  |           |
