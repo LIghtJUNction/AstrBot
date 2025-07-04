@@ -8,7 +8,6 @@ import inspect
 import json
 import logging
 import os
-from re import S
 import sys
 import traceback
 from types import ModuleType

@@ -10,6 +10,7 @@ from ..entities import ProviderType
 from ..register import register_provider_adapter
 from astrbot import logger
 
+
 @register_provider_adapter(
     "volcengine_tts", "火山引擎 TTS", provider_type=ProviderType.TEXT_TO_SPEECH
 )
@@ -21,7 +22,9 @@ class ProviderVolcengineTTS(TTSProvider):
         self.cluster = provider_config.get("volcengine_cluster", "")
         self.voice_type = provider_config.get("volcengine_voice_type", "")
         self.speed_ratio = provider_config.get("volcengine_speed_ratio", 1.0)
-        self.api_base = provider_config.get("api_base", "https://openspeech.bytedance.com/api/v1/tts")
+        self.api_base = provider_config.get(
+            "api_base", "https://openspeech.bytedance.com/api/v1/tts"
+        )
         self.timeout = provider_config.get("timeout", 20)
 
     def _build_request_payload(self, text: str) -> dict:
@@ -29,11 +32,9 @@ class ProviderVolcengineTTS(TTSProvider):
             "app": {
                 "appid": self.appid,
                 "token": self.api_key,
-                "cluster": self.cluster
+                "cluster": self.cluster,
             },
-            "user": {
-                "uid": str(uuid.uuid4())
-            },
+            "user": {"uid": str(uuid.uuid4())},
             "audio": {
                 "voice_type": self.voice_type,
                 "encoding": "mp3",
@@ -47,15 +48,15 @@ class ProviderVolcengineTTS(TTSProvider):
                 "text_type": "plain",
                 "operation": "query",
                 "with_frontend": 1,
-                "frontend_type": "unitTson"
-            }
+                "frontend_type": "unitTson",
+            },
         }
 
     async def get_audio(self, text: str) -> str:
         """异步方法获取语音文件路径"""
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer; {self.api_key}"
+            "Authorization": f"Bearer; {self.api_key}",
         }
 
         payload = self._build_request_payload(text)
@@ -70,7 +71,7 @@ class ProviderVolcengineTTS(TTSProvider):
                     self.api_base,
                     data=json.dumps(payload),
                     headers=headers,
-                    timeout=self.timeout
+                    timeout=self.timeout,
                 ) as response:
                     logger.debug(f"响应状态码: {response.status}")
 
@@ -89,8 +90,7 @@ class ProviderVolcengineTTS(TTSProvider):
 
                             loop = asyncio.get_running_loop()
                             await loop.run_in_executor(
-                                None,
-                                lambda: open(file_path, "wb").write(audio_data)
+                                None, lambda: open(file_path, "wb").write(audio_data)
                             )
 
                             return file_path
@@ -98,7 +98,9 @@ class ProviderVolcengineTTS(TTSProvider):
                             error_msg = resp_data.get("message", "未知错误")
                             raise Exception(f"火山引擎 TTS API 返回错误: {error_msg}")
                     else:
-                        raise Exception(f"火山引擎 TTS API 请求失败: {response.status}, {response_text}")
+                        raise Exception(
+                            f"火山引擎 TTS API 请求失败: {response.status}, {response_text}"
+                        )
 
         except Exception as e:
             error_details = traceback.format_exc()

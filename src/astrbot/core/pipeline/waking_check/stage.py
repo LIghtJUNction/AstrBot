@@ -135,7 +135,6 @@ class WakingCheckStage(Stage):
                             f"插件 {star_map[handler.handler_module_path].name}: {e}"
                         )
                     )
-                    await event._post_send()
                     event.stop_event()
                     passed = False
                     break
@@ -150,7 +149,6 @@ class WakingCheckStage(Stage):
                                 f"您(ID: {event.get_sender_id()})的权限不足以使用此指令。通过 /sid 获取 ID 并请管理员添加。"
                             )
                         )
-                        await event._post_send()
                     logger.info(
                         f"触发 {star_map[handler.handler_module_path].name} 时, 用户(ID={event.get_sender_id()}) 权限不足。"
                     )
@@ -166,7 +164,7 @@ class WakingCheckStage(Stage):
                         "parsed_params"
                     )
 
-            event.clear_extra()
+            event._extras.pop("parsed_params", None)
 
         event.set_extra("activated_handlers", activated_handlers)
         event.set_extra("handlers_parsed_params", handlers_parsed_params)
