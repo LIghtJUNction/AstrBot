@@ -1,18 +1,17 @@
-from typing import List, Dict, Type
 from .platform_metadata import PlatformMetadata
 from astrbot.core import logger
 
-platform_registry: List[PlatformMetadata] = []
+platform_registry: list[PlatformMetadata] = []
 """维护了通过装饰器注册的平台适配器"""
-platform_cls_map: Dict[str, Type] = {}
+platform_cls_map: dict[str, type] = {}
 """维护了平台适配器名称和适配器类的映射"""
 
 
 def register_platform_adapter(
     adapter_name: str,
     desc: str,
-    default_config_tmpl: dict = None,
-    adapter_display_name: str = None,
+    default_config_tmpl: dict | None = None,
+    adapter_display_name: str | None = None,
 ):
     """用于注册平台适配器的带参装饰器。
 

@@ -1,4 +1,4 @@
-import abc
+from abc import ABC, abstractmethod
 from typing import List
 from typing import TypedDict, AsyncGenerator
 from astrbot.core.provider.func_tool_manager import FuncCall
@@ -24,7 +24,7 @@ class ProviderMeta:
     type: str
 
 
-class AbstractProvider(abc.ABC):
+class AbstractProvider(ABC):
     def __init__(self, provider_config: dict) -> None:
         super().__init__()
         self.model_name = ""
@@ -61,7 +61,7 @@ class Provider(AbstractProvider):
         self.curr_personality = default_persona
         """维护了当前的使用的 persona，即人格。可能为 None"""
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_current_key(self) -> str:
         raise NotImplementedError()
 
@@ -69,25 +69,25 @@ class Provider(AbstractProvider):
         """获得提供商 Key"""
         return self.provider_config.get("key", [])
 
-    @abc.abstractmethod
+    @abstractmethod
     def set_key(self, key: str):
         raise NotImplementedError()
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_models(self) -> List[str]:
         """获得支持的模型列表"""
         raise NotImplementedError()
 
-    @abc.abstractmethod
+    @abstractmethod
     async def text_chat(
         self,
         prompt: str,
-        session_id: str = None,
-        image_urls: list[str] = None,
-        func_tool: FuncCall = None,
-        contexts: list = None,
-        system_prompt: str = None,
-        tool_calls_result: ToolCallsResult | list[ToolCallsResult] = None,
+        session_id: str | None = None,
+        image_urls: list[str] | None = None,
+        func_tool: FuncCall | None = None,
+        contexts: list | None = None,
+        system_prompt: str | None = None,
+        tool_calls_result: ToolCallsResult | list[ToolCallsResult] | None = None,
         model: str | None = None,
         **kwargs,
     ) -> LLMResponse:
@@ -111,12 +111,12 @@ class Provider(AbstractProvider):
     async def text_chat_stream(
         self,
         prompt: str,
-        session_id: str = None,
-        image_urls: list[str] = None,
-        func_tool: FuncCall = None,
-        contexts: list = None,
-        system_prompt: str = None,
-        tool_calls_result: ToolCallsResult | list[ToolCallsResult] = None,
+        session_id: str | None = None,
+        image_urls: list[str] | None = None,
+        func_tool: FuncCall | None = None,
+        contexts: list | None = None,
+        system_prompt: str | None = None,
+        tool_calls_result: ToolCallsResult | list[ToolCallsResult] | None = None,
         model: str | None = None,
         **kwargs,
     ) -> AsyncGenerator[LLMResponse, None]:
@@ -137,7 +137,7 @@ class Provider(AbstractProvider):
         """
         ...
 
-    async def pop_record(self, context: List):
+    async def pop_record(self, context: list):
         """
         弹出 context 第一条非系统提示词对话记录
         """
@@ -162,7 +162,7 @@ class STTProvider(AbstractProvider):
         self.provider_config = provider_config
         self.provider_settings = provider_settings
 
-    @abc.abstractmethod
+    @abstractmethod
     async def get_text(self, audio_url: str) -> str:
         """获取音频的文本"""
         raise NotImplementedError()
@@ -174,7 +174,7 @@ class TTSProvider(AbstractProvider):
         self.provider_config = provider_config
         self.provider_settings = provider_settings
 
-    @abc.abstractmethod
+    @abstractmethod
     async def get_audio(self, text: str) -> str:
         """获取文本的音频，返回音频文件路径"""
         raise NotImplementedError()
@@ -186,17 +186,17 @@ class EmbeddingProvider(AbstractProvider):
         self.provider_config = provider_config
         self.provider_settings = provider_settings
 
-    @abc.abstractmethod
+    @abstractmethod
     async def get_embedding(self, text: str) -> list[float]:
         """获取文本的向量"""
         ...
 
-    @abc.abstractmethod
+    @abstractmethod
     async def get_embeddings(self, text: list[str]) -> list[list[float]]:
         """批量获取文本的向量"""
         ...
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_dim(self) -> int:
         """获取向量的维度"""
         ...
