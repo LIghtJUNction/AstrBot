@@ -24,7 +24,6 @@ except ImportError:
     logger.warning("未安装 nh3 库，无法清理插件 README.md 中的 HTML 标签。")
     nh3 = None
 
-
 class PluginRoute(Route):
     def __init__(
         self,

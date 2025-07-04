@@ -2,7 +2,6 @@ import threading
 import os
 from logging import Logger
 
-
 class LogPipe(threading.Thread):
     def __init__(
         self,

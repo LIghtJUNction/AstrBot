@@ -6,7 +6,6 @@ from quart import request
 from astrbot.core import DEMO_MODE
 from astrbot import logger
 
-
 class AuthRoute(Route):
     def __init__(self, context: RouteContext) -> None:
         super().__init__(context)
@@ -17,8 +16,8 @@ class AuthRoute(Route):
         self.register_routes()
 
     async def login(self):
-        username = self.config["dashboard"]["username"]
-        password = self.config["dashboard"]["password"]
+        username: str = self.config["dashboard"]["username"]
+        password: str = self.config["dashboard"]["password"]
         post_data = await request.json
         if post_data["username"] == username and post_data["password"] == password:
             change_pwd_hint = False

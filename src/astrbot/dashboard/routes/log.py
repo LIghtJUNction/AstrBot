@@ -4,7 +4,6 @@ from quart import make_response
 from astrbot.core import logger, LogBroker
 from .route import Route, RouteContext
 
-
 class LogRoute(Route):
     def __init__(self, context: RouteContext, log_broker: LogBroker) -> None:
         super().__init__(context)

@@ -10,7 +10,6 @@ from astrbot.core import logger
 from astrbot.core.core_lifecycle import AstrBotCoreLifecycle
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
-
 class ChatRoute(Route):
     def __init__(
         self,

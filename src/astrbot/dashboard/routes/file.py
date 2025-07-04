@@ -3,7 +3,6 @@ from astrbot import logger
 from quart import abort, send_file
 from astrbot.core import file_token_service
 
-
 class FileRoute(Route):
     def __init__(
         self,

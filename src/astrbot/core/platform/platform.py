@@ -8,7 +8,6 @@ from astrbot.core.message.message_event_result import MessageChain
 from .astr_message_event import MessageSesion
 from astrbot.core.utils.metrics import Metric
 
-
 class Platform(ABC):
     def __init__(self, event_queue: Queue):
         super().__init__()

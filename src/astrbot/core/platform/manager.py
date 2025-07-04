@@ -7,7 +7,6 @@ from .register import platform_cls_map
 from astrbot.core import logger
 from .sources.webchat.webchat_adapter import WebChatAdapter
 
-
 class PlatformManager:
     def __init__(self, config: AstrBotConfig, event_queue: Queue):
         self.platform_insts: list[Platform] = []

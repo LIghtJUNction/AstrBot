@@ -4,7 +4,7 @@ import re
 import hashlib
 import uuid
 from dataclasses import dataclass
-from typing import List, Union, Optional, AsyncGenerator
+from typing import AsyncGenerator
 
 from astrbot.core.db.po import Conversation
 from astrbot.core.message.components import (
@@ -23,7 +23,6 @@ from astrbot.core.provider.entities import ProviderRequest
 from astrbot.core.utils.metrics import Metric
 from .astrbot_message import AstrBotMessage, Group
 from .platform_metadata import PlatformMetadata
-
 
 @dataclass
 class MessageSesion:
@@ -93,7 +92,7 @@ class AstrMessageEvent(ABC):
         """
         return self.message_str
 
-    def _outline_chain(self, chain: List[BaseMessageComponent]) -> str:
+    def _outline_chain(self, chain: list[BaseMessageComponent]) -> str:
         outline = ""
         for i in chain:
             if isinstance(i, Plain):
@@ -128,7 +127,7 @@ class AstrMessageEvent(ABC):
         """
         return self._outline_chain(self.message_obj.message)
 
-    def get_messages(self) -> List[BaseMessageComponent]:
+    def get_messages(self) -> list[BaseMessageComponent]:
         """
         获取消息链。
         """
@@ -240,7 +239,7 @@ class AstrMessageEvent(ABC):
     async def _post_send(self):
         """调度器会在执行 send() 后调用该方法 deprecated in v3.5.18"""
 
-    def set_result(self, result: Union[MessageEventResult, str]):
+    def set_result(self, result: MessageEventResult | str):
         """设置消息事件的结果。
 
         Note:
@@ -341,7 +340,7 @@ class AstrMessageEvent(ABC):
             return MessageEventResult().url_image(url_or_path)
         return MessageEventResult().file_image(url_or_path)
 
-    def chain_result(self, chain: List[BaseMessageComponent]) -> MessageEventResult:
+    def chain_result(self, chain: list[BaseMessageComponent]) -> MessageEventResult:
         """
         创建一个空的消息事件结果，包含指定的消息链。
         """
@@ -356,8 +355,8 @@ class AstrMessageEvent(ABC):
         prompt: str,
         func_tool_manager=None,
         session_id: str = None,
-        image_urls: List[str] = [],
-        contexts: List = [],
+        image_urls: list[str] = [],
+        contexts: list[str] = [],
         system_prompt: str = "",
         conversation: Conversation | None = None,
     ) -> ProviderRequest:
@@ -414,7 +413,7 @@ class AstrMessageEvent(ABC):
         )
         self._has_send_oper = True
 
-    async def get_group(self, group_id: str | None = None, **kwargs) -> Optional[Group]:
+    async def get_group(self, group_id: str | None = None, **kwargs) -> Group | None:
         """获取一个群聊的数据, 如果不填写 group_id: 如果是私聊消息，返回 None。如果是群聊消息，返回当前群聊的数据。
 
         适配情况:

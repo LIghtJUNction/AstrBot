@@ -3,11 +3,10 @@ import os
 import uuid
 import time
 
-
 class FileTokenService:
     """维护一个简单的基于令牌的文件下载服务，支持超时和懒清除。"""
 
-    def __init__(self, default_timeout: float = 300):
+    def __init__(self, default_timeout: float = 300) -> None:
         self.lock = asyncio.Lock()
         self.staged_files = {}  # token: (file_path, expire_time)
         self.default_timeout = default_timeout
@@ -19,7 +18,7 @@ class FileTokenService:
         for token in expired_tokens:
             self.staged_files.pop(token, None)
 
-    async def register_file(self, file_path: str, timeout: float = None) -> str:
+    async def register_file(self, file_path: str, timeout: float | None = None) -> str:
         """向令牌服务注册一个文件。
 
         Args:

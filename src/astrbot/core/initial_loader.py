@@ -14,7 +14,6 @@ from astrbot.core.db import BaseDatabase
 from astrbot.core import LogBroker
 from astrbot.dashboard.server import AstrBotDashboard
 
-
 class InitialLoader:
     """AstrBot 启动器，负责初始化和启动核心组件和仪表板服务器。"""
 
