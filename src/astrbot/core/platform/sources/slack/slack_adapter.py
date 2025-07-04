@@ -17,7 +17,12 @@ from astrbot.api.platform import (
 from astrbot.api.event import MessageChain
 from .slack_event import SlackMessageEvent
 from .client import SlackWebhookClient, SlackSocketClient
-from astrbot.api.message_components import *  # noqa: F403
+from astrbot.api.message_components import (
+    At,
+    Plain,
+    Image,
+    File,
+)
 from astrbot.api import logger
 from astrbot.core.platform.astr_message_event import MessageSesion
 from ...register import register_platform_adapter
