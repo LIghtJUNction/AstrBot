@@ -77,8 +77,5 @@ cli.add_command(conf)
 #region cli.plug 子命令组
 cli.add_command(plug)
 
-
-
-
 if __name__ == "__main__":
     cli()
