@@ -1,7 +1,7 @@
 import click
 from astrbot.cli.plug.new import new
 from astrbot.cli.plug.search import search
-from astrbot.cli.plug.list import list_impl
+from astrbot.cli.plug.ls import list_impl
 from astrbot.cli.plug.install import install
 from astrbot.cli.plug.update import update
 from astrbot.cli.plug.remove import remove

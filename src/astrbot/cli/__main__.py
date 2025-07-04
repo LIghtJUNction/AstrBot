@@ -20,7 +20,6 @@ logo_tmpl = r"""
 /__/     \__\ |_______/       |__|     | _| `._____||______/   \______/      |__|
 """
 
-
 @click.group(invoke_without_command=True, no_args_is_help=False)
 @click.version_option(__version__, prog_name="AstrBot")
 def cli() -> None:
