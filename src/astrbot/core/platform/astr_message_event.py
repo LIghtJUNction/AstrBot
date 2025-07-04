@@ -1,4 +1,4 @@
-import abc
+from abc import ABC
 import asyncio
 import re
 import hashlib
@@ -40,7 +40,7 @@ class MessageSesion:
         return MessageSesion(platform_name, MessageType(message_type), session_id)
 
 
-class AstrMessageEvent(abc.ABC):
+class AstrMessageEvent(ABC):
     def __init__(
         self,
         message_str: str,
@@ -70,7 +70,7 @@ class AstrMessageEvent(abc.ABC):
         )
         self.unified_msg_origin = str(self.session)
         """统一的消息来源字符串。格式为 platform_name:message_type:session_id"""
-        self._result: MessageEventResult = None
+        self._result: MessageEventResult | None = None
         """消息事件的结果"""
 
         self._has_send_oper = False
@@ -359,7 +359,7 @@ class AstrMessageEvent(abc.ABC):
         image_urls: List[str] = [],
         contexts: List = [],
         system_prompt: str = "",
-        conversation: Conversation = None,
+        conversation: Conversation | None = None,
     ) -> ProviderRequest:
         """
         创建一个 LLM 请求。
@@ -414,7 +414,7 @@ class AstrMessageEvent(abc.ABC):
         )
         self._has_send_oper = True
 
-    async def get_group(self, group_id: str = None, **kwargs) -> Optional[Group]:
+    async def get_group(self, group_id: str | None = None, **kwargs) -> Optional[Group]:
         """获取一个群聊的数据, 如果不填写 group_id: 如果是私聊消息，返回 None。如果是群聊消息，返回当前群聊的数据。
 
         适配情况:

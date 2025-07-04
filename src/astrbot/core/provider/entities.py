@@ -4,7 +4,7 @@ import json
 from astrbot.core.utils.io import download_image_by_url
 from astrbot import logger
 from dataclasses import dataclass, field
-from typing import List, Dict, Type
+from typing import Type
 from .func_tool_manager import FuncCall
 from openai.types.chat.chat_completion import ChatCompletion
 from openai.types.chat.chat_completion_message_tool_call import (
@@ -57,8 +57,8 @@ class ToolCallMessageSegment:
 class AssistantMessageSegment:
     """OpenAI 格式的上下文中 role 为 assistant 的消息段。参考: https://platform.openai.com/docs/guides/function-calling"""
 
-    content: str = None
-    tool_calls: List[ChatCompletionMessageToolCall | Dict] = field(default_factory=list)
+    content: str | None = None
+    tool_calls: list[ChatCompletionMessageToolCall | dict] = field(default_factory=list)
     role: str = "assistant"
 
     def to_dict(self):
@@ -78,10 +78,10 @@ class ToolCallsResult:
 
     tool_calls_info: AssistantMessageSegment
     """函数调用的信息"""
-    tool_calls_result: List[ToolCallMessageSegment]
+    tool_calls_result: list[ToolCallMessageSegment]
     """函数调用的结果"""
 
-    def to_openai_messages(self) -> List[Dict]:
+    def to_openai_messages(self) -> list[dict]:
         ret = [
             self.tool_calls_info.to_dict(),
             *[item.to_dict() for item in self.tool_calls_result],
@@ -162,7 +162,7 @@ class ProviderRequest:
 
         return result_parts
 
-    async def assemble_context(self) -> Dict:
+    async def assemble_context(self) -> dict:
         """将请求(prompt 和 image_urls)包装成 OpenAI 的消息格式。"""
         if self.image_urls:
             user_content = {
@@ -206,15 +206,15 @@ class LLMResponse:
     """角色, assistant, tool, err"""
     result_chain: MessageChain = None
     """返回的消息链"""
-    tools_call_args: List[Dict[str, any]] = field(default_factory=list)
+    tools_call_args: list[dict[str, any]] = field(default_factory=list)
     """工具调用参数"""
-    tools_call_name: List[str] = field(default_factory=list)
+    tools_call_name: list[str] = field(default_factory=list)
     """工具调用名称"""
-    tools_call_ids: List[str] = field(default_factory=list)
+    tools_call_ids: list[str] = field(default_factory=list)
     """工具调用 ID"""
 
     raw_completion: ChatCompletion = None
-    _new_record: Dict[str, any] = None
+    _new_record: dict[str, any] = None
 
     _completion_text: str = ""
 
@@ -226,11 +226,11 @@ class LLMResponse:
         role: str,
         completion_text: str = "",
         result_chain: MessageChain = None,
-        tools_call_args: List[Dict[str, any]] = None,
-        tools_call_name: List[str] = None,
-        tools_call_ids: List[str] = None,
+        tools_call_args: list[dict[str, any]] = None,
+        tools_call_name: list[str] = None,
+        tools_call_ids: list[str] = None,
         raw_completion: ChatCompletion = None,
-        _new_record: Dict[str, any] = None,
+        _new_record: dict[str, any] = None,
         is_chunk: bool = False,
     ):
         """初始化 LLMResponse
@@ -278,7 +278,7 @@ class LLMResponse:
         else:
             self._completion_text = value
 
-    def to_openai_tool_calls(self) -> List[Dict]:
+    def to_openai_tool_calls(self) -> list[dict]:
         """将工具调用信息转换为 OpenAI 格式"""
         ret = []
         for idx, tool_call_arg in enumerate(self.tools_call_args):

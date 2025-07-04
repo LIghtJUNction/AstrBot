@@ -11,7 +11,6 @@ def validate_log_level(value: str) -> str:
         )
     return value
 
-
 def validate_dashboard_port(value: str) -> int:
     """验证 Dashboard 端口"""
     try:
@@ -22,20 +21,17 @@ def validate_dashboard_port(value: str) -> int:
     except ValueError:
         raise click.ClickException("端口必须是数字")
 
-
 def validate_dashboard_username(value: str) -> str:
     """验证 Dashboard 用户名"""
     if not value:
         raise click.ClickException("用户名不能为空")
     return value
 
-
 def validate_dashboard_password(value: str) -> str:
     """验证 Dashboard 密码"""
     if not value:
         raise click.ClickException("密码不能为空")
     return hashlib.md5(value.encode()).hexdigest()
-
 
 def validate_timezone(value: str) -> str:
     """验证时区"""
@@ -44,7 +40,6 @@ def validate_timezone(value: str) -> str:
     except Exception:
         raise click.ClickException(f"无效的时区: {value}，请使用有效的IANA时区名称")
     return value
-
 
 def validate_callback_api_base(value: str) -> str:
     """验证回调接口基址"""

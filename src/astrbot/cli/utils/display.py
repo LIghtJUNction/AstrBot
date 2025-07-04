@@ -1,9 +1,10 @@
 """Display utilities for CLI output with colors"""
 
+from typing import Any
 import click
 
 
-def display_plugins(plugins: list, title: str, color: str = "white"):
+def display_plugins(plugins: list[dict[str, Any]], title: str, color: str = "white"):
     """
     Display a list of plugins with colored output
     

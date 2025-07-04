@@ -1,4 +1,4 @@
-import abc
+from abc import ABC, abstractmethod
 import uuid
 from typing import Awaitable, Any
 from asyncio import Queue
@@ -9,14 +9,14 @@ from .astr_message_event import MessageSesion
 from astrbot.core.utils.metrics import Metric
 
 
-class Platform(abc.ABC):
+class Platform(ABC):
     def __init__(self, event_queue: Queue):
         super().__init__()
         # 维护了消息平台的事件队列，EventBus 会从这里取出事件并处理。
         self._event_queue = event_queue
         self.client_self_id = uuid.uuid4().hex
 
-    @abc.abstractmethod
+    @abstractmethod
     def run(self) -> Awaitable[Any]:
         """
         得到一个平台的运行实例，需要返回一个协程对象。
@@ -29,7 +29,7 @@ class Platform(abc.ABC):
         """
         ...
 
-    @abc.abstractmethod
+    @abstractmethod
     def meta(self) -> PlatformMetadata:
         """
         得到一个平台的元数据。
