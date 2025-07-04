@@ -23,7 +23,7 @@ from astrbot.dashboard.routes import (
     FileRoute,
 )
 from astrbot.dashboard.routes.route import RouteContext, Response
-from astrbot.core import logger, WEBUI_SK
+from astrbot.core import logger
 from astrbot.core.db import BaseDatabase
 from astrbot.core.utils.io import get_local_ip_addresses
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
