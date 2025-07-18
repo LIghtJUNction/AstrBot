@@ -2,29 +2,30 @@
 本地 Agent 模式的 LLM 调用 Stage
 """
 
-import traceback
-import copy
 import asyncio
+import copy
 import json
-from typing import Union, AsyncGenerator
-from ...context import PipelineContext
-from ..stage import Stage
-from astrbot.core.platform.astr_message_event import AstrMessageEvent
+import traceback
+from typing import AsyncGenerator, Union
+from astrbot.core import logger
+from astrbot.core.message.components import Image
 from astrbot.core.message.message_event_result import (
+    MessageChain,
     MessageEventResult,
     ResultContentType,
-    MessageChain,
 )
-from astrbot.core.message.components import Image
-from astrbot.core import logger
-from astrbot.core.utils.metrics import Metric
-from astrbot.core.provider.entities import (
-    ProviderRequest,
-    LLMResponse,
-)
-from astrbot.core.star.star_handler import EventType
-from ..agent_runner.tool_loop_agent import ToolLoopAgent
+from astrbot.core.platform.astr_message_event import AstrMessageEvent
 from astrbot.core.provider import Provider
+from astrbot.core.provider.entities import (
+    LLMResponse,
+    ProviderRequest,
+)
+from astrbot.core.star.session_llm_manager import SessionServiceManager
+from astrbot.core.star.star_handler import EventType
+from astrbot.core.utils.metrics import Metric
+from ...context import PipelineContext
+from ..agent_runner.tool_loop_agent import ToolLoopAgent
+from ..stage import Stage
 
 
 class LLMRequestSubStage(Stage):
@@ -72,6 +73,12 @@ class LLMRequestSubStage(Stage):
         if not self.ctx.astrbot_config["provider_settings"]["enable"]:
             logger.debug("未启用 LLM 能力，跳过处理。")
             return
+
+        # 检查会话级别的LLM启停状态
+        if not SessionServiceManager.should_process_llm_request(event):
+            logger.debug(f"会话 {event.unified_msg_origin} 禁用了 LLM，跳过处理。")
+            return
+
         provider = self._select_provider(event)
         if provider is None:
             return
@@ -166,6 +173,9 @@ class LLMRequestSubStage(Stage):
             event=event,
             pipeline_ctx=self.ctx,
         )
+        logger.debug(
+            f"handle provider[id: {provider.provider_config['id']}] request: {req}"
+        )
         await tool_loop_agent.reset(req=req, streaming=self.streaming_response)
 
         async def requesting():
@@ -177,8 +187,15 @@ class LLMRequestSubStage(Stage):
                         if event.is_stopped():
                             return
                         if resp.type == "tool_call_result":
-                            continue  # 跳过工具调用结果
-                        if resp.type == "tool_call":
+                            msg_chain = resp.data["chain"]
+                            if msg_chain.type == "tool_direct_result":
+                                # tool_direct_result 用于标记 llm tool 需要直接发送给用户的内容
+                                resp.data["chain"].type = "tool_call_result"
+                                await event.send(resp.data["chain"])
+                                continue
+                            # 对于其他情况，暂时先不处理
+                            continue
+                        elif resp.type == "tool_call":
                             if self.streaming_response:
                                 # 用来标记流式响应需要分节
                                 yield MessageChain(chain=[], type="break")
@@ -214,7 +231,7 @@ class LLMRequestSubStage(Stage):
                     logger.error(traceback.format_exc())
                     event.set_result(
                         MessageEventResult().message(
-                            f"AstrBot 请求失败。\n错误类型: {type(e).__name__}\n错误信息: {str(e)}"
+                            f"AstrBot 请求失败。\n错误类型: {type(e).__name__}\n错误信息: {str(e)}\n\n请在控制台查看和分享错误详情。\n"
                         )
                     )
                     return
@@ -254,11 +271,13 @@ class LLMRequestSubStage(Stage):
 
         # 异步处理 WebChat 特殊情况
         if event.get_platform_name() == "webchat":
-            asyncio.create_task(self._handle_webchat(event, req))
+            asyncio.create_task(self._handle_webchat(event, req, provider))
 
         await self._save_to_history(event, req, tool_loop_agent.get_final_llm_resp())
 
-    async def _handle_webchat(self, event: AstrMessageEvent, req: ProviderRequest):
+    async def _handle_webchat(
+        self, event: AstrMessageEvent, req: ProviderRequest, prov: Provider
+    ):
         """处理 WebChat 平台的特殊情况，包括第一次 LLM 对话时总结对话内容生成 title"""
         conversation = await self.conv_manager.get_conversation(
             event.unified_msg_origin, req.conversation.cid
@@ -268,10 +287,9 @@ class LLMRequestSubStage(Stage):
             latest_pair = messages[-2:]
             if not latest_pair:
                 return
-            provider = self.ctx.plugin_manager.context.get_using_provider()
             cleaned_text = "User: " + latest_pair[0].get("content", "").strip()
             logger.debug(f"WebChat 对话标题生成请求，清理后的文本: {cleaned_text}")
-            llm_resp = await provider.text_chat(
+            llm_resp = await prov.text_chat(
                 system_prompt="You are expert in summarizing user's query.",
                 prompt=(
                     f"Please summarize the following query of user:\n"
@@ -333,7 +351,6 @@ class LLMRequestSubStage(Stage):
         await self.conv_manager.update_conversation(
             event.unified_msg_origin, req.conversation.cid, history=messages
         )
-        logger.debug(f"messages persisted: {messages}")
 
     def fix_messages(self, messages: list[dict]) -> list[dict]:
         """验证并且修复上下文"""

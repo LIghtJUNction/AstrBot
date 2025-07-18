@@ -27,7 +27,7 @@ const PurpleTheme: ThemeTypes = {
     borderLight: '#d0d0d0',
     border: '#d0d0d0',
     inputBorder: '#787878',
-    containerBg: '#eef2f6',
+    containerBg: '#f7f1f6',
     surface: '#fff',
     'on-surface-variant': '#fff',
     facebook: '#4267b2',
@@ -38,8 +38,9 @@ const PurpleTheme: ThemeTypes = {
     secondary200: '#b39ddb',
     background: '#f9fafcf4',
     overlay: '#ffffffaa',
-    codeBg: '#f5f0ff',
-    code: '#673ab7',
+    codeBg: '#ececec',
+    preBg: 'rgb(249, 249, 249)',
+    code: 'rgb(13, 13, 13)',
     chatMessageBubble: '#e7ebf4',
   }
 };

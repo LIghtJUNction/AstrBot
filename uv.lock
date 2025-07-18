@@ -213,7 +213,7 @@ wheels = [
 
 [[package]]
 name = "astrbot"
-version = "3.5.18"
+version = "3.5.22"
 source = { editable = "." }
 dependencies = [
     { name = "aiocqhttp" },
@@ -239,7 +239,6 @@ dependencies = [
     { name = "lark-oapi" },
     { name = "lxml-html-clean" },
     { name = "mcp" },
-    { name = "nh3" },
     { name = "openai" },
     { name = "ormsgpack" },
     { name = "pillow" },
@@ -288,7 +287,6 @@ requires-dist = [
     { name = "lark-oapi", specifier = ">=1.4.15" },
     { name = "lxml-html-clean", specifier = ">=0.4.2" },
     { name = "mcp", specifier = ">=1.8.0" },
-    { name = "nh3", specifier = ">=0.2.21" },
     { name = "openai", specifier = ">=1.78.0" },
     { name = "ormsgpack", specifier = ">=1.9.1" },
     { name = "pillow", specifier = ">=11.2.1" },
@@ -1395,6 +1393,7 @@ wheels = [
 ]
 
 [[package]]
+<<<<<<< HEAD
 name = "nh3"
 version = "0.2.21"
 source = { registry = "https://pypi.org/simple" }
@@ -1426,6 +1425,8 @@ wheels = [
 ]
 
 [[package]]
+=======
+>>>>>>> sync
 name = "numpy"
 version = "2.2.6"
 source = { registry = "https://pypi.org/simple" }

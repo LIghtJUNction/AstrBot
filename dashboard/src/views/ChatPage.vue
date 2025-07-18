@@ -80,7 +80,7 @@
                         <div class="conversation-header-content" v-if="currCid && getCurrentConversation">
                             <h2 class="conversation-header-title">{{ getCurrentConversation.title ||
                                 tm('conversation.newConversation')
-                            }}</h2>
+                                }}</h2>
                             <div class="conversation-header-time">{{ formatDate(getCurrentConversation.updated_at) }}
                             </div>
                         </div>
@@ -126,17 +126,17 @@
                                 <span>Hello, I'm</span>
                                 <span class="bot-name">AstrBot ⭐</span>
                             </div>
-                            <div class="welcome-hint">
+                            <div class="welcome-hint markdown-content">
                                 <span>{{ t('core.common.type') }}</span>
                                 <code>help</code>
                                 <span>{{ tm('shortcuts.help') }} 😊</span>
                             </div>
-                            <div class="welcome-hint">
+                            <div class="welcome-hint markdown-content">
                                 <span>{{ t('core.common.longPress') }}</span>
                                 <code>Ctrl + B</code>
                                 <span>{{ tm('shortcuts.voiceRecord') }} 🎤</span>
                             </div>
-                            <div class="welcome-hint">
+                            <div class="welcome-hint markdown-content">
                                 <span>{{ t('core.common.press') }}</span>
                                 <code>Ctrl + V</code>
                                 <span>{{ tm('shortcuts.pasteImage') }} 🏞️</span>
@@ -149,14 +149,15 @@
                                 <!-- 用户消息 -->
                                 <div v-if="msg.type == 'user'" class="user-message">
                                     <div class="message-bubble user-bubble"
+                                        :class="{ 'has-audio': msg.audio_url }"
                                         :style="{ backgroundColor: isDark ? '#2d2e30' : '#e7ebf4' }">
-                                        <span>{{ msg.message }}</span>
+                                        <pre style="font-family: inherit; white-space: pre-wrap; word-wrap: break-word;">{{ msg.message }}</pre>
 
                                         <!-- 图片附件 -->
                                         <div class="image-attachments" v-if="msg.image_url && msg.image_url.length > 0">
                                             <div v-for="(img, index) in msg.image_url" :key="index"
                                                 class="image-attachment">
-                                                <img :src="img" class="attached-image" />
+                                                <img :src="img" class="attached-image" @click="openImagePreview(img)" />
                                             </div>
                                         </div>
 
@@ -170,13 +171,41 @@
                                     </div>
                                 </div>
 
-                                <!-- 机器人消息 -->
+                                <!-- Bot Messages -->
                                 <div v-else class="bot-message">
                                     <v-avatar class="bot-avatar" size="36">
                                         <span class="text-h2">✨</span>
                                     </v-avatar>
-                                    <div class="message-bubble bot-bubble">
-                                        <div v-html="marked(msg.message)" class="markdown-content"></div>
+                                    <div class="bot-message-content">
+                                        <div class="message-bubble bot-bubble">
+                                            <!-- Text -->
+                                            <div v-if="msg.message && msg.message.trim()" 
+                                                 v-html="md.render(msg.message)" 
+                                                 class="markdown-content"></div>
+                                            
+                                            <!-- Image -->
+                                            <div class="embedded-images" v-if="msg.embedded_images && msg.embedded_images.length > 0">
+                                                <div v-for="(img, imgIndex) in msg.embedded_images" :key="imgIndex"
+                                                     class="embedded-image">
+                                                    <img :src="img" class="bot-embedded-image" @click="openImagePreview(img)" />
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Audio -->
+                                            <div class="embedded-audio" v-if="msg.embedded_audio">
+                                                <audio controls class="audio-player">
+                                                    <source :src="msg.embedded_audio" type="audio/wav">
+                                                    {{ t('messages.errors.browser.audioNotSupported') }}
+                                                </audio>
+                                            </div>
+                                        </div>
+                                        <div class="message-actions">
+                                            <v-btn :icon="getCopyIcon(index)" size="small" variant="text"
+                                                class="copy-message-btn"
+                                                :class="{ 'copy-success': isCopySuccess(index) }"
+                                                @click="copyBotMessage(msg.message, index)"
+                                                :title="t('core.common.copy')" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -189,10 +218,10 @@
                             style="width: 85%; max-width: 900px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 24px; padding: 4px;">
                             <textarea id="input-field" v-model="prompt" @keydown="handleInputKeyDown"
                                 @click:clear="clearMessage" placeholder="Ask AstrBot..."
-                                style="width: 100%; resize: none; outline: none; border: 1px solid var(--v-theme-border); border-radius: 12px; padding: 12px 16px; min-height: 40px; font-family: inherit; font-size: 16px; background-color: var(--v-theme-surface);"></textarea>
+                                style="width: 100%; resize: none; outline: none; border: 1px solid var(--v-theme-border); border-radius: 12px; padding: 8px 16px; min-height: 40px; font-family: inherit; font-size: 16px; background-color: var(--v-theme-surface);"></textarea>
                             <div
                                 style="display: flex; justify-content: space-between; align-items: center; padding: 0px 8px;">
-                                <div style="display: flex; justify-content: flex-start; margin-top: 8px;">
+                                <div style="display: flex; justify-content: flex-start; margin-top: 4px;">
                                     <!-- 选择提供商和模型 -->
                                     <ProviderModelSelector ref="providerModelSelector" />
                                 </div>
@@ -247,12 +276,25 @@
             </v-card-actions>
         </v-card>
     </v-dialog>
+
+    <!-- 图片预览对话框 -->
+    <v-dialog v-model="imagePreviewDialog" max-width="90vw" max-height="90vh">
+        <v-card class="image-preview-card" elevation="8">
+            <v-card-title class="d-flex justify-space-between align-center pa-4">
+                <span>{{ t('core.common.imagePreview') }}</span>
+                <v-btn icon="mdi-close" variant="text" @click="imagePreviewDialog = false" />
+            </v-card-title>
+            <v-card-text class="text-center pa-4">
+                <img :src="previewImageUrl" class="preview-image-large" />
+            </v-card-text>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script>
 import { router } from '@/router';
 import axios from 'axios';
-import { marked } from 'marked';
+import MarkdownIt from 'markdown-it';
 import { ref } from 'vue';
 import { useCustomizerStore } from '@/stores/customizer';
 import { useI18n, useModuleI18n } from '@/i18n/composables';
@@ -261,8 +303,11 @@ import ProviderModelSelector from '@/components/chat/ProviderModelSelector.vue';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github.css';
 
-marked.setOptions({
-    breaks: true,
+// 配置markdown-it，启用代码高亮
+const md = new MarkdownIt({
+    html: false,        // 禁用HTML标签，防XSS
+    breaks: true,       // 换行转<br>
+    linkify: true,      // 自动转链接
     highlight: function (code, lang) {
         if (lang && hljs.getLanguage(lang)) {
             try {
@@ -294,7 +339,7 @@ export default {
             t,
             tm,
             router,
-            marked,
+            md,
             ref
         };
     },
@@ -340,6 +385,15 @@ export default {
             sidebarHoverExpanded: false,
             sidebarHoverDelay: 100, // 悬停延迟，单位毫秒            
             pendingCid: null, // Store pending conversation ID for route handling
+
+            // 复制成功提示
+            copySuccessMessage: null,
+            copySuccessTimeout: null,
+            copiedMessages: new Set(), // 存储已复制的消息索引
+
+            // 图片预览相关变量
+            imagePreviewDialog: false,
+            previewImageUrl: ''
         }
     },
 
@@ -545,6 +599,25 @@ export default {
             this.stagedAudioUrl = null;
         },
 
+        openImagePreview(imageUrl) {
+            this.previewImageUrl = imageUrl;
+            this.imagePreviewDialog = true;
+        },
+
+        initImageClickEvents() {
+            this.$nextTick(() => {
+                // 查找所有动态生成的图片（在markdown-content中）
+                const images = document.querySelectorAll('.markdown-content img');
+                images.forEach((img) => {
+                    if (!img.hasAttribute('data-click-enabled')) {
+                        img.style.cursor = 'pointer';
+                        img.setAttribute('data-click-enabled', 'true');
+                        img.onclick = () => this.openImagePreview(img.src);
+                    }
+                });
+            });
+        },
+
         checkStatus() {
             axios.get('/api/chat/status').then(response => {
                 console.log(response.data);
@@ -662,7 +735,6 @@ export default {
                 }
             }
 
-
             axios.get('/api/chat/get_conversation?conversation_id=' + cid[0]).then(async response => {
                 this.currCid = cid[0];
                 let message = JSON.parse(response.data.data.history);
@@ -670,27 +742,33 @@ export default {
                     if (message[i].message.startsWith('[IMAGE]')) {
                         let img = message[i].message.replace('[IMAGE]', '');
                         const imageUrl = await this.getMediaFile(img);
-                        message[i].message = `<img src="${imageUrl}" style="max-width: 80%; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);"/>`
+                        if (!message[i].embedded_images) {
+                            message[i].embedded_images = [];
+                        }
+                        message[i].embedded_images.push(imageUrl);
+                        message[i].message = ''; // 清空message，避免显示标记文本
                     }
+                    
                     if (message[i].message.startsWith('[RECORD]')) {
                         let audio = message[i].message.replace('[RECORD]', '');
                         const audioUrl = await this.getMediaFile(audio);
-                        message[i].message = `<audio controls class="audio-player">
-                                    <source src="${audioUrl}" type="audio/wav">
-                                    ${this.t('messages.errors.browser.audioNotSupported')}
-                                  </audio>`
+                        message[i].embedded_audio = audioUrl;
+                        message[i].message = ''; // 清空message，避免显示标记文本
                     }
+                    
                     if (message[i].image_url && message[i].image_url.length > 0) {
                         for (let j = 0; j < message[i].image_url.length; j++) {
                             message[i].image_url[j] = await this.getMediaFile(message[i].image_url[j]);
                         }
                     }
+                    
                     if (message[i].audio_url) {
                         message[i].audio_url = await this.getMediaFile(message[i].audio_url);
                     }
                 }
                 this.messages = message;
                 this.initCodeCopyButtons();
+                this.initImageClickEvents();
             }).catch(err => {
                 console.error(err);
             });
@@ -807,6 +885,8 @@ export default {
             const selection = this.$refs.providerModelSelector?.getCurrentSelection();
             const selectedProviderId = selection?.providerId || '';
             const selectedModelName = selection?.modelName || '';
+            let prompt = this.prompt.trim();
+            this.prompt = ''; // 清空输入框
 
             try {
                 const response = await fetch('/api/chat/send', {
@@ -816,7 +896,7 @@ export default {
                         'Authorization': 'Bearer ' + localStorage.getItem('token')
                     },
                     body: JSON.stringify({
-                        message: this.prompt.trim(), // 确保发送的消息已去除前后空格
+                        message: prompt,
                         conversation_id: this.currCid,
                         image_url: this.stagedImagesName,
                         audio_url: this.stagedAudioUrl ? [this.stagedAudioUrl] : [],
@@ -824,8 +904,6 @@ export default {
                         selected_model: selectedModelName
                     })
                 });
-
-                this.prompt = ''; // 清空输入框;
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -869,9 +947,6 @@ export default {
                                 continue;
                             }
 
-                            if (chunk_json.type === 'heartbeat') {
-                                continue; // 心跳包
-                            }
                             if (chunk_json.type === 'error') {
                                 console.error('Error received:', chunk_json.data);
                                 continue;
@@ -882,7 +957,8 @@ export default {
                                 const imageUrl = await this.getMediaFile(img);
                                 let bot_resp = {
                                     type: 'bot',
-                                    message: `<img src="${imageUrl}" style="max-width: 80%; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);"/>`
+                                    message: '',
+                                    embedded_images: [imageUrl]
                                 }
                                 this.messages.push(bot_resp);
                             } else if (chunk_json.type === 'record') {
@@ -890,10 +966,8 @@ export default {
                                 const audioUrl = await this.getMediaFile(audio);
                                 let bot_resp = {
                                     type: 'bot',
-                                    message: `<audio controls class="audio-player">
-                                        <source src="${audioUrl}" type="audio/wav">
-                                        ${this.t('messages.errors.browser.audioNotSupported')}
-                                      </audio>`
+                                    message: '',
+                                    embedded_audio: audioUrl
                                 }
                                 this.messages.push(bot_resp);
                             } else if (chunk_json.type === 'plain') {
@@ -907,19 +981,19 @@ export default {
                                 } else {
                                     message_obj.message.value += chunk_json.data;
                                 }
-                            } else if (chunk_json.type === 'end') {
-                                in_streaming = false;
-                                // 在消息流结束后初始化代码复制按钮
-                                this.initCodeCopyButtons();
-                                continue;
                             } else if (chunk_json.type === 'update_title') {
                                 // 更新对话标题
                                 const conversation = this.conversations.find(c => c.cid === chunk_json.cid);
                                 if (conversation) {
                                     conversation.title = chunk_json.data;
                                 }
-                            } else {
-                                console.warn('未知数据类型:', chunk_json.type);
+                            }
+                            if ((chunk_json.type === 'break' && chunk_json.streaming) || !chunk_json.streaming) {
+                                // break means a segment end
+                                in_streaming = false;
+                                // 在消息流结束后初始化代码复制按钮和图片点击事件
+                                this.initCodeCopyButtons();
+                                this.initImageClickEvents();
                             }
                             this.scrollToBottom();
                         }
@@ -950,8 +1024,9 @@ export default {
             this.$nextTick(() => {
                 const container = this.$refs.messageContainer;
                 container.scrollTop = container.scrollHeight;
-                // 在滚动后初始化代码复制按钮
+                // 在滚动后初始化代码复制按钮和图片点击事件
                 this.initCodeCopyButtons();
+                this.initImageClickEvents();
             });
         },
         handleInputKeyDown(e) {
@@ -1000,7 +1075,6 @@ export default {
         // 复制代码到剪贴板
         copyCodeToClipboard(code) {
             navigator.clipboard.writeText(code).then(() => {
-                // 可以添加一个简单的提示
                 console.log('代码已复制到剪贴板');
             }).catch(err => {
                 console.error('复制失败:', err);
@@ -1017,6 +1091,78 @@ export default {
                 }
                 document.body.removeChild(textArea);
             });
+        },
+
+        // 复制bot消息到剪贴板
+        copyBotMessage(message, messageIndex) {
+            // 获取对应的消息对象
+            const msgObj = this.messages[messageIndex];
+            let textToCopy = '';
+            
+            // 如果有文本消息，添加到复制内容中
+            if (message && message.trim()) {
+                // 移除HTML标签，获取纯文本
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = message;
+                textToCopy = tempDiv.textContent || tempDiv.innerText || message;
+            }
+            
+            // 如果有内嵌图片，添加说明
+            if (msgObj && msgObj.embedded_images && msgObj.embedded_images.length > 0) {
+                if (textToCopy) textToCopy += '\n\n';
+                textToCopy += `[包含 ${msgObj.embedded_images.length} 张图片]`;
+            }
+            
+            // 如果有内嵌音频，添加说明
+            if (msgObj && msgObj.embedded_audio) {
+                if (textToCopy) textToCopy += '\n\n';
+                textToCopy += '[包含音频内容]';
+            }
+            
+            // 如果没有任何内容，使用默认文本
+            if (!textToCopy.trim()) {
+                textToCopy = '[媒体内容]';
+            }
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                console.log('消息已复制到剪贴板');
+                this.showCopySuccess(messageIndex);
+            }).catch(err => {
+                console.error('复制失败:', err);
+                // 如果现代API失败，使用传统方法
+                const textArea = document.createElement('textarea');
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    console.log('消息已复制到剪贴板 (fallback)');
+                    this.showCopySuccess(messageIndex);
+                } catch (fallbackErr) {
+                    console.error('复制失败 (fallback):', fallbackErr);
+                }
+                document.body.removeChild(textArea);
+            });
+        },
+
+        // 显示复制成功提示
+        showCopySuccess(messageIndex) {
+            this.copiedMessages.add(messageIndex);
+
+            // 2秒后移除成功状态
+            setTimeout(() => {
+                this.copiedMessages.delete(messageIndex);
+            }, 2000);
+        },
+
+        // 获取复制按钮图标
+        getCopyIcon(messageIndex) {
+            return this.copiedMessages.has(messageIndex) ? 'mdi-check' : 'mdi-content-copy';
+        },
+
+        // 检查是否为复制成功状态
+        isCopySuccess(messageIndex) {
+            return this.copiedMessages.has(messageIndex);
         },
 
         // 获取复制图标SVG
@@ -1333,11 +1479,11 @@ export default {
 }
 
 .welcome-hint code {
-    background-color: var(--v-theme-codeBg);
+    background-color: rgb(var(--v-theme-codeBg));
     padding: 2px 6px;
     margin: 0 4px;
     border-radius: 4px;
-    color: var(--v-theme-code);
+    color: rgb(var(--v-theme-code));
     font-family: 'Fira Code', monospace;
     font-size: 13px;
 }
@@ -1368,21 +1514,65 @@ export default {
     gap: 12px;
 }
 
+.bot-message-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 80%;
+    position: relative;
+}
+
+.message-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    margin-left: 8px;
+}
+
+.bot-message:hover .message-actions {
+    opacity: 1;
+}
+
+.copy-message-btn {
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    color: var(--v-theme-secondary);
+}
+
+.copy-message-btn:hover {
+    opacity: 1;
+    background-color: rgba(103, 58, 183, 0.1);
+}
+
+.copy-message-btn.copy-success {
+    color: #4caf50;
+    opacity: 1;
+}
+
+.copy-message-btn.copy-success:hover {
+    color: #4caf50;
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
 .message-bubble {
     padding: 8px 16px;
     border-radius: 12px;
-    max-width: 80%;
 }
 
 .user-bubble {
     color: var(--v-theme-primaryText);
-    padding: 12px 16px;
+    padding: 18px 20px;
     font-size: 16px;
+    max-width: 60%;
+    border-radius: 1.5rem;
 }
 
 .bot-bubble {
     border: 1px solid var(--v-theme-border);
     color: var(--v-theme-primaryText);
+    font-size: 16px;
+    max-width: 100%;
 }
 
 .user-avatar,
@@ -1415,13 +1605,59 @@ export default {
 
 .attached-image:hover {
     transform: scale(1.02);
+    cursor: pointer;
+}
+
+/* 图片预览对话框样式 */
+.image-preview-card {
+    background-color: var(--v-theme-surface) !important;
+    border: 1px solid var(--v-theme-border);
+}
+
+/* 亮色主题下的图片预览对话框 */
+.v-theme--light .image-preview-card,
+.v-theme--PurpleTheme .image-preview-card {
+    background-color: #ffffff !important;
+    border-color: #e0e0e0 !important;
+}
+
+/* 暗色主题下的图片预览对话框 */
+.v-theme--dark .image-preview-card,
+.v-theme--PurpleThemeDark .image-preview-card {
+    background-color: #1e1e1e !important;
+    border-color: #333333 !important;
+}
+
+/* 确保对话框标题栏和内容区域的背景色 */
+.image-preview-card .v-card-title {
+    background-color: inherit;
+}
+
+.image-preview-card .v-card-text {
+    background-color: inherit;
+}
+
+.preview-image-large {
+    max-width: 100%;
+    max-height: 75vh;
+    width: auto;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .audio-attachment {
     margin-top: 8px;
+    min-width: 250px;
+}
+
+/* 包含音频的消息气泡最小宽度 */
+.message-bubble.has-audio {
+    min-width: 280px;
 }
 
 .audio-player {
+    width: 100%;
     height: 36px;
     border-radius: 18px;
 }
@@ -1515,8 +1751,8 @@ export default {
 }
 
 .markdown-content p {
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: .5rem;
+    margin-bottom: .5rem;
 }
 
 .markdown-content pre {
@@ -1529,7 +1765,7 @@ export default {
 }
 
 .markdown-content code {
-    background-color: var(--v-theme-codeBg);
+    background-color: rgb(var(--v-theme-codeBg));
     padding: 2px 4px;
     border-radius: 4px;
     font-family: 'Fira Code', monospace;
@@ -1553,7 +1789,9 @@ export default {
 /* 自定义代码高亮样式 */
 .markdown-content pre {
     border: 1px solid var(--v-theme-border);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    background-color: rgb(var(--v-theme-preBg));
+    border-radius: 16px;
+    padding: 16px;
 }
 
 /* 确保highlight.js的样式正确应用 */
@@ -1727,6 +1965,41 @@ export default {
     width: 100%;
     padding-right: 32px;
     flex-shrink: 0;
-    /* 防止header被压缩 */
+}
+
+.embedded-images {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.embedded-image {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.bot-embedded-image {
+    max-width: 80%;
+    width: auto;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.bot-embedded-image:hover {
+    transform: scale(1.02);
+}
+
+.embedded-audio {
+    width: 300px;
+    margin-top: 8px;
+}
+
+.embedded-audio .audio-player {
+    width: 100%;
+    max-width: 300px;
 }
 </style>

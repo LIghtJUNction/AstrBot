@@ -168,12 +168,9 @@ class ChatRoute(Route):
                     yield f"data: {json.dumps(result, ensure_ascii=False)}\n\n"
                     await asyncio.sleep(0.05)
 
-                    if streaming and type != "end":
-                        continue
-
-                    if type == "update_title":
-                        continue                    
-                    if result_text:
+                    if type == "end":
+                        break
+                    elif (streaming and type == "complete") or not streaming:
                         # append bot message
                         conversation = self.db.get_conversation_by_user_id(
                             username, cid
@@ -190,7 +187,7 @@ class ChatRoute(Route):
                         self.db.update_conversation(
                             username, cid, history=json.dumps(history)
                         )
-                        break
+
             except BaseException as _:
                 logger.debug(f"用户 {username} 断开聊天长连接。")
                 return

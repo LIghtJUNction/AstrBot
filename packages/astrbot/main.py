@@ -11,6 +11,7 @@ import astrbot.api.event.filter as filter
 from astrbot.api.event import AstrMessageEvent, MessageEventResult
 from astrbot.api import sp
 from astrbot.api.provider import ProviderRequest
+from astrbot.core import DEMO_MODE
 from astrbot.core.platform.astr_message_event import MessageSesion
 from astrbot.core.platform.message_type import MessageType
 from astrbot.core.provider.entities import ProviderType
@@ -27,6 +28,7 @@ from astrbot.core.config.default import VERSION
 from .long_term_memory import LongTermMemory
 from astrbot.core import logger
 from astrbot.api.message_components import Plain, Image, Reply
+from astrbot.core.star.session_llm_manager import SessionServiceManager
 from typing import Union
 from enum import Enum
 
@@ -56,12 +58,6 @@ class RstScene(Enum):
         return cls.PRIVATE
 
 
-@star.register(
-    name="astrbot",
-    desc="AstrBot 基础指令结合 + 拓展功能",
-    author="Soulter",
-    version="4.0.0",
-)
 class Main(star.Star):
     def __init__(self, context: star.Context) -> None:
         self.context = context
@@ -240,6 +236,9 @@ class Main(star.Star):
     @plugin.command("off")
     async def plugin_off(self, event: AstrMessageEvent, plugin_name: str = None):
         """禁用插件"""
+        if DEMO_MODE:
+            event.set_result(MessageEventResult().message("演示模式下无法禁用插件。"))
+            return
         if not plugin_name:
             event.set_result(
                 MessageEventResult().message("/plugin off <插件名> 禁用插件。")
@@ -252,6 +251,9 @@ class Main(star.Star):
     @plugin.command("on")
     async def plugin_on(self, event: AstrMessageEvent, plugin_name: str = None):
         """启用插件"""
+        if DEMO_MODE:
+            event.set_result(MessageEventResult().message("演示模式下无法启用插件。"))
+            return
         if not plugin_name:
             event.set_result(
                 MessageEventResult().message("/plugin on <插件名> 启用插件。")
@@ -264,6 +266,9 @@ class Main(star.Star):
     @plugin.command("get")
     async def plugin_get(self, event: AstrMessageEvent, plugin_repo: str = None):
         """安装插件"""
+        if DEMO_MODE:
+            event.set_result(MessageEventResult().message("演示模式下无法安装插件。"))
+            return
         if not plugin_repo:
             event.set_result(
                 MessageEventResult().message("/plugin get <插件仓库地址> 安装插件")
@@ -338,16 +343,18 @@ class Main(star.Star):
 
     @filter.command("tts")
     async def tts(self, event: AstrMessageEvent):
-        """开关文本转语音"""
-        config = self.context.get_config()
-        if config["provider_tts_settings"]["enable"]:
-            config["provider_tts_settings"]["enable"] = False
-            config.save_config()
-            event.set_result(MessageEventResult().message("已关闭文本转语音。"))
-            return
-        config["provider_tts_settings"]["enable"] = True
-        config.save_config()
-        event.set_result(MessageEventResult().message("已开启文本转语音。"))
+        """开关文本转语音（会话级别）"""
+        session_id = event.unified_msg_origin
+        current_status = SessionServiceManager.is_tts_enabled_for_session(session_id)
+
+        # 切换状态
+        new_status = not current_status
+        SessionServiceManager.set_tts_status_for_session(session_id, new_status)
+
+        status_text = "已开启" if new_status else "已关闭"
+        event.set_result(
+            MessageEventResult().message(f"{status_text}当前会话的文本转语音。")
+        )
 
     @filter.command("sid")
     async def sid(self, event: AstrMessageEvent):
@@ -1328,13 +1335,36 @@ UID: {user_id} 此 ID 可用于设置管理员。
                 ) and not req.contexts:
                     req.contexts[:0] = begin_dialogs
 
-        if quote and quote.message_str:
+        if quote:
+            sender_info = ""
             if quote.sender_nickname:
                 sender_info = f"(Sent by {quote.sender_nickname})"
-            else:
-                sender_info = ""
-            req.system_prompt += f"\nUser is quoting the message\
-                {sender_info}: {quote.message_str}, please consider the context."
+            message_str = quote.message_str or "[Empty Text]"
+            req.system_prompt += (
+                f"\nUser is quoting a message{sender_info}.\n"
+                f"Here are the information of the quoted message: Text Content: {message_str}.\n"
+            )
+            image_seg = None
+            if quote.chain:
+                for comp in quote.chain:
+                    if isinstance(comp, Image):
+                        image_seg = comp
+                        break
+            if image_seg:
+                try:
+                    if prov := self.context.get_using_provider(
+                        event.unified_msg_origin
+                    ):
+                        llm_resp = await prov.text_chat(
+                            prompt="Please describe the image content.",
+                            image_urls=[await image_seg.convert_to_file_path()],
+                        )
+                        if llm_resp.completion_text:
+                            req.system_prompt += (
+                                f"Image Caption: {llm_resp.completion_text}\n"
+                            )
+                except BaseException as e:
+                    logger.error(f"处理引用图片失败: {e}")
 
         if self.ltm:
             try:
