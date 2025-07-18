@@ -5,12 +5,17 @@ import socket
 
 import jwt
 import psutil
-
-from astrbot.core.config.default import VERSION
-from quart import Quart, request, jsonify, g
+from quart import Quart, g, jsonify, request
 from quart.logging import default_handler
+
+from astrbot.core import logger
+from astrbot.core.config.default import VERSION
 from astrbot.core.core_lifecycle import AstrBotCoreLifecycle
-from astrbot.dashboard.routes import (
+from astrbot.core.db import BaseDatabase
+from astrbot.core.utils.astrbot_path import get_astrbot_data_path
+from astrbot.core.utils.io import get_local_ip_addresses
+
+from .routes import (
     AuthRoute,
     PluginRoute,
     ConfigRoute,
@@ -23,13 +28,6 @@ from astrbot.dashboard.routes import (
     ConversationRoute,
     FileRoute,
 )
-from astrbot.dashboard.routes.route import RouteContext, Response
-from astrbot.core import logger
-from astrbot.core.db import BaseDatabase
-from astrbot.core.utils.astrbot_path import get_astrbot_data_path
-from astrbot.core.utils.io import get_local_ip_addresses
-
-from .routes import *
 from .routes.route import Response, RouteContext
 from .routes.session_management import SessionManagementRoute
 
