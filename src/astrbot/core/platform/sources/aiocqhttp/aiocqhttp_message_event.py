@@ -89,52 +89,6 @@ class AiocqhttpMessageEvent(AstrMessageEvent):
         send_one_by_one = any(
             isinstance(seg, (Node, Nodes, File)) for seg in message_chain.chain
         )
-<<<<<<< HEAD
-        if send_one_by_one:
-            for seg in message.chain:
-                if isinstance(seg, (Node, Nodes)):
-                    # 合并转发消息
-
-                    if isinstance(seg, Node):
-                        nodes = Nodes([seg])
-                        seg = nodes
-
-                    payload = await seg.to_dict()
-
-                    if self.get_group_id():
-                        payload["group_id"] = self.get_group_id()
-                        await self.bot.call_action("send_group_forward_msg", **payload)
-                    else:
-                        payload["user_id"] = self.get_sender_id()
-                        await self.bot.call_action(
-                            "send_private_forward_msg", **payload
-                        )                
-                elif isinstance(seg, File):
-                    d = await AiocqhttpMessageEvent._from_segment_to_dict(seg)
-                    # 根据消息类型使用对应的API方法发送文件
-                    if self.get_group_id():
-                        await self.bot.send_group_msg(group_id=int(self.get_group_id()), message=[d])
-                    else:
-                        await self.bot.send_private_msg(user_id=int(self.get_sender_id()), message=[d])
-                else:
-                    # 根据消息类型使用对应的API方法发送其他消息
-                    msg = await AiocqhttpMessageEvent._parse_onebot_json(MessageChain([seg]))
-                    if self.get_group_id():
-                        await self.bot.send_group_msg(group_id=int(self.get_group_id()), message=msg)
-                    else:
-                        await self.bot.send_private_msg(user_id=int(self.get_sender_id()), message=msg)
-                    await asyncio.sleep(0.5)
-        
-        else:
-            ret = await AiocqhttpMessageEvent._parse_onebot_json(message)
-            if not ret:
-                return
-              # 根据消息类型使用对应的API方法
-            if self.get_group_id():
-                await self.bot.send_group_msg(group_id=int(self.get_group_id()), message=ret)
-            else:
-                await self.bot.send_private_msg(user_id=int(self.get_sender_id()), message=ret)
-=======
         if not send_one_by_one:
             ret = await cls._parse_onebot_json(message_chain)
             if not ret:
@@ -147,7 +101,6 @@ class AiocqhttpMessageEvent(AstrMessageEvent):
                 if isinstance(seg, Node):
                     nodes = Nodes([seg])
                     seg = nodes
->>>>>>> sync
 
                 payload = await seg.to_dict()
 
