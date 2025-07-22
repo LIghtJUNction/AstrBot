@@ -26,10 +26,11 @@ import asyncio
 import base64
 import json
 import os
+from typing import Any, BinaryIO
 import uuid
 from enum import Enum
 
-from pydantic.v1 import BaseModel
+from pydantic import BaseModel
 
 from astrbot.core import astrbot_config, file_token_service, logger
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
@@ -67,11 +68,19 @@ class ComponentType(Enum):
 
     WechatEmoji = "WechatEmoji"  # Wechat 下的 emoji 表情包
 
+    # Discord 专用组件
+
+    DiscordEmbed = "discord_embed"  # Discord 的 Embed 消息组件
+    DiscordReference = "discord_reference"  # Discord 的引用组件
+    DiscordView = "discord_view"  # Discord 的视图组件，包含按钮和选择菜单
+    DiscordButton = "discord_button"  # Discord 的按钮组件
+
+
 class BaseMessageComponent(BaseModel):
     type: ComponentType
 
     def toString(self):
-        output = f"[CQ:{self.type.lower()}"
+        output = f"[CQ:{self.type.value.lower()}"
         for k, v in self.__dict__.items():
             if k == "type" or v is None:
                 continue
@@ -98,18 +107,22 @@ class BaseMessageComponent(BaseModel):
             if k == "_type":
                 k = "type"
             data[k] = v
-        return {"type": self.type.lower(), "data": data}
+        output: dict[str, str | Any] = {"type": self.type.value.lower(), "data": data}
+        return output
 
-    async def to_dict(self) -> dict:
+    async def to_dict(self) -> dict[str, str | Any]:
         # 默认情况下，回退到旧的同步 toDict()
         return self.toDict()
+    
 class Plain(BaseMessageComponent):
-    type: ComponentType = "Plain"
+    type: ComponentType = ComponentType.Plain
     text: str
     convert: bool | None = True  # 若为 False 则直接发送未转换 CQ 码的消息
 
-    def __init__(self, text: str, convert: bool = True, **_):
-        super().__init__(text=text, convert=convert, **_)
+    def __init__(self, text: str, convert: bool = True, **kwargs: Any):
+        super().__init__(type=ComponentType.Plain, **kwargs)
+        self.text = text
+        self.convert = convert
 
     def toString(self):  # 没有 [CQ:plain] 这种东西，所以直接导出纯文本
         if not self.convert:
@@ -125,14 +138,14 @@ class Plain(BaseMessageComponent):
         return {"type": "text", "data": {"text": self.text}}
 
 class Face(BaseMessageComponent):
-    type: ComponentType = "Face"
+    type: ComponentType = ComponentType.Face
     id: int
 
-    def __init__(self, **_):
-        super().__init__(**_)
+    def __init__(self, **kwargs: Any):
+        super().__init__(type=ComponentType.Face, **kwargs)
 
 class Record(BaseMessageComponent):
-    type: ComponentType = "Record"
+    type: ComponentType = ComponentType.Record
     file: str | None = ""
     magic: bool | None = False
     url: str | None = ""
@@ -142,21 +155,18 @@ class Record(BaseMessageComponent):
     # 额外
     path: str | None
 
-    def __init__(self, file: str | None, **_):
-        for k in _.keys():
-            if k == "url":
-                pass
-                # Protocol.warn(f"go-cqhttp doesn't support send {self.type} by {k}")
-        super().__init__(file=file, **_)
+    def __init__(self, file: str | None, **kwargs: Any):
+        super().__init__(type=ComponentType.Record, **kwargs)
+        self.file = file
 
     @staticmethod
-    def fromFileSystem(path, **_):
-        return Record(file=f"file:///{os.path.abspath(path)}", path=path, **_)
+    def fromFileSystem(path: str, **kwargs: Any) -> "Record":
+        return Record(file=f"file:///{os.path.abspath(path)}", path=path, **kwargs)
 
     @staticmethod
-    def fromURL(url: str, **_):
+    def fromURL(url: str, **kwargs: Any) -> "Record":
         if url.startswith("http://") or url.startswith("https://"):
-            return Record(file=url, **_)
+            return Record(file=url, **kwargs)
         raise Exception("not a valid url")
 
     async def convert_to_file_path(self) -> str:
@@ -229,24 +239,25 @@ class Record(BaseMessageComponent):
 
         return f"{callback_host}/api/file/{token}"
 class Video(BaseMessageComponent):
-    type: ComponentType = "Video"
+    type: ComponentType = ComponentType.Video
     file: str
     cover: str | None = ""
     c: int | None = 2
     # 额外
     path: str | None = ""
 
-    def __init__(self, file: str, **_):
-        super().__init__(file=file, **_)
+    def __init__(self, file: str, **kwargs: Any):
+        super().__init__(type=ComponentType.Video, **kwargs)
+        self.file = file
 
     @staticmethod
-    def fromFileSystem(path, **_):
-        return Video(file=f"file:///{os.path.abspath(path)}", path=path, **_)
+    def fromFileSystem(path: str, **kwargs: Any) -> "Video":
+        return Video(file=f"file:///{os.path.abspath(path)}", path=path, **kwargs)
 
     @staticmethod
-    def fromURL(url: str, **_):
+    def fromURL(url: str, **kwargs: Any) -> "Video":
         if url.startswith("http://") or url.startswith("https://"):
-            return Video(file=url, **_)
+            return Video(file=url, **kwargs)
         raise Exception("not a valid url")
 
     async def convert_to_file_path(self) -> str:
@@ -313,12 +324,12 @@ class Video(BaseMessageComponent):
             },
         }
 class At(BaseMessageComponent):
-    type: ComponentType = "At"
+    type: ComponentType = ComponentType.At
     qq: int | str  # 此处str为all时代表所有人
     name: str | None = ""
 
-    def __init__(self, **_):
-        super().__init__(**_)
+    def __init__(self, **kwargs: Any):
+        super().__init__(type=ComponentType.At, **kwargs)
 
     def toDict(self):
         return {
@@ -326,39 +337,39 @@ class At(BaseMessageComponent):
             "data": {"qq": str(self.qq)},
         }
 class AtAll(At):
-    qq: str = "all"
+    qq : int | str = "all"
 
     def __init__(self, **_):
-        super().__init__(**_)
+        super().__init__(type=ComponentType.At, **_)
 
 class RPS(BaseMessageComponent):  # TODO
-    type: ComponentType = "RPS"
+    type: ComponentType = ComponentType.RPS
 
     def __init__(self, **_):
-        super().__init__(**_)
+        super().__init__(type=ComponentType.RPS, **_)
 
 class Dice(BaseMessageComponent):  # TODO
-    type: ComponentType = "Dice"
+    type: ComponentType = ComponentType.Dice
 
     def __init__(self, **_):
-        super().__init__(**_)
+        super().__init__(type=ComponentType.Dice, **_)
 
 class Shake(BaseMessageComponent):  # TODO
-    type: ComponentType = "Shake"
+    type: ComponentType = ComponentType.Shake
 
     def __init__(self, **_):
-        super().__init__(**_)
+        super().__init__(type=ComponentType.Shake, **_)
 
 class Anonymous(BaseMessageComponent):  # TODO
-    type: ComponentType = "Anonymous"
+    type: ComponentType = ComponentType.Anonymous
     ignore: bool | None = False
 
     def __init__(self, **_):
-        super().__init__(**_)
+        super().__init__(type=ComponentType.Anonymous, **_)
 
 
 class Share(BaseMessageComponent):
-    type: ComponentType = "Share"
+    type: ComponentType = ComponentType.Share
     url: str
     title: str
     content: str | None = ""
@@ -369,7 +380,7 @@ class Share(BaseMessageComponent):
 
 
 class Contact(BaseMessageComponent):  # TODO
-    type: ComponentType = "Contact"
+    type: ComponentType = ComponentType.Contact
     _type: str  # type 字段冲突
     id: int | None = 0
 
@@ -378,7 +389,7 @@ class Contact(BaseMessageComponent):  # TODO
 
 
 class Location(BaseMessageComponent):  # TODO
-    type: ComponentType = "Location"
+    type: ComponentType = ComponentType.Location
     lat: float
     lon: float
     title: str | None = ""
@@ -389,7 +400,7 @@ class Location(BaseMessageComponent):  # TODO
 
 
 class Music(BaseMessageComponent):
-    type: ComponentType = "Music"
+    type: ComponentType = ComponentType.Music
     _type: str
     id: int | None = 0
     url: str | None = ""
@@ -406,7 +417,7 @@ class Music(BaseMessageComponent):
 
 
 class Image(BaseMessageComponent):
-    type: ComponentType = "Image"
+    type: ComponentType = ComponentType.Image
     file: str | None = ""
     _type: str | None = ""
     subType: int | None = 0
@@ -419,7 +430,8 @@ class Image(BaseMessageComponent):
     file_unique: str | None = ""  # 某些平台可能有图片缓存的唯一标识
 
     def __init__(self, file: str | None, **_):
-        super().__init__(file=file, **_)
+        super().__init__(type=ComponentType.Image, **_)
+        self.file = file
 
     @staticmethod
     def fromURL(url: str, **_):
@@ -517,7 +529,7 @@ class Image(BaseMessageComponent):
 
 
 class Reply(BaseMessageComponent):
-    type: ComponentType = "Reply"
+    type: ComponentType = ComponentType.Reply
     id: str | int
     """所引用的消息 ID"""
     chain: list["BaseMessageComponent"] | None = []
@@ -543,7 +555,7 @@ class Reply(BaseMessageComponent):
 
 
 class RedBag(BaseMessageComponent):
-    type: ComponentType = "RedBag"
+    type: ComponentType = ComponentType.RedBag
     title: str
 
     def __init__(self, **_):
@@ -551,7 +563,7 @@ class RedBag(BaseMessageComponent):
 
 
 class Poke(BaseMessageComponent):
-    type: str = ""
+    type: ComponentType = ComponentType.Poke
     id: int | None = 0
     qq: int | None = 0
 
@@ -561,7 +573,7 @@ class Poke(BaseMessageComponent):
 
 
 class Forward(BaseMessageComponent):
-    type: ComponentType = "Forward"
+    type: ComponentType = ComponentType.Forward
     id: str
 
     def __init__(self, **_):
@@ -571,7 +583,7 @@ class Forward(BaseMessageComponent):
 class Node(BaseMessageComponent):
     """群合并转发消息"""
 
-    type: ComponentType = "Node"
+    type: ComponentType = ComponentType.Node
     id: int | None = 0  # 忽略
     name: str | None = ""  # qq昵称
     uin: str | None = "0"  # qq号
@@ -593,7 +605,7 @@ class Node(BaseMessageComponent):
                 bs64 = await comp.convert_to_base64()
                 data_content.append(
                     {
-                        "type": comp.type.lower(),
+                        "type": comp.type.value.lower(),
                         "data": {"file": f"base64://{bs64}"},
                     }
                 )
@@ -623,7 +635,7 @@ class Node(BaseMessageComponent):
 
 
 class Nodes(BaseMessageComponent):
-    type: ComponentType = "Nodes"
+    type: ComponentType = ComponentType.Nodes
     nodes: list[Node]
 
     def __init__(self, nodes: list[Node], **_):
@@ -649,7 +661,7 @@ class Nodes(BaseMessageComponent):
 
 
 class Xml(BaseMessageComponent):
-    type: ComponentType = "Xml"
+    type: ComponentType = ComponentType.Xml
     data: str
     resid: int | None = 0
 
@@ -658,7 +670,7 @@ class Xml(BaseMessageComponent):
 
 
 class Json(BaseMessageComponent):
-    type: ComponentType = "Json"
+    type: ComponentType = ComponentType.Json
     data: str | dict
     resid: int | None = 0
 
@@ -669,7 +681,7 @@ class Json(BaseMessageComponent):
 
 
 class CardImage(BaseMessageComponent):
-    type: ComponentType = "CardImage"
+    type: ComponentType = ComponentType.CardImage
     file: str
     cache: bool | None = True
     minwidth: int | None = 400
@@ -688,15 +700,15 @@ class CardImage(BaseMessageComponent):
 
 
 class TTS(BaseMessageComponent):
-    type: ComponentType = "TTS"
+    type: ComponentType = ComponentType.TTS
     text: str
 
     def __init__(self, **_):
-        super().__init__(**_)
+        super().__init__(type=ComponentType.TTS, **_)
 
 
 class Unknown(BaseMessageComponent):
-    type: ComponentType = "Unknown"
+    type: ComponentType = ComponentType.Unknown
     text: str
 
     def toString(self):
@@ -708,15 +720,17 @@ class File(BaseMessageComponent):
     文件消息段
     """
 
-    type: ComponentType = "File"
+    type: ComponentType = ComponentType.File
     name: str | None = ""  # 名字
     file_: str | None = ""  # 本地路径
     url: str | None = ""  # url
 
     def __init__(self, name: str, file: str = "", url: str = ""):
         """文件消息段。"""
-        super().__init__(name=name, file_=file, url=url)
-
+        super().__init__(type=ComponentType.File)
+        self.name = name
+        self.file_ = file
+        self.url = url
     @property
     def file(self) -> str:
         """
@@ -838,7 +852,7 @@ class File(BaseMessageComponent):
 
 
 class WechatEmoji(BaseMessageComponent):
-    type: ComponentType = "WechatEmoji"
+    type: ComponentType = ComponentType.WechatEmoji
     md5: str | None = ""
     md5_len: int | None = 0
     cdnurl: str | None = ""

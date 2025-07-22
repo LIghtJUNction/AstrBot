@@ -1,24 +1,25 @@
 import discord
-from typing import List
+
 from astrbot.api.message_components import BaseMessageComponent
+from astrbot.core.message.components import ComponentType
 
 
 # Discord专用组件
 class DiscordEmbed(BaseMessageComponent):
     """Discord Embed消息组件"""
 
-    type: str = "discord_embed"
+    type: ComponentType = ComponentType.DiscordEmbed
 
     def __init__(
         self,
-        title: str = None,
-        description: str = None,
-        color: int = None,
-        url: str = None,
-        thumbnail: str = None,
-        image: str = None,
-        footer: str = None,
-        fields: List[dict] = None,
+        title: str | None = None,
+        description: str | None = None,
+        color: int | None = None,
+        url: str | None = None,
+        thumbnail: str | None = None,
+        image: str | None = None,
+        footer: str | None = None,
+        fields: list[dict] | None = None,
     ):
         self.title = title
         self.description = description
@@ -61,15 +62,15 @@ class DiscordEmbed(BaseMessageComponent):
 class DiscordButton(BaseMessageComponent):
     """Discord按钮组件"""
 
-    type: str = "discord_button"
+    type: ComponentType = ComponentType.DiscordButton
 
     def __init__(
         self,
         label: str,
-        custom_id: str = None,
+        custom_id: str | None = None,
         style: str = "primary",
-        emoji: str = None,
-        url: str = None,
+        emoji: str | None = None,
+        url: str | None = None,
         disabled: bool = False,
     ):
         self.label = label
@@ -81,7 +82,7 @@ class DiscordButton(BaseMessageComponent):
 
 class DiscordReference(BaseMessageComponent):
     """Discord引用组件"""
-    type: str = "discord_reference"
+    type: ComponentType = ComponentType.DiscordReference
     def __init__(self, message_id: str, channel_id: str):
         self.message_id = message_id
         self.channel_id = channel_id
@@ -90,10 +91,10 @@ class DiscordReference(BaseMessageComponent):
 class DiscordView(BaseMessageComponent):
     """Discord视图组件，包含按钮和选择菜单"""
 
-    type: str = "discord_view"
+    type: ComponentType = ComponentType.DiscordView
 
     def __init__(
-        self, components: List[BaseMessageComponent] = None, timeout: float = None
+        self, components: list[BaseMessageComponent] | None = None, timeout: float | None = None
     ):
         self.components = components or []
         self.timeout = timeout
