@@ -195,7 +195,7 @@ def get_local_ip_addresses():
     net_interfaces = psutil.net_if_addrs()
     network_ips = []
 
-    for interface, addrs in net_interfaces.items():
+    for _interface, addrs in net_interfaces.items():
         for addr in addrs:
             if addr.family == socket.AF_INET:  # 使用 socket.AF_INET 代替 psutil.AF_INET
                 network_ips.append(addr.address)

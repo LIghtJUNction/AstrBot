@@ -378,7 +378,7 @@ class FunctionToolManager:
             running_events = [
                 client.running_event.wait() for client in self.mcp_client_dict.values()
             ]
-            for key, event in self.mcp_client_event.items():
+            for _key, event in self.mcp_client_event.items():
                 event.set()
             # waiting for all clients to finish
             try:
