@@ -15,7 +15,9 @@ def update(name: str, proxy: str | None):
             (
                 p
                 for p in plugins
-                if p["name"] == name and p["status"].value == PluginStatus.NEED_UPDATE
+                # plugin["status"] may be a plain str or a PluginStatus; compare directly
+                # to the PluginStatus member to avoid accessing .value on a str.
+                if p["name"] == name and p["status"] == PluginStatus.NEED_UPDATE
             ),
             None,
         )

@@ -9,7 +9,8 @@ def install(name: str, proxy: str | None):
     from ..utils import get_astrbot_root, build_plug_list, manage_plugin, PluginStatus
     base_path: Path = get_astrbot_root()
     plug_path: Path = base_path / "data" / "plugins"
-    plugins: list[dict[str, str]] = build_plug_list(base_path / "data" / "plugins")
+    # plugin dict values may contain PluginStatus members or plain strings
+    plugins: list[dict[str, str | PluginStatus]] = build_plug_list(base_path / "data" / "plugins")
 
     # 首先尝试精确匹配
     exact_plugin = next(
@@ -26,12 +27,12 @@ def install(name: str, proxy: str | None):
         return
 
     # 如果精确匹配失败，进行模糊搜索
-    available_plugins: list[dict[str, str]] = [p for p in plugins if p["status"] == PluginStatus.NOT_INSTALLED]
+    available_plugins: list[dict[str, str | PluginStatus]] = [p for p in plugins if p["status"] == PluginStatus.NOT_INSTALLED]
     
     # 按优先级搜索：名称 > 描述 > 作者
-    name_matches: list[dict[str, str]] = []
-    desc_matches: list[dict[str, str]] = []
-    author_matches: list[dict[str, str]] = []
+    name_matches: list[dict[str, str | PluginStatus]] = []
+    desc_matches: list[dict[str, str | PluginStatus]] = []
+    author_matches: list[dict[str, str | PluginStatus]] = []
     
     name_lower = name.lower()
     for p in available_plugins:
@@ -50,7 +51,7 @@ def install(name: str, proxy: str | None):
             author_matches.append(p)
     
     # 合并结果并限制为3个选项
-    fuzzy_matches: list[dict[str, str]] = (name_matches + desc_matches + author_matches)[:3]
+    fuzzy_matches: list[dict[str, str | PluginStatus]] = (name_matches + desc_matches + author_matches)[:3]
     
     if not fuzzy_matches:
         raise click.ClickException(
@@ -78,6 +79,7 @@ def install(name: str, proxy: str | None):
     try:
         choice = click.prompt("请选择要安装的插件 (输入序号)", type=int)
         if 1 <= choice <= len(fuzzy_matches):
+            # selected_plugin may have PluginStatus or str for the "status" key
             selected_plugin: dict[str, str | PluginStatus] = fuzzy_matches[choice - 1]
             manage_plugin(selected_plugin, plug_path, is_update=False, proxy=proxy)
         else:

@@ -12,7 +12,7 @@ import logging
 
 import certifi
 
-from typing import Union
+from typing import Any
 
 from PIL import Image
 from .astrbot_path import get_astrbot_data_path
@@ -20,7 +20,7 @@ from .astrbot_path import get_astrbot_data_path
 logger = logging.getLogger("astrbot")
 
 
-def on_error(func, path, exc_info):
+def on_error(func: Any, path: str, exc_info: Any) -> None:
     """
     a callback of the rmtree function.
     """
@@ -52,7 +52,7 @@ def port_checker(port: int, host: str = "localhost"):
         return False
 
 
-def save_temp_img(img: Union[Image.Image, str]) -> str:
+def save_temp_img(img: Image.Image | str) -> str:
     temp_dir = os.path.join(get_astrbot_data_path(), "temp")
     # 获得文件创建时间，清除超过 12 小时的
     try:
@@ -78,7 +78,7 @@ def save_temp_img(img: Union[Image.Image, str]) -> str:
 
 
 async def download_image_by_url(
-    url: str, post: bool = False, post_data: dict = None, path=None
+    url: str, post: bool = False, post_data: dict | None = None, path=None
 ) -> str:
     """
     下载图片, 返回 path

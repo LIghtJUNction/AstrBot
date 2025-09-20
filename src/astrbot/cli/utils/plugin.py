@@ -1,4 +1,6 @@
+from __future__ import annotations
 import shutil
+
 import tempfile
 
 import httpx
@@ -9,14 +11,25 @@ from pathlib import Path
 from zipfile import ZipFile
 
 import click
+from typing import Any,TypedDict
 from .version_comparator import VersionComparator
+
 
 class PluginStatus(str, Enum):
     INSTALLED = "已安装"
     NEED_UPDATE = "需更新"
     NOT_INSTALLED = "未安装"
     NOT_PUBLISHED = "未发布"
-    
+
+
+class PluginDict(TypedDict):
+    name: str
+    desc: str
+    version: str
+    author: str
+    repo: str
+    status: PluginStatus
+    local_path: str | None
 def get_git_repo(url: str, target_path: Path, proxy: str | None = None):
     """从 Git 仓库下载代码并解压到指定路径"""
     temp_dir = Path(tempfile.mkdtemp())
@@ -79,7 +92,7 @@ def get_git_repo(url: str, target_path: Path, proxy: str | None = None):
             shutil.rmtree(temp_dir, ignore_errors=True)
 
 
-def load_yaml_metadata(plugin_dir: Path) -> dict:
+def load_yaml_metadata(plugin_dir: Path) -> dict[str, Any]:
     """从 metadata.yaml 文件加载插件元数据
 
     Args:
@@ -97,7 +110,7 @@ def load_yaml_metadata(plugin_dir: Path) -> dict:
     return {}
 
 
-def build_plug_list(plugins_dir: Path) -> list[dict[str,str | PluginStatus]]:
+def build_plug_list(plugins_dir: Path) -> list[PluginDict]:
     """构建插件列表，包含本地和在线插件信息
 
     Args:
@@ -107,7 +120,7 @@ def build_plug_list(plugins_dir: Path) -> list[dict[str,str | PluginStatus]]:
         list: 包含插件信息的字典列表
     """
     # 获取本地插件信息
-    result = []
+    result: list[PluginDict] = []
     if plugins_dir.exists():
         for plugin_name in [d.name for d in plugins_dir.glob("*") if d.is_dir()]:
             plugin_dir = plugins_dir / plugin_name
@@ -135,7 +148,7 @@ def build_plug_list(plugins_dir: Path) -> list[dict[str,str | PluginStatus]]:
                 )
 
     # 获取在线插件列表
-    online_plugins = []
+    online_plugins: list[PluginDict] = []
     try:
         with httpx.Client() as client:
             resp = client.get("https://api.soulter.top/astrbot/plugins")
@@ -184,7 +197,7 @@ def build_plug_list(plugins_dir: Path) -> list[dict[str,str | PluginStatus]]:
 
 
 def manage_plugin(
-    plugin: dict[str, str], plugins_dir: Path, is_update: bool = False, proxy: str | None = None
+    plugin: PluginDict, plugins_dir: Path, is_update: bool = False, proxy: str | None = None
 ) -> None:
     """安装或更新插件
 
@@ -203,16 +216,17 @@ def manage_plugin(
     else:
         target_path = plugins_dir / plugin_name
 
-    backup_path = Path(f"{target_path}_backup") if is_update else None
+    backup_path: Path | None = Path(f"{target_path}_backup") if is_update else None
 
     # 检查插件是否存在
     if is_update and not target_path.exists():
         raise click.ClickException(f"插件 {plugin_name} 未安装，无法更新")
 
     # 备份现有插件
-    if is_update and backup_path.exists():
+    if backup_path and backup_path.exists():
         shutil.rmtree(backup_path)
     if is_update:
+        assert backup_path is not None
         shutil.copytree(target_path, backup_path)
 
     try:
@@ -222,13 +236,13 @@ def manage_plugin(
         get_git_repo(repo_url, target_path, proxy)
 
         # 更新成功，删除备份
-        if is_update and backup_path.exists():
+        if backup_path and backup_path.exists():
             shutil.rmtree(backup_path)
         click.echo(f"插件 {plugin_name} {'更新' if is_update else '安装'}成功")
     except Exception as e:
         if target_path.exists():
             shutil.rmtree(target_path, ignore_errors=True)
-        if is_update and backup_path.exists():
+        if backup_path and backup_path.exists():
             shutil.move(backup_path, target_path)
         raise click.ClickException(
             f"{'更新' if is_update else '安装'}插件 {plugin_name} 时出错: {e}"
