@@ -1,5 +1,6 @@
 import asyncio
 import traceback
+from typing import Protocol, cast
 
 from astrbot.core import logger, sp
 from astrbot.core.astrbot_config_mgr import AstrBotConfigManager
@@ -9,6 +10,10 @@ from .entities import ProviderType
 from .provider import Provider, STTProvider, TTSProvider, EmbeddingProvider
 from .register import llm_tools, provider_cls_map
 from ..persona_mgr import PersonaManager
+
+
+class Terminatable(Protocol):
+    async def terminate(self) -> None: ...
 
 
 class ProviderManager:
@@ -443,7 +448,7 @@ class ProviderManager:
                 self.curr_tts_provider_inst = None
 
             if getattr(self.inst_map[provider_id], "terminate", None):
-                await self.inst_map[provider_id].terminate()  # type: ignore
+                await cast(Terminatable, self.inst_map[provider_id]).terminate()
 
             logger.info(
                 f"{provider_id} 提供商适配器已终止({len(self.provider_insts)}, {len(self.stt_provider_insts)}, {len(self.tts_provider_insts)})"
@@ -453,7 +458,7 @@ class ProviderManager:
     async def terminate(self):
         for provider_inst in self.provider_insts:
             if hasattr(provider_inst, "terminate"):
-                await provider_inst.terminate()  # type: ignore
+                await cast(Terminatable, provider_inst).terminate()
         try:
             await self.llm_tools.disable_mcp_server()
         except Exception:

@@ -12,7 +12,9 @@ def install(name: str, proxy: str | None):
     base_path: Path = get_astrbot_root()
     plug_path: Path = base_path / "data" / "plugins"
     # plugin dict values may contain PluginStatus members or plain strings
-    plugins: list[dict[str, str | PluginStatus]] = build_plug_list(base_path / "data" / "plugins")
+    plugins: list[dict[str, str | PluginStatus]] = build_plug_list(
+        base_path / "data" / "plugins"
+    )
 
     # 首先尝试精确匹配
     exact_plugin = next(
@@ -30,13 +32,15 @@ def install(name: str, proxy: str | None):
 
     # 如果精确匹配失败，进行模糊搜索
 
-    available_plugins: list[dict[str, str | PluginStatus]] = [p for p in plugins if p["status"] == PluginStatus.NOT_INSTALLED]
-    
+    available_plugins: list[dict[str, str | PluginStatus]] = [
+        p for p in plugins if p["status"] == PluginStatus.NOT_INSTALLED
+    ]
+
     # 按优先级搜索：名称 > 描述 > 作者
     name_matches: list[dict[str, str | PluginStatus]] = []
     desc_matches: list[dict[str, str | PluginStatus]] = []
     author_matches: list[dict[str, str | PluginStatus]] = []
-    
+
     name_lower = name.lower()
     for p in available_plugins:
         plugin_name_lower = p["name"].lower()
@@ -55,8 +59,10 @@ def install(name: str, proxy: str | None):
 
     # 合并结果并限制为3个选项
 
-    fuzzy_matches: list[dict[str, str | PluginStatus]] = (name_matches + desc_matches + author_matches)[:3]
-    
+    fuzzy_matches: list[dict[str, str | PluginStatus]] = (
+        name_matches + desc_matches + author_matches
+    )[:3]
+
     if not fuzzy_matches:
         raise click.ClickException(
             click.style(f"未找到匹配 '{name}' 的可安装插件", fg="red")

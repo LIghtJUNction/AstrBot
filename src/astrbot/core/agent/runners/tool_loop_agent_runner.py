@@ -63,7 +63,7 @@ class ToolLoopAgentRunner(BaseAgentRunner[TContext]):
         """Yields chunks *and* a final LLMResponse."""
         if self.streaming:
             stream = self.provider.text_chat_stream(**self.req.__dict__)
-            async for resp in stream:  # type: ignore
+            async for resp in stream:
                 yield resp
         else:
             yield await self.provider.text_chat(**self.req.__dict__)

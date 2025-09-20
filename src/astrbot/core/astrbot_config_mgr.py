@@ -10,6 +10,7 @@ from typing import TypeVar, TypedDict, Any
 
 _VT = TypeVar("_VT")
 
+
 class ConfInfo(TypedDict):
     """Configuration information for a specific session or platform."""
 

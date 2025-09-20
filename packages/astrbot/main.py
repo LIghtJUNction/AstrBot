@@ -1006,7 +1006,7 @@ UID: {user_id} 此 ID 可用于设置管理员。
     @filter.permission_type(filter.PermissionType.ADMIN)
     @filter.command("persona")
     async def persona(self, message: AstrMessageEvent):
-        cmd = message.message_str.split(" ")  # type: ignore
+        cmd: list[str] = message.message_str.split(" ")
         umo = message.unified_msg_origin
 
         curr_persona_name = "无"
