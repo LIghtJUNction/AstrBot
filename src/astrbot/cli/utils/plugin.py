@@ -97,7 +97,7 @@ def load_yaml_metadata(plugin_dir: Path) -> dict:
     return {}
 
 
-def build_plug_list(plugins_dir: Path) -> list:
+def build_plug_list(plugins_dir: Path) -> list[dict[str,str]]:
     """构建插件列表，包含本地和在线插件信息
 
     Args:

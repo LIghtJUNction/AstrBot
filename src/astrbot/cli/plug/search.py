@@ -7,11 +7,12 @@ def search(query: str):
     from ..utils import get_astrbot_root, build_plug_list, display_plugins
 
     base_path = get_astrbot_root()
-    plugins = build_plug_list(base_path / "plugins")    # 按优先级分类搜索结果：名称 > 描述 > 作者
-    name_matches = []
-    desc_matches = []
-    author_matches = []
-    
+    plugins: list[dict[str,str]] = build_plug_list(base_path / "plugins")    # 按优先级分类搜索结果：名称 > 描述 > 作者
+    name_matches: list[dict[str,str]] = []
+    desc_matches: list[dict[str,str]] = []
+    author_matches: list[dict[str,str]] = []
+    # p dict[str,str]
+    # p = {"name": "插件名", "desc": "插件描述", "author": "插件作者"}
     for p in plugins:
         name_lower = p["name"].lower()
         desc_lower = p["desc"].lower()
@@ -28,7 +29,7 @@ def search(query: str):
         elif query_lower in author_lower:
             author_matches.append(p)
       # 按优先级合并结果，并逆序排列（最新的在前面）
-    matched_plugins = (name_matches + desc_matches + author_matches)[::-1]
+    matched_plugins: list[dict[str, str]] = (name_matches + desc_matches + author_matches)[::-1]
 
     if not matched_plugins:
         click.echo(click.style(f"未找到匹配 '{query}' 的插件", fg="yellow"))
