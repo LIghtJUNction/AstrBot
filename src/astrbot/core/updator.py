@@ -1,15 +1,5 @@
-import os
-import psutil
-import sys
-import time
 import warnings
-from .zip_updator import ReleaseInfo, RepoZipUpdator
 from .updater import AstrBotUpdater as _AstrBotUpdater
-from astrbot.core import logger
-from astrbot.core.config.default import VERSION
-from typing import Any
-from astrbot.core.utils.io import download_file
-from astrbot.core.utils.astrbot_path import get_astrbot_path
 
 
 class AstrBotUpdator(_AstrBotUpdater):
@@ -25,4 +15,4 @@ class AstrBotUpdator(_AstrBotUpdater):
             DeprecationWarning,
             stacklevel=2,
         )
-
+        super().__init__(repo_mirror)

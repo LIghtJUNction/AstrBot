@@ -30,7 +30,7 @@ from .context import Context
 from .filter.permission import PermissionType, PermissionTypeFilter
 from .star import star_map, star_registry
 from .star_handler import star_handlers_registry
-from .updator import PluginUpdator
+from .updater import PluginUpdater
 
 try:
     from watchfiles import PythonFilter, awatch
@@ -41,7 +41,7 @@ except ImportError:
 
 class PluginManager:
     def __init__(self, context: Context, config: AstrBotConfig):
-        self.updator = PluginUpdator()
+        self.updater = PluginUpdater()
 
         self.context = context
         self.context._star_manager = self
@@ -621,7 +621,7 @@ class PluginManager:
                 如果找不到插件元数据则返回 None。
         """
         async with self._pm_lock:
-            plugin_path = await self.updator.install(repo_url, proxy)
+            plugin_path = await self.updater.install(repo_url, proxy)
             # reload the plugin
             dir_name = os.path.basename(plugin_path)
             await self.load(specified_dir_name=dir_name)
@@ -741,7 +741,7 @@ class PluginManager:
         if plugin.reserved:
             raise Exception("该插件是 AstrBot 保留插件，无法更新。")
 
-        await self.updator.update(plugin, proxy=proxy)
+        await self.updater.update(plugin, proxy=proxy)
         await self.reload(plugin_name)
 
     async def turn_off_plugin(self, plugin_name: str):
@@ -826,7 +826,7 @@ class PluginManager:
         dir_name = os.path.basename(zip_file_path).replace(".zip", "")
         dir_name = dir_name.removesuffix("-master").removesuffix("-main").lower()
         desti_dir = os.path.join(self.plugin_store_path, dir_name)
-        self.updator.unzip_file(zip_file_path, desti_dir)
+        self.updater.unzip_file(zip_file_path, desti_dir)
 
         # remove the zip
         try:

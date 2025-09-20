@@ -1,17 +1,4 @@
-import aiohttp
-import os
-import re
-import zipfile
-import shutil
 import warnings
-
-import ssl
-import certifi
-from typing import Any, Callable
-
-from astrbot.core.utils.io import on_error, download_file
-from astrbot.core import logger
-from astrbot.core.utils.version_comparator import VersionComparator
 
 # Import the new classes
 from .zip_updater import ReleaseInfo as _ReleaseInfo, RepoZipUpdater as _RepoZipUpdater
@@ -26,7 +13,7 @@ class RepoZipUpdator(_RepoZipUpdater):
     [DEPRECATED] This class has been renamed to RepoZipUpdater.
     Please use RepoZipUpdater instead. This alias will be removed in a future version.
     """
-    
+
     def __init__(self, repo_mirror: str = "") -> None:
         warnings.warn(
             "RepoZipUpdator is deprecated and will be removed in a future version. "
@@ -35,4 +22,3 @@ class RepoZipUpdator(_RepoZipUpdater):
             stacklevel=2,
         )
         super().__init__(repo_mirror)
-

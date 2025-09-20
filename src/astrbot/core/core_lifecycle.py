@@ -25,7 +25,7 @@ from astrbot.core.persona_mgr import PersonaManager
 from astrbot.core.provider.manager import ProviderManager
 from astrbot.core import LogBroker
 from astrbot.core.db import BaseDatabase
-from astrbot.core.updator import AstrBotUpdator
+from astrbot.core.updater import AstrBotUpdater
 from astrbot.core import logger, sp
 from astrbot.core.config.default import VERSION
 from astrbot.core.conversation_mgr import ConversationManager
@@ -136,7 +136,7 @@ class AstrBotCoreLifecycle:
         self.pipeline_scheduler_mapping = await self.load_pipeline_scheduler()
 
         # 初始化更新器
-        self.astrbot_updator = AstrBotUpdator()
+        self.astrbot_updater = AstrBotUpdater()
 
         # 初始化事件总线
         self.event_bus = EventBus(
@@ -249,7 +249,7 @@ class AstrBotCoreLifecycle:
         await self.platform_manager.terminate()
         self.dashboard_shutdown_event.set()
         threading.Thread(
-            target=self.astrbot_updator._reboot, name="restart", daemon=True
+            target=self.astrbot_updater._reboot, name="restart", daemon=True
         ).start()
 
     def load_platform(self) -> list[asyncio.Task]:
