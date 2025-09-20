@@ -1,3 +1,5 @@
+from typing import Any
+
 __version__ = "3.5.23"
 
 
@@ -8,7 +10,7 @@ def get_cli():
     return cli
 
 
-def __getattr__(name: str):
+def __getattr__(name: str) -> Any:
     if name == "cli":
         return get_cli()
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
@@ -16,5 +18,5 @@ def __getattr__(name: str):
 
 __all__ = [
     "__version__",
-    "cli",  # type: ignore
+    "cli",
 ]

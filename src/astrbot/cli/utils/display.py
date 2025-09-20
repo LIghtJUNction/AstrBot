@@ -5,7 +5,9 @@ import click
 from .plugin import PluginStatus
 
 
-def display_plugins(plugins: list[dict[str, str | PluginStatus]], title: str, color: str = "white"):
+def display_plugins(
+    plugins: list[dict[str, str | PluginStatus]], title: str, color: str = "white"
+):
     """
     Display a list of plugins with colored output
 

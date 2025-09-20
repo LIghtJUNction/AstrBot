@@ -472,7 +472,7 @@ class PluginManager:
                     for handler in related_handlers:
                         handler.handler = functools.partial(
                             handler.handler,
-                            metadata.star_cls,  # type: ignore
+                            metadata.star_cls,  # functools.partial loses typing information
                         )
                     # 绑定 llm_tool handler
                     for func_tool in llm_tools.func_list:
@@ -493,7 +493,7 @@ class PluginManager:
                                 ft.handler_module_path = metadata.module_path
                                 ft.handler = functools.partial(
                                     ft.handler,
-                                    metadata.star_cls,  # type: ignore
+                                    metadata.star_cls,  # functools.partial loses typing information
                                 )
                             if ft.name in inactivated_llm_tools:
                                 ft.active = False

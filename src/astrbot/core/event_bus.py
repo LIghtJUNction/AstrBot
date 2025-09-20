@@ -18,6 +18,7 @@ from astrbot.core import logger
 from .platform import AstrMessageEvent
 from astrbot.core.astrbot_config_mgr import AstrBotConfigManager
 
+
 class EventBus:
     """用于处理事件的分发和处理"""
 

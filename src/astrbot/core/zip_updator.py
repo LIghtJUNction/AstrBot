@@ -32,9 +32,11 @@ class ReleaseInfo:
 class RepoZipUpdator:
     def __init__(self, repo_mirror: str = "") -> None:
         self.repo_mirror = repo_mirror
-        self.rm_on_error: Callable[..., None] = on_error 
+        self.rm_on_error: Callable[..., None] = on_error
 
-    async def fetch_release_info(self, url: str, latest: bool = True) -> list[dict[str, Any]]:
+    async def fetch_release_info(
+        self, url: str, latest: bool = True
+    ) -> list[dict[str, Any]]:
         """
         请求版本信息。
         返回一个列表，每个元素是一个字典，包含版本号、发布时间、更新内容、commit hash等信息。
@@ -80,7 +82,9 @@ class RepoZipUpdator:
             raise Exception("解析版本信息失败")
         return ret
 
-    def github_api_release_parser(self, releases: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def github_api_release_parser(
+        self, releases: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         """
         解析 GitHub API 返回的 releases 信息。
         返回一个列表，每个元素是一个字典，包含版本号、发布时间、更新内容、commit hash等信息。

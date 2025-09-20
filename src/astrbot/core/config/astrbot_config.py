@@ -57,7 +57,9 @@ class AstrBotConfig(dict[str, Any]):
 
         self.update(conf)
 
-    def _config_schema_to_default_config(self, schema: dict[str, Any]) -> dict[str, Any]:
+    def _config_schema_to_default_config(
+        self, schema: dict[str, Any]
+    ) -> dict[str, Any]:
         """将 Schema 转换成 Config"""
         conf = {}
 

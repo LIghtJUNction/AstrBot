@@ -139,7 +139,7 @@ class MCPClient:
                     mcp.ClientSession(
                         *streams,
                         read_timeout_seconds=read_timeout,
-                        logging_callback=logging_callback,  # type: ignore
+                        logging_callback=logging_callback,  # External library mcp has loose typing for callbacks
                     )
                 )
             else:
@@ -165,7 +165,7 @@ class MCPClient:
                         read_stream=read_s,
                         write_stream=write_s,
                         read_timeout_seconds=read_timeout,
-                        logging_callback=logging_callback,  # type: ignore
+                        logging_callback=logging_callback,  # External library mcp has loose typing for callbacks
                     )
                 )
 
@@ -186,7 +186,7 @@ class MCPClient:
                         logger=logger,
                         identifier=f"MCPServer-{name}",
                         callback=callback,
-                    ),  # type: ignore
+                    ),  # External library mcp has type compatibility issues with LogPipe
                 ),
             )
 
