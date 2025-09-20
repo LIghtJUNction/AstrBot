@@ -1,19 +1,25 @@
 import click
 import json
 
+
 @click.command()
 @click.argument("key", required=False)
-@click.option("--format", "-f",
-              type=click.Choice(["simple", "json", "yaml"]),
-              default="simple",
-              help="输出格式")
+@click.option(
+    "--format",
+    "-f",
+    type=click.Choice(["simple", "json", "yaml"]),
+    default="simple",
+    help="输出格式",
+)
 @click.option("--show-type", "-t", is_flag=True, help="显示值的类型")
 @click.option("--all", "-a", is_flag=True, help="显示所有配置项（包括未在验证器中的）")
-def get(key: str = None, format: str = "simple", show_type: bool = False, all: bool = False):
+def get(
+    key: str = None, format: str = "simple", show_type: bool = False, all: bool = False
+):
     """获取配置项的值
-    
+
     不提供key则显示所有可配置项，使用 --all 显示完整配置
-    
+
     示例:
     \b
     astrbot conf get                    # 显示所有的已知配置项
@@ -23,6 +29,7 @@ def get(key: str = None, format: str = "simple", show_type: bool = False, all: b
     """
 
     from .utils import load_config, get_nested_item
+
     config = load_config()
 
     if key:
@@ -39,7 +46,9 @@ def get(key: str = None, format: str = "simple", show_type: bool = False, all: b
                 for possible_key in possible_keys[:5]:  # 最多显示5个建议
                     click.echo(f"  {click.style(possible_key, fg='cyan')}")
             else:
-                raise click.ClickException(click.style(f"未找到配置项: {key}", fg="red"))
+                raise click.ClickException(
+                    click.style(f"未找到配置项: {key}", fg="red")
+                )
         except Exception as e:
             raise click.ClickException(click.style(f"获取配置失败: {str(e)}", fg="red"))
     else:
@@ -67,13 +76,17 @@ def _display_single_value(key: str, value, format: str, show_type: bool):
         if show_type:
             click.echo(f"{key}_type: {type(value).__name__}")
     else:  # simple
-        type_info = f" ({click.style(type(value).__name__, fg='cyan')})" if show_type else ""
-        click.echo(f"{click.style(key, fg='cyan', bold=True)}: {click.style(str(display_value), fg='green')}{type_info}")
+        type_info = (
+            f" ({click.style(type(value).__name__, fg='cyan')})" if show_type else ""
+        )
+        click.echo(
+            f"{click.style(key, fg='cyan', bold=True)}: {click.style(str(display_value), fg='green')}{type_info}"
+        )
 
 
 def _display_known_config(config: dict, format: str, show_type: bool):
     """显示已知配置项"""
-    from .utils import CONFIG_VALIDATORS,get_nested_item
+    from .utils import CONFIG_VALIDATORS, get_nested_item
 
     if format == "json":
         output = {}
@@ -106,10 +119,18 @@ def _display_known_config(config: dict, format: str, show_type: bool):
             try:
                 value = get_nested_item(config, key)
                 display_value = "********" if key == "dashboard.password" else value
-                type_info = f" ({click.style(type(value).__name__, fg='cyan')})" if show_type else ""
-                click.echo(f"  {click.style(key, fg='yellow')}: {click.style(str(display_value), fg='green')}{type_info}")
+                type_info = (
+                    f" ({click.style(type(value).__name__, fg='cyan')})"
+                    if show_type
+                    else ""
+                )
+                click.echo(
+                    f"  {click.style(key, fg='yellow')}: {click.style(str(display_value), fg='green')}{type_info}"
+                )
             except (KeyError, TypeError):
-                click.echo(f"  {click.style(key, fg='yellow')}: {click.style('未设置', fg='red')}")
+                click.echo(
+                    f"  {click.style(key, fg='yellow')}: {click.style('未设置', fg='red')}"
+                )
 
 
 def _display_all_config(config: dict, format: str, show_type: bool):
@@ -124,7 +145,9 @@ def _display_all_config(config: dict, format: str, show_type: bool):
         _print_config_recursive(config, "", show_type)
 
 
-def _print_config_recursive(obj: dict, prefix: str = "", show_type: bool = False, level: int = 0):
+def _print_config_recursive(
+    obj: dict, prefix: str = "", show_type: bool = False, level: int = 0
+):
     """递归打印配置"""
     indent = "  " * level
     for key, value in obj.items():
@@ -139,8 +162,12 @@ def _print_config_recursive(obj: dict, prefix: str = "", show_type: bool = False
         else:
             display_value = value
 
-        type_info = f" ({click.style(type(value).__name__, fg='cyan')})" if show_type else ""
-        click.echo(f"{indent}{click.style(key, fg='yellow')}: {click.style(str(display_value), fg='green')}{type_info}")
+        type_info = (
+            f" ({click.style(type(value).__name__, fg='cyan')})" if show_type else ""
+        )
+        click.echo(
+            f"{indent}{click.style(key, fg='yellow')}: {click.style(str(display_value), fg='green')}{type_info}"
+        )
 
 
 def _print_yaml_recursive(obj: dict, show_type: bool = False, level: int = 0):
@@ -198,7 +225,11 @@ def _find_similar_keys(config: dict, target_key: str) -> list[str]:
         return exact_matches
 
     # 包含匹配
-    contains_matches = [key for key in all_keys if target_lower in key.lower() or key.lower() in target_lower]
+    contains_matches = [
+        key
+        for key in all_keys
+        if target_lower in key.lower() or key.lower() in target_lower
+    ]
     return sorted(contains_matches)
 
 

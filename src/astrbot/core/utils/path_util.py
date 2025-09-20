@@ -1,6 +1,7 @@
 import os
 from astrbot.core import logger
 
+
 def path_Mapping(mappings, srcPath: str) -> str:
     """路径映射处理函数。尝试支援 Windows 和 Linux 的路径映射。
     Args:

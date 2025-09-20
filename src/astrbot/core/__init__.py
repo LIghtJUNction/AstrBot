@@ -1,6 +1,6 @@
 import os
 
-from .log import LogManager, LogBroker  
+from .log import LogManager, LogBroker
 from astrbot.core.utils.t2i.renderer import HtmlRenderer
 from astrbot.core.utils.shared_preferences import SharedPreferences
 from astrbot.core.utils.pip_installer import PipInstaller

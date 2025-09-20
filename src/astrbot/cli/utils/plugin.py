@@ -21,15 +21,6 @@ class PluginStatus(str, Enum):
     NOT_INSTALLED = "未安装"
     NOT_PUBLISHED = "未发布"
 
-
-class PluginDict(TypedDict):
-    name: str
-    desc: str
-    version: str
-    author: str
-    repo: str
-    status: PluginStatus
-    local_path: str | None
 def get_git_repo(url: str, target_path: Path, proxy: str | None = None):
     """从 Git 仓库下载代码并解压到指定路径"""
     temp_dir = Path(tempfile.mkdtemp())
@@ -110,7 +101,9 @@ def load_yaml_metadata(plugin_dir: Path) -> dict[str, Any]:
     return {}
 
 
-def build_plug_list(plugins_dir: Path) -> list[PluginDict]:
+
+def build_plug_list(plugins_dir: Path) -> list[dict[str, str | PluginStatus]]:
+
     """构建插件列表，包含本地和在线插件信息
 
     Args:
@@ -197,7 +190,12 @@ def build_plug_list(plugins_dir: Path) -> list[PluginDict]:
 
 
 def manage_plugin(
-    plugin: PluginDict, plugins_dir: Path, is_update: bool = False, proxy: str | None = None
+
+    plugin: dict[str, str],
+    plugins_dir: Path,
+    is_update: bool = False,
+    proxy: str | None = None,
+
 ) -> None:
     """安装或更新插件
 

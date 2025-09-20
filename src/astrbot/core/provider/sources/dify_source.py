@@ -1,6 +1,6 @@
 import astrbot.core.message.components as Comp
 import os
-from typing import List
+
 from .. import Provider
 from ..entities import LLMResponse
 from ..func_tool_manager import FuncCall
@@ -56,9 +56,9 @@ class ProviderDify(Provider):
         self,
         prompt: str,
         session_id: str = None,
-        image_urls: List[str] = None,
+        image_urls: list[str] = None,
         func_tool: FuncCall = None,
-        contexts: List = None,
+        contexts: list = None,
         system_prompt: str = None,
         tool_calls_result=None,
         model=None,

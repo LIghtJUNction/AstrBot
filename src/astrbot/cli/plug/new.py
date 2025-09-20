@@ -9,6 +9,7 @@ def new(name: str, whl: bool = False):
     if not whl:
         from ..utils import get_astrbot_root, get_git_repo
         import re
+
         base_path = get_astrbot_root()
         plug_path = base_path / "plugins" / name
 
@@ -19,10 +20,14 @@ def new(name: str, whl: bool = False):
         desc = click.prompt("请输入插件描述", type=str)
         version = click.prompt("请输入插件版本", type=str)
         if not re.match(r"^\d+\.\d+(\.\d+)?$", version.lower().lstrip("v")):
-            raise click.ClickException(click.style("版本号必须为 x.y 或 x.y.z 格式", fg="red"))
+            raise click.ClickException(
+                click.style("版本号必须为 x.y 或 x.y.z 格式", fg="red")
+            )
         repo = click.prompt("请输入插件仓库：", type=str)
         if not repo.startswith("http"):
-            raise click.ClickException(click.style("仓库地址必须以 http 开头", fg="red"))
+            raise click.ClickException(
+                click.style("仓库地址必须以 http 开头", fg="red")
+            )
 
         click.echo(click.style("正在下载插件模板...", fg="cyan"))
         get_git_repo(
@@ -43,7 +48,9 @@ def new(name: str, whl: bool = False):
 
         # 重写 README.md
         with open(plug_path / "README.md", "w", encoding="utf-8") as f:
-            f.write(f"# {name}\n\n{desc}\n\n# 支持\n\n[帮助文档](https://astrbot.app)\n")
+            f.write(
+                f"# {name}\n\n{desc}\n\n# 支持\n\n[帮助文档](https://astrbot.app)\n"
+            )
 
         # 重写 main.py
         with open(plug_path / "main.py", "r", encoding="utf-8") as f:

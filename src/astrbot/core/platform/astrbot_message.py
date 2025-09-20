@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from astrbot.core.message.components import BaseMessageComponent
 from .message_type import MessageType
 
+
 @dataclass
 class MessageMember:
     user_id: str  # 发送者id

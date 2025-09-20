@@ -1,11 +1,13 @@
 import click
 
+
 @click.command()
 @click.argument("name")
 def remove(name: str):
     """卸载插件"""
     import shutil
     from ..utils import get_astrbot_root, build_plug_list
+
     base_path = get_astrbot_root()
     plugins = build_plug_list(base_path / "data" / "plugins")
     plugin = next((p for p in plugins if p["name"] == name), None)

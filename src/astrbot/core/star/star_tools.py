@@ -22,7 +22,7 @@ import inspect
 import os
 import uuid
 from pathlib import Path
-from typing import Union, Awaitable, List, Optional, ClassVar
+from typing import Awaitable, ClassVar
 from astrbot.core.message.components import BaseMessageComponent
 from astrbot.core.message.message_event_result import MessageChain
 from astrbot.api.platform import MessageMember, AstrBotMessage, MessageType
@@ -44,7 +44,7 @@ class StarTools:
     这些方法封装了一些常用操作，使插件开发更加简单便捷!
     """
 
-    _context: ClassVar[Optional[Context]] = None
+    _context: ClassVar[Context | None] = None
 
     @classmethod
     def initialize(cls, context: Context) -> None:
@@ -58,7 +58,7 @@ class StarTools:
 
     @classmethod
     async def send_message(
-        cls, session: Union[str, MessageSession], message_chain: MessageChain
+        cls, session: str | MessageSession, message_chain: MessageChain
     ) -> bool:
         """
         根据session(unified_msg_origin)主动发送消息
@@ -122,7 +122,7 @@ class StarTools:
         self_id: str,
         session_id: str,
         sender: MessageMember,
-        message: List[BaseMessageComponent],
+        message: list[BaseMessageComponent],
         message_str: str,
         message_id: str = "",
         raw_message: object = None,
@@ -136,7 +136,7 @@ class StarTools:
             self_id (str): 机器人自身ID
             session_id (str): 会话ID(通常为用户ID)(QQ号, 群号等)
             sender (MessageMember): 发送者信息, 例如 MessageMember(user_id="123456", nickname="昵称")
-            message (List[BaseMessageComponent]): 消息组件列表, 也就是消息链, 这个不会发给 llm, 但是会经过其他处理
+            message (list[BaseMessageComponent]): 消息组件列表, 也就是消息链, 这个不会发给 llm, 但是会经过其他处理
             message_str (str): 消息字符串, 也就是纯文本消息, 也就是发送给 llm 的消息, 与消息链一致
 
             message_id (str): 消息ID, 构造消息时可以随意填写也可不填
@@ -250,7 +250,7 @@ class StarTools:
         cls._context.unregister_llm_tool(name)
 
     @classmethod
-    def get_data_dir(cls, plugin_name: Optional[str] = None) -> Path:
+    def get_data_dir(cls, plugin_name: str | None = None) -> Path:
         """
         返回插件数据目录的绝对路径。
 

@@ -6,6 +6,7 @@ from quart import request
 from astrbot.core import DEMO_MODE
 from astrbot import logger
 
+
 class AuthRoute(Route):
     def __init__(self, context: RouteContext) -> None:
         super().__init__(context)

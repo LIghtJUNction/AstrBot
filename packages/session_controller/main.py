@@ -51,15 +51,13 @@ class Waiter(Star):
                             func_tools_mgr = self.context.get_llm_tool_manager()
 
                             # 获取用户当前的对话信息
-                            curr_cid = await self.context.conversation_manager.\
-                                get_curr_conversation_id(
+                            curr_cid = await self.context.conversation_manager.get_curr_conversation_id(
                                 event.unified_msg_origin
                             )
                             conversation = None
 
                             if curr_cid:
-                                conversation = await self.context.conversation_manager.\
-                                    get_conversation(
+                                conversation = await self.context.conversation_manager.get_conversation(
                                     event.unified_msg_origin, curr_cid
                                 )
                             else:
@@ -78,7 +76,7 @@ class Waiter(Star):
                                     "你友好地询问用户想要聊些什么或者需要什么帮助，"
                                     "回复要符合人设，不要太过机械化。"
                                     "请注意，你仅需要输出要回复用户的内容，不要输出其他任何东西"
-                                ), # 这是修复F501 单行不能太长，这样改后和之前完全等效
+                                ),  # 这是修复F501 单行不能太长，这样改后和之前完全等效
                                 func_tool_manager=func_tools_mgr,
                                 session_id=curr_cid,
                                 contexts=[],

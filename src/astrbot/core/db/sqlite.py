@@ -80,7 +80,7 @@ class SQLiteDatabase(BaseDatabase):
             count = result.scalar_one_or_none()
             return count if count is not None else 0
 
-    async def get_platform_stats(self, offset_sec: int = 86400) -> T.List[PlatformStat]:
+    async def get_platform_stats(self, offset_sec: int = 86400) -> list[PlatformStat]:
         """Get platform statistics within the specified offset in seconds and group by platform_id."""
         async with self.get_db() as session:
             session: AsyncSession

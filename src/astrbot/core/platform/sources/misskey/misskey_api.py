@@ -1,5 +1,5 @@
 import json
-from typing import Any, Optional, Dict, List, Callable, Awaitable
+from typing import Any, Callable, Awaitable
 import uuid
 
 try:
@@ -51,10 +51,10 @@ class StreamingClient:
     def __init__(self, instance_url: str, access_token: str):
         self.instance_url = instance_url.rstrip("/")
         self.access_token = access_token
-        self.websocket: Optional[Any] = None
+        self.websocket: Any | None = None
         self.is_connected = False
-        self.message_handlers: Dict[str, Callable] = {}
-        self.channels: Dict[str, str] = {}
+        self.message_handlers: dict[str, Callable] = {}
+        self.channels: dict[str, str] = {}
         self._running = False
         self._last_pong = None
 
@@ -88,7 +88,7 @@ class StreamingClient:
         logger.info("[Misskey WebSocket] 连接已断开")
 
     async def subscribe_channel(
-        self, channel_type: str, params: Optional[Dict] = None
+        self, channel_type: str, params: dict | None = None
     ) -> str:
         if not self.is_connected or not self.websocket:
             raise WebSocketError("WebSocket 未连接")
@@ -117,7 +117,7 @@ class StreamingClient:
         del self.channels[channel_id]
 
     def add_message_handler(
-        self, event_type: str, handler: Callable[[Dict], Awaitable[None]]
+        self, event_type: str, handler: Callable[[dict], Awaitable[None]]
     ):
         self.message_handlers[event_type] = handler
 
@@ -153,7 +153,7 @@ class StreamingClient:
             logger.error(f"[Misskey WebSocket] 监听消息失败: {e}")
             self.is_connected = False
 
-    async def _handle_message(self, data: Dict[str, Any]):
+    async def _handle_message(self, data: dict[str, Any]):
         message_type = data.get("type")
         body = data.get("body", {})
 
@@ -224,8 +224,8 @@ class MisskeyAPI:
     def __init__(self, instance_url: str, access_token: str):
         self.instance_url = instance_url.rstrip("/")
         self.access_token = access_token
-        self._session: Optional[aiohttp.ClientSession] = None
-        self.streaming: Optional[StreamingClient] = None
+        self._session: aiohttp.ClientSession | None = None
+        self.streaming: StreamingClient | None = None
 
     async def __aenter__(self):
         return self
@@ -310,7 +310,7 @@ class MisskeyAPI:
         retryable_exceptions=(APIConnectionError, APIRateLimitError),
     )
     async def _make_request(
-        self, endpoint: str, data: Optional[Dict[str, Any]] = None
+        self, endpoint: str, data: dict[str, Any | None] = None
     ) -> Any:
         url = f"{self.instance_url}/api/{endpoint}"
         payload = {"i": self.access_token}
@@ -328,12 +328,12 @@ class MisskeyAPI:
         self,
         text: str,
         visibility: str = "public",
-        reply_id: Optional[str] = None,
-        visible_user_ids: Optional[List[str]] = None,
+        reply_id: str | None = None,
+        visible_user_ids: list[str | None] = None,
         local_only: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建新贴文"""
-        data: Dict[str, Any] = {
+        data: dict[str, Any] = {
             "text": text,
             "visibility": visibility,
             "localOnly": local_only,
@@ -348,11 +348,11 @@ class MisskeyAPI:
         logger.debug(f"发帖成功，note_id: {note_id}")
         return result
 
-    async def get_current_user(self) -> Dict[str, Any]:
+    async def get_current_user(self) -> dict[str, Any]:
         """获取当前用户信息"""
         return await self._make_request("i", {})
 
-    async def send_message(self, user_id: str, text: str) -> Dict[str, Any]:
+    async def send_message(self, user_id: str, text: str) -> dict[str, Any]:
         """发送聊天消息"""
         result = await self._make_request(
             "chat/messages/create-to-user", {"toUserId": user_id, "text": text}
@@ -361,7 +361,7 @@ class MisskeyAPI:
         logger.debug(f"聊天发送成功，message_id: {message_id}")
         return result
 
-    async def send_room_message(self, room_id: str, text: str) -> Dict[str, Any]:
+    async def send_room_message(self, room_id: str, text: str) -> dict[str, Any]:
         """发送房间消息"""
         result = await self._make_request(
             "chat/messages/create-to-room", {"toRoomId": room_id, "text": text}
@@ -371,10 +371,10 @@ class MisskeyAPI:
         return result
 
     async def get_messages(
-        self, user_id: str, limit: int = 10, since_id: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+        self, user_id: str, limit: int = 10, since_id: str | None = None
+    ) -> list[dict[str, Any]]:
         """获取聊天消息历史"""
-        data: Dict[str, Any] = {"userId": user_id, "limit": limit}
+        data: dict[str, Any] = {"userId": user_id, "limit": limit}
         if since_id:
             data["sinceId"] = since_id
 
@@ -386,10 +386,10 @@ class MisskeyAPI:
             return []
 
     async def get_mentions(
-        self, limit: int = 10, since_id: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+        self, limit: int = 10, since_id: str | None = None
+    ) -> list[dict[str, Any]]:
         """获取提及通知"""
-        data: Dict[str, Any] = {"limit": limit}
+        data: dict[str, Any] = {"limit": limit}
         if since_id:
             data["sinceId"] = since_id
         data["includeTypes"] = ["mention", "reply", "quote"]

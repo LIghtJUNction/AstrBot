@@ -6,7 +6,7 @@ import asyncio
 import copy
 import json
 import traceback
-from typing import AsyncGenerator, Union
+from typing import AsyncGenerator
 from astrbot.core import logger
 from astrbot.core.message.components import Image
 from astrbot.core.message.message_event_result import (
@@ -341,7 +341,7 @@ class LLMRequestSubStage(Stage):
 
     async def process(
         self, event: AstrMessageEvent, _nested: bool = False
-    ) -> Union[None, AsyncGenerator[None, None]]:
+    ) -> None | AsyncGenerator[None, None]:
         req: ProviderRequest | None = None
 
         if not self.ctx.astrbot_config["provider_settings"]["enable"]:

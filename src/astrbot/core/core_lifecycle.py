@@ -34,6 +34,7 @@ from astrbot.core.astrbot_config_mgr import AstrBotConfigManager
 from astrbot.core.star.star_handler import star_handlers_registry, EventType
 from astrbot.core.star.star_handler import star_map
 
+
 class AstrBotCoreLifecycle:
     """
     AstrBot 核心生命周期管理类, 负责管理 AstrBot 的启动、停止、重启等操作。

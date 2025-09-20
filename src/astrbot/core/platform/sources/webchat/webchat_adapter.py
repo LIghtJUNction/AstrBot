@@ -11,7 +11,7 @@ from astrbot.core.platform import (
     PlatformMetadata,
 )
 from astrbot.core.message.message_event_result import MessageChain
-from astrbot.core.message.components import Plain, Image, Record 
+from astrbot.core.message.components import Plain, Image, Record
 from astrbot import logger
 from .webchat_queue_mgr import webchat_queue_mgr, WebChatQueueMgr
 from .webchat_event import WebChatMessageEvent

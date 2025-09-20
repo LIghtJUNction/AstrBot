@@ -145,7 +145,7 @@ class ConversationManager:
             unified_msg_origin (str): 统一的消息来源字符串。格式为 platform_name:message_type:session_id，可选
             platform_id (str): 平台 ID, 可选参数, 用于过滤对话
         Returns:
-            conversations (List[Conversation]): 对话对象列表
+            conversations (list[Conversation]): 对话对象列表
         """
         convs = await self.db.get_conversations(
             user_id=unified_msg_origin, platform_id=platform_id
@@ -200,7 +200,7 @@ class ConversationManager:
         Args:
             unified_msg_origin (str): 统一的消息来源字符串。格式为 platform_name:message_type:session_id
             conversation_id (str): 对话 ID, 是 uuid 格式的字符串
-            history (List[Dict]): 对话历史记录, 是一个字典列表, 每个字典包含 role 和 content 字段
+            history (list[dict]): 对话历史记录, 是一个字典列表, 每个字典包含 role 和 content 字段
         """
         if not conversation_id:
             # 如果没有提供 conversation_id，则获取当前的

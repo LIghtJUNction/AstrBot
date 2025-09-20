@@ -9,6 +9,7 @@ from typing import Any
 from astrbot.core.utils.io import download_file
 from astrbot.core.utils.astrbot_path import get_astrbot_path
 
+
 class AstrBotUpdator(RepoZipUpdator):
     """AstrBot 更新器，继承自 RepoZipUpdator 类
     该类用于处理 AstrBot 的更新操作

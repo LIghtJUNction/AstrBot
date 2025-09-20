@@ -223,7 +223,7 @@ class AiocqhttpAdapter(Platform):
                     # 如果文本段为空，则跳过
                     continue
                 message_str += current_text
-                a = ComponentTypes[t](text=current_text) 
+                a = ComponentTypes[t](text=current_text)
                 abm.message.append(a)
 
             elif t == "file":
@@ -347,7 +347,7 @@ class AiocqhttpAdapter(Platform):
                         logger.error(f"获取 @ 用户信息失败: {e}，此消息段将被忽略。")
             else:
                 for m in m_group:
-                    a = ComponentTypes[t](**m["data"]) 
+                    a = ComponentTypes[t](**m["data"])
                     abm.message.append(a)
 
         abm.timestamp = int(time.time())

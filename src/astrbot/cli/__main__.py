@@ -10,6 +10,7 @@ from astrbot.cli.run import run
 from astrbot.cli.conf import conf
 from astrbot.cli.plug import plug
 from rich.traceback import install
+
 install(show_locals=True)
 logo_tmpl = r"""
      ___           _______.___________..______      .______     ______   .___________.
@@ -19,6 +20,7 @@ logo_tmpl = r"""
  /  _____  \  .----)   |      |  |     |  |\  \----.|  |_)  | |  `--'  |     |  |
 /__/     \__\ |_______/       |__|     | _| `._____||______/   \______/      |__|
 """
+
 
 @click.group(invoke_without_command=True, no_args_is_help=False)
 @click.version_option(__version__, prog_name="AstrBot")
@@ -31,14 +33,25 @@ def cli() -> None:
     click.echo(click.style("=" * 30, fg="red"))
     click.echo(click.style("Available commands:", fg="white", bold=True))
     click.echo(f"  {click.style('Command Groups | 命令组:', fg='blue', bold=True)}")
-    click.echo(f"    {click.style('conf', fg='blue')} - Configuration management | 配置管理")
+    click.echo(
+        f"    {click.style('conf', fg='blue')} - Configuration management | 配置管理"
+    )
     click.echo(f"    {click.style('plug', fg='blue')} - Plugin management | 插件管理")
-    click.echo(f"  {click.style('Individual Commands | 可用的命令:', fg='green', bold=True)}")
-    click.echo(f"    {click.style('init', fg='green')} - Initialize AstrBot | 初始化 AstrBot")
+    click.echo(
+        f"  {click.style('Individual Commands | 可用的命令:', fg='green', bold=True)}"
+    )
+    click.echo(
+        f"    {click.style('init', fg='green')} - Initialize AstrBot | 初始化 AstrBot"
+    )
     click.echo(f"    {click.style('run', fg='green')} - Run AstrBot | 运行 AstrBot")
-    click.echo(f"    {click.style('help', fg='green')} - Show help information | 显示帮助信息")
+    click.echo(
+        f"    {click.style('help', fg='green')} - Show help information | 显示帮助信息"
+    )
     click.echo(click.style("=" * 30, fg="red"))
-    click.echo(f"Use {click.style('astrbot --help / help', fg='yellow')} for detailed help information.")
+    click.echo(
+        f"Use {click.style('astrbot --help / help', fg='yellow')} for detailed help information."
+    )
+
 
 # 拓展帮助指令 当然直接使用 --help也是可以看帮助信息的
 @cli.command()
@@ -55,10 +68,16 @@ def help(command_name: str | None) -> None:
         command = cli.get_command(ctx, command_name)
         if command:
             # 显示特定命令的帮助信息
-            click.echo(click.style(f"Help for command '{command_name}':", fg="green", bold=True))
+            click.echo(
+                click.style(
+                    f"Help for command '{command_name}':", fg="green", bold=True
+                )
+            )
             click.echo(command.get_help(ctx))
         else:
-            click.echo(click.style(f"Unknown command: {command_name}", fg="red", bold=True))
+            click.echo(
+                click.style(f"Unknown command: {command_name}", fg="red", bold=True)
+            )
             sys.exit(1)
     else:
         # 显示通用帮助信息
@@ -66,14 +85,15 @@ def help(command_name: str | None) -> None:
         click.echo("=" * 20)
         click.echo(cli.get_help(ctx))
 
-#region cli.command
+
+# region cli.command
 cli.add_command(init)
 cli.add_command(run)
 
-#region cli.conf 子命令组
+# region cli.conf 子命令组
 cli.add_command(conf)
 
-#region cli.plug 子命令组
+# region cli.plug 子命令组
 cli.add_command(plug)
 
 if __name__ == "__main__":

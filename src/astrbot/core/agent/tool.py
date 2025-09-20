@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from deprecated import deprecated
-from typing import Awaitable, Literal, Any, Optional
+from typing import Awaitable, Literal, Any
 from .mcp_client import MCPClient
 
 
@@ -71,7 +71,7 @@ class ToolSet:
         """Remove a tool by its name."""
         self.tools = [tool for tool in self.tools if tool.name != name]
 
-    def get_tool(self, name: str) -> Optional[FunctionTool]:
+    def get_tool(self, name: str) -> FunctionTool | None:
         """Get a tool by its name."""
         for tool in self.tools:
             if tool.name == name:

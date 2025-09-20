@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from datetime import timedelta
-from typing import Optional
+
 from contextlib import AsyncExitStack
 from astrbot import logger
 from astrbot.core.utils.log_pipe import LogPipe
@@ -89,7 +89,7 @@ async def _quick_test_mcp_connection(config: dict) -> tuple[bool, str]:
 class MCPClient:
     def __init__(self):
         # Initialize session and client objects
-        self.session: Optional[mcp.ClientSession] = None
+        self.session: mcp.ClientSession | None = None
         self.exit_stack = AsyncExitStack()
 
         self.name = None
@@ -197,7 +197,7 @@ class MCPClient:
         await self.session.initialize()
 
     async def list_tools_and_save(self) -> mcp.ListToolsResult:
-        """List all tools from the server and save them to self.tools"""
+        """list all tools from the server and save them to self.tools"""
         response = await self.session.list_tools()
         self.tools = response.tools
         return response
@@ -205,4 +205,4 @@ class MCPClient:
     async def cleanup(self):
         """Clean up resources"""
         await self.exit_stack.aclose()
-        self.running_event.set()  # Set the running event to indicate cleanup is done
+        self.running_event.set()  # set the running event to indicate cleanup is done

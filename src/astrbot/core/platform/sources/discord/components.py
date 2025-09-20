@@ -83,7 +83,9 @@ class DiscordButton(BaseMessageComponent):
 
 class DiscordReference(BaseMessageComponent):
     """Discord引用组件"""
+
     type: ComponentType = ComponentType.DiscordReference
+
     def __init__(self, message_id: str, channel_id: str):
         self.message_id = message_id
         self.channel_id = channel_id
@@ -95,7 +97,9 @@ class DiscordView(BaseMessageComponent):
     type: ComponentType = ComponentType.DiscordView
 
     def __init__(
-        self, components: list[BaseMessageComponent] | None = None, timeout: float | None = None
+        self,
+        components: list[BaseMessageComponent] | None = None,
+        timeout: float | None = None,
     ):
         self.components = components or []
         self.timeout = timeout

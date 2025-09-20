@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+
 from typing import AsyncGenerator
 from astrbot.core.agent.tool import ToolSet
 from astrbot.core.provider.entities import (
@@ -66,7 +66,7 @@ class Provider(AbstractProvider):
     def get_current_key(self) -> str:
         raise NotImplementedError()
 
-    def get_keys(self) -> List[str]:
+    def get_keys(self) -> list[str]:
         """获得提供商 Key"""
         return self.provider_config.get("key", [])
 
@@ -75,7 +75,7 @@ class Provider(AbstractProvider):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_models(self) -> List[str]:
+    def get_models(self) -> list[str]:
         """获得支持的模型列表"""
         raise NotImplementedError()
 

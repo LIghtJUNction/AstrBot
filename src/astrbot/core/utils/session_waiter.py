@@ -8,10 +8,10 @@ import time
 import functools
 import copy
 import astrbot.core.message.components as Comp
-from typing import Dict, Any, Callable, Awaitable
+from typing import Any, Callable, Awaitable
 from astrbot.core.platform import AstrMessageEvent
 
-USER_SESSIONS: Dict[str, "SessionWaiter"] = {}  # 存储 SessionWaiter 实例
+USER_SESSIONS: dict[str, "SessionWaiter"] = {}  # 存储 SessionWaiter 实例
 FILTERS: list["SessionFilter"] = []  # 存储 SessionFilter 实例
 
 

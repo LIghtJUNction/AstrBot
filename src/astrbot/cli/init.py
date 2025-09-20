@@ -22,17 +22,19 @@ async def initialize_astrbot(astrbot_root: Path) -> None:
         if click.confirm(
             f"请检查当前目录是否正确，确认正确请回车: {astrbot_root}",
             default=True,
-            abort=True,        ):
+            abort=True,
+        ):
             dot_astrbot.touch()
             metadata = {}
-            metadata["last_update"] = datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+            metadata["last_update"] = datetime.datetime.now().strftime(
+                "%d/%m/%Y, %H:%M:%S"
+            )
             metadata["version"] = __version__
 
             import json
 
             with open(dot_astrbot, "w") as f:
                 json.dump(metadata, f)
-
 
             click.echo(f"Created {click.style(str(dot_astrbot), fg='green')}")
 
@@ -47,7 +49,9 @@ async def initialize_astrbot(astrbot_root: Path) -> None:
         path.mkdir(parents=True, exist_ok=True)
         status = "Created" if not path.exists() else "Directory exists"
         status_color = "green" if status == "Created" else "cyan"
-        click.echo(f"{click.style(status, fg=status_color)}: {click.style(str(path), fg='yellow')}")
+        click.echo(
+            f"{click.style(status, fg=status_color)}: {click.style(str(path), fg='yellow')}"
+        )
 
     await check_dashboard(astrbot_root / "data")
 
@@ -65,9 +69,17 @@ def init() -> None:
     try:
         with lock.acquire():
             asyncio.run(initialize_astrbot(astrbot_root))
-        click.echo(click.style("✓ AstrBot initialization completed successfully!", fg="green", bold=True))
+        click.echo(
+            click.style(
+                "✓ AstrBot initialization completed successfully!",
+                fg="green",
+                bold=True,
+            )
+        )
     except Timeout:
-        raise click.ClickException(click.style("无法获取锁文件，请检查是否有其他实例正在运行", fg="red"))
+        raise click.ClickException(
+            click.style("无法获取锁文件，请检查是否有其他实例正在运行", fg="red")
+        )
 
     except Exception as e:
         raise click.ClickException(click.style(f"初始化失败: {e!s}", fg="red"))

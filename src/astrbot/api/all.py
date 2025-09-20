@@ -80,7 +80,7 @@ from .message_components import (
     Unknown,
     File,
     WechatEmoji,
-    ComponentTypes
+    ComponentTypes,
 )
 
 __all__ = [
@@ -146,17 +146,16 @@ __all__ = [
     "File",
     "WechatEmoji",
     "ComponentTypes",
-
 ]
 
 # event
 
 # star register
-from astrbot.core.star.config import * # noqa: F401,F403 过时功能
+from astrbot.core.star.config import *  # noqa: F401,F403 过时功能
 
 # provider
 
 # platform
 
 
-from .message_components import * # noqa: F401,F403
+from .message_components import *  # noqa: F401,F403

@@ -20,6 +20,7 @@ from astrbot.core.provider import Provider
 from astrbot.core.provider.provider import RerankProvider
 import asyncio
 
+
 def try_cast(value: str, type_: str) -> int | None | float:
     if type_ == "int":
         try:
@@ -41,9 +42,7 @@ def try_cast(value: str, type_: str) -> int | None | float:
             return None
 
 
-def validate_config(
-    data, schema: dict, is_core: bool
-) -> tuple[list[str], dict]:
+def validate_config(data, schema: dict, is_core: bool) -> tuple[list[str], dict]:
     errors = []
 
     def validate(data: dict, metadata: dict = schema, path=""):
@@ -700,7 +699,7 @@ class ConfigRoute(Route):
                     break
                 ret["config"] = (
                     plugin_md.config
-                )  # 这是自定义的 Dict 类（AstrBotConfig）
+                )  # 这是自定义的 dict 类（AstrBotConfig）
                 ret["metadata"] = {
                     plugin_name: {
                         "description": f"{plugin_name} 配置",

@@ -6,11 +6,13 @@ import asyncio
 import traceback
 from filelock import FileLock, Timeout
 
+
 async def run_astrbot(astrbot_root: Path):
     """运行 AstrBot"""
     from ..core import logger, LogManager, LogBroker, db_helper
     from ..core.initial_loader import InitialLoader
     from .utils import check_dashboard
+
     await check_dashboard(astrbot_root / "data")
 
     log_broker = LogBroker()
@@ -28,6 +30,7 @@ async def run_astrbot(astrbot_root: Path):
 def run(reload: bool, port: str) -> None:
     """运行 AstrBot"""
     from .utils import check_astrbot_root, get_astrbot_root
+
     try:
         os.environ["ASTRBOT_CLI"] = "1"
         astrbot_root = get_astrbot_root()
@@ -54,6 +57,10 @@ def run(reload: bool, port: str) -> None:
     except KeyboardInterrupt:
         click.echo(click.style("AstrBot 已关闭...", fg="red"))
     except Timeout:
-        raise click.ClickException(click.style("无法获取锁文件，请检查是否有其他实例正在运行", fg="red"))
+        raise click.ClickException(
+            click.style("无法获取锁文件，请检查是否有其他实例正在运行", fg="red")
+        )
     except Exception as e:
-        raise click.ClickException(click.style(f"运行时出现错误: {e}\n{traceback.format_exc()}", fg="red"))
+        raise click.ClickException(
+            click.style(f"运行时出现错误: {e}\n{traceback.format_exc()}", fg="red")
+        )

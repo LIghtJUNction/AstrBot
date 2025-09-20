@@ -8,6 +8,7 @@ from astrbot.core import logger
 from astrbot.core.star.star_handler import star_handlers_registry, star_map, EventType
 from .sources.webchat.webchat_adapter import WebChatAdapter
 
+
 class PlatformManager:
     def __init__(self, config: AstrBotConfig, event_queue: Queue):
         self.platform_insts: list[Platform] = []
@@ -46,7 +47,7 @@ class PlatformManager:
 
             logger.info(
                 f"载入 {platform_config['type']}({platform_config['id']}) 平台适配器 ..."
-            )        
+            )
             match platform_config["type"]:
                 case "aiocqhttp":
                     from .sources.aiocqhttp.aiocqhttp_platform_adapter import (
@@ -190,6 +191,7 @@ class PlatformManager:
 
     def get_insts(self):
         return self.platform_insts
+
 
 __all__ = [
     "asyncio",

@@ -52,7 +52,7 @@ class DingtalkMessageEvent(AstrMessageEvent):
                         self.message_obj.raw_message,
                     )
                     logger.debug(f"send image: {ret}")
-                
+
                 except Exception as e:
                     logger.warning(f"钉钉图片处理失败: {e}, 跳过图片发送")
                     continue

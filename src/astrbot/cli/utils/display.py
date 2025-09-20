@@ -8,9 +8,9 @@ from .plugin import PluginStatus
 def display_plugins(plugins: list[dict[str, str | PluginStatus]], title: str, color: str = "white"):
     """
     Display a list of plugins with colored output
-    
+
     Args:
-        plugins: List of plugin dictionaries
+        plugins: list of plugin dictionaries
         title: Title to display above the plugin list
         color: Color for the title (red, green, blue, yellow, cyan, magenta, white, etc.)
     """
@@ -44,7 +44,9 @@ def display_plugins(plugins: list[dict[str, str | PluginStatus]], title: str, co
             name_color = "red"
 
         # Display plugin information
-        click.echo(f"  {click.style(name, fg=name_color, bold=True)} ({version}) - {author}")
+        click.echo(
+            f"  {click.style(name, fg=name_color, bold=True)} ({version}) - {author}"
+        )
         click.echo(f"    {desc}")
         click.echo(f"    Status: {click.style(status_str, fg=name_color)}")
         click.echo()

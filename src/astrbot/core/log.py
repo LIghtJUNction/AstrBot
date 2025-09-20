@@ -28,6 +28,7 @@ import os
 import sys
 from collections import deque
 from asyncio import Queue
+
 # 日志缓存大小
 CACHED_SIZE = 200
 # 日志颜色配置
@@ -118,6 +119,7 @@ class LogBroker:
                 q.put_nowait(log_entry)
             except asyncio.QueueFull:
                 pass
+
 
 class LogQueueHandler(logging.Handler):
     """日志处理器, 用于将日志消息发送到 LogBroker

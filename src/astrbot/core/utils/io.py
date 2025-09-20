@@ -12,8 +12,6 @@ import logging
 
 import certifi
 
-from typing import Any
-
 from PIL import Image
 from .astrbot_path import get_astrbot_data_path
 
