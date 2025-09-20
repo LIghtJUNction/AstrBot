@@ -18,7 +18,6 @@ from .astrbot_path import get_astrbot_data_path
 
 logger = logging.getLogger("astrbot")
 
-
 def on_error(func: Any, path: str, exc_info: Any) -> None:
     """
     a callback of the rmtree function.
