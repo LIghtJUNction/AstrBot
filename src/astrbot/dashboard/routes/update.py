@@ -2,7 +2,7 @@ import traceback
 from .route import Route, Response, RouteContext
 from quart import request
 from astrbot.core.core_lifecycle import AstrBotCoreLifecycle
-from astrbot.core.updator import AstrBotUpdator
+from astrbot.core.updater import AstrBotUpdater
 from astrbot.core import logger, pip_installer
 from astrbot.core.utils.io import download_dashboard, get_dashboard_version
 from astrbot.core.config.default import VERSION
@@ -14,7 +14,7 @@ class UpdateRoute(Route):
     def __init__(
         self,
         context: RouteContext,
-        astrbot_updator: AstrBotUpdator,
+        astrbot_updater: AstrBotUpdater,
         core_lifecycle: AstrBotCoreLifecycle,
     ) -> None:
         super().__init__(context)
@@ -26,7 +26,7 @@ class UpdateRoute(Route):
             "/update/pip-install": ("POST", self.install_pip_package),
             "/update/migration": ("POST", self.do_migration),
         }
-        self.astrbot_updator = astrbot_updator
+        self.astrbot_updater = astrbot_updater
         self.core_lifecycle = core_lifecycle
         self.register_routes()
 
@@ -57,7 +57,7 @@ class UpdateRoute(Route):
                     .__dict__
                 )
             else:
-                ret = await self.astrbot_updator.check_update(None, None, False)
+                ret = await self.astrbot_updater.check_update(None, None, False)
                 return Response(
                     status="success",
                     message=str(ret) if ret is not None else "已经是最新版本了。",
@@ -74,7 +74,7 @@ class UpdateRoute(Route):
 
     async def get_releases(self):
         try:
-            ret = await self.astrbot_updator.get_releases()
+            ret = await self.astrbot_updater.get_releases()
             return Response().ok(ret).__dict__
         except Exception as e:
             logger.error(f"/api/update/releases: {traceback.format_exc()}")
@@ -95,7 +95,7 @@ class UpdateRoute(Route):
             proxy = proxy.removesuffix("/")
 
         try:
-            await self.astrbot_updator.update(
+            await self.astrbot_updater.update(
                 latest=latest, version=version, proxy=proxy
             )
 
