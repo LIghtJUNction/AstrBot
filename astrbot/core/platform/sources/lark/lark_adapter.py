@@ -13,7 +13,7 @@ from astrbot.api.platform import (
     PlatformMetadata,
 )
 from astrbot.api.event import MessageChain
-from astrbot.core.platform.astr_message_event import MessageSesion
+from astrbot.core.platform.astr_message_event import MessageSession
 from .lark_event import LarkMessageEvent
 from ...register import register_platform_adapter
 from astrbot import logger
@@ -69,7 +69,7 @@ class LarkPlatformAdapter(Platform):
         )
 
     async def send_by_session(
-        self, session: MessageSesion, message_chain: MessageChain
+        self, session: MessageSession, message_chain: MessageChain
     ):
         res = await LarkMessageEvent._convert_to_lark(message_chain, self.lark_api)
         wrapped = {

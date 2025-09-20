@@ -19,7 +19,7 @@ from astrbot.core.platform.astrbot_message import (
     MessageType,
 )
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
-from astrbot.core.platform.astr_message_event import MessageSesion
+from astrbot.core.platform.astr_message_event import MessageSession
 
 from ...register import register_platform_adapter
 from .wechatpadpro_message_event import WeChatPadProMessageEvent
@@ -837,7 +837,7 @@ class WeChatPadProAdapter(Platform):
         return self.metadata
 
     async def send_by_session(
-        self, session: MessageSesion, message_chain: MessageChain
+        self, session: MessageSession, message_chain: MessageChain
     ):
         dummy_message_obj = AstrBotMessage()
         dummy_message_obj.session_id = session.session_id

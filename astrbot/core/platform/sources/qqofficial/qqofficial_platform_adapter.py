@@ -21,7 +21,7 @@ from astrbot import logger
 from astrbot.api.event import MessageChain
 from typing import Union, List
 from astrbot.api.message_components import Image, Plain, At
-from astrbot.core.platform.astr_message_event import MessageSesion
+from astrbot.core.platform.astr_message_event import MessageSession
 from .qqofficial_message_event import QQOfficialMessageEvent
 from ...register import register_platform_adapter
 from astrbot.core.message.components import BaseMessageComponent
@@ -120,7 +120,7 @@ class QQOfficialPlatformAdapter(Platform):
         self.test_mode = os.environ.get("TEST_MODE", "off") == "on"
 
     async def send_by_session(
-        self, session: MessageSesion, message_chain: MessageChain
+        self, session: MessageSession, message_chain: MessageChain
     ):
         raise NotImplementedError("QQ 机器人官方 API 适配器不支持 send_by_session")
 

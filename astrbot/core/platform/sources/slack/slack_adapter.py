@@ -24,7 +24,7 @@ from astrbot.api.message_components import (
     File,
 )
 from astrbot.api import logger
-from astrbot.core.platform.astr_message_event import MessageSesion
+from astrbot.core.platform.astr_message_event import MessageSession
 from ...register import register_platform_adapter
 
 
@@ -74,7 +74,7 @@ class SlackAdapter(Platform):
         self.bot_self_id = None
 
     async def send_by_session(
-        self, session: MessageSesion, message_chain: MessageChain
+        self, session: MessageSession, message_chain: MessageChain
     ):
         blocks, text = SlackMessageEvent._parse_slack_blocks(
             message_chain=message_chain, web_client=self.web_client

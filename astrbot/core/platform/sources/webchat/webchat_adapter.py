@@ -15,7 +15,7 @@ from astrbot.core.message.components import Plain, Image, Record
 from astrbot import logger
 from .webchat_queue_mgr import webchat_queue_mgr, WebChatQueueMgr
 from .webchat_event import WebChatMessageEvent
-from astrbot.core.platform.astr_message_event import MessageSesion
+from astrbot.core.platform.astr_message_event import MessageSession
 from ...register import register_platform_adapter
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
@@ -81,7 +81,7 @@ class WebChatAdapter(Platform):
         )
 
     async def send_by_session(
-        self, session: MessageSesion, message_chain: MessageChain
+        self, session: MessageSession, message_chain: MessageChain
     ):
         await WebChatMessageEvent._send(message_chain, session.session_id)
         await super().send_by_session(session, message_chain)

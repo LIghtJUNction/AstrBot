@@ -16,7 +16,7 @@ from astrbot.api.event import MessageChain
 from .aiocqhttp_message_event import AiocqhttpMessageEvent
 from astrbot.api.message_components import Poke, File, Reply, At, ComponentTypes
 from astrbot.api import logger
-from astrbot.core.platform.astr_message_event import MessageSesion
+from astrbot.core.platform.astr_message_event import MessageSession
 from ...register import register_platform_adapter
 from aiocqhttp.exceptions import ActionFailed
 
@@ -80,7 +80,7 @@ class AiocqhttpAdapter(Platform):
             logger.info("aiocqhttp(OneBot v11) 适配器已连接。")
 
     async def send_by_session(
-        self, session: MessageSesion, message_chain: MessageChain
+        self, session: MessageSession, message_chain: MessageChain
     ):
         is_group = session.message_type == MessageType.GROUP_MESSAGE
         if is_group:

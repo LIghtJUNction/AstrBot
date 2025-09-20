@@ -8,7 +8,7 @@ import botpy.types.message
 from botpy import Client
 from astrbot.api.platform import Platform, AstrBotMessage, MessageType, PlatformMetadata
 from astrbot.api.event import MessageChain
-from astrbot.core.platform.astr_message_event import MessageSesion
+from astrbot.core.platform.astr_message_event import MessageSession
 from .qo_webhook_event import QQOfficialWebhookMessageEvent
 from ...register import register_platform_adapter
 from .qo_webhook_server import QQOfficialWebhook
@@ -93,7 +93,7 @@ class QQOfficialWebhookPlatformAdapter(Platform):
         self.client.set_platform(self)
 
     async def send_by_session(
-        self, session: MessageSesion, message_chain: MessageChain
+        self, session: MessageSession, message_chain: MessageChain
     ):
         raise NotImplementedError("QQ 机器人官方 API 适配器不支持 send_by_session")
 

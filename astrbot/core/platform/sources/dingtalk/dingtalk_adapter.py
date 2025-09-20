@@ -14,7 +14,7 @@ from astrbot.api.platform import (
 )
 from astrbot.api.event import MessageChain
 from astrbot.api.message_components import Image, Plain, At
-from astrbot.core.platform.astr_message_event import MessageSesion
+from astrbot.core.platform.astr_message_event import MessageSession
 from .dingtalk_event import DingtalkMessageEvent
 from ...register import register_platform_adapter
 from astrbot import logger
@@ -69,7 +69,7 @@ class DingtalkPlatformAdapter(Platform):
         self.client_ = client  # 用于 websockets 的 client
 
     async def send_by_session(
-        self, session: MessageSesion, message_chain: MessageChain
+        self, session: MessageSession, message_chain: MessageChain
     ):
         raise NotImplementedError("钉钉机器人适配器不支持 send_by_session")
 

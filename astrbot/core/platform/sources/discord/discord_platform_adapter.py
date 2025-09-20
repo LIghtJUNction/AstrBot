@@ -14,7 +14,7 @@ from astrbot.api.platform import (
 )
 from astrbot.api.event import MessageChain
 from astrbot.api.message_components import Plain, Image, File
-from astrbot.core.platform.astr_message_event import MessageSesion
+from astrbot.core.platform.astr_message_event import MessageSession
 from astrbot.api.platform import register_platform_adapter
 from astrbot import logger
 from .client import DiscordBotClient
@@ -52,7 +52,7 @@ class DiscordPlatformAdapter(Platform):
 
     @override
     async def send_by_session(
-        self, session: MessageSesion, message_chain: MessageChain
+        self, session: MessageSession, message_chain: MessageChain
     ):
         """通过会话发送消息"""
         # 创建一个 message_obj 以便在 event 中使用

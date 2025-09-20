@@ -5,7 +5,7 @@ from asyncio import Queue
 from .platform_metadata import PlatformMetadata
 from .astr_message_event import AstrMessageEvent
 from astrbot.core.message.message_event_result import MessageChain
-from .message_session import MessageSesion
+from .message_session import MessageSession
 from astrbot.core.utils.metrics import Metric
 
 class Platform(ABC):
@@ -36,7 +36,7 @@ class Platform(ABC):
         raise NotImplementedError
 
     async def send_by_session(
-        self, session: MessageSesion, message_chain: MessageChain
+        self, session: MessageSession, message_chain: MessageChain
     ) -> Awaitable[Any]:
         """
         通过会话发送消息。该方法旨在让插件能够直接通过**可持久化的会话数据**发送消息，而不需要保存 event 对象。

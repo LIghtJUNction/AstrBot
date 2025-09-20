@@ -6,7 +6,7 @@ from .shared_preferences_v3 import sp as sp_v3
 from astrbot.core.config.default import DB_PATH
 from astrbot.api import logger, sp
 from astrbot.core.config import AstrBotConfig
-from astrbot.core.platform.astr_message_event import MessageSesion
+from astrbot.core.platform.astr_message_event import MessageSession
 from sqlalchemy.ext.asyncio import AsyncSession
 from astrbot.core.db.po import ConversationV2, PlatformMessageHistory
 from sqlalchemy import text
@@ -65,7 +65,7 @@ async def migration_conversation_table(
                         )
                     if ":" not in conv.user_id:
                         continue
-                    session = MessageSesion.from_str(session_str=conv.user_id)
+                    session = MessageSession.from_str(session_str=conv.user_id)
                     platform_id = get_platform_id(
                         platform_id_map, session.platform_name
                     )
@@ -283,7 +283,7 @@ async def migration_preferences(
         if not umo or not conversation_id:
             continue
         try:
-            session = MessageSesion.from_str(session_str=umo)
+            session = MessageSession.from_str(session_str=umo)
             platform_id = get_platform_id(platform_id_map, session.platform_name)
             session.platform_id = platform_id
             await sp.put_async("umo", str(session), "sel_conv_id", conversation_id)
@@ -296,7 +296,7 @@ async def migration_preferences(
         if not umo or not config:
             continue
         try:
-            session = MessageSesion.from_str(session_str=umo)
+            session = MessageSession.from_str(session_str=umo)
             platform_id = get_platform_id(platform_id_map, session.platform_name)
             session.platform_id = platform_id
 
@@ -311,7 +311,7 @@ async def migration_preferences(
         if not umo or not variables:
             continue
         try:
-            session = MessageSesion.from_str(session_str=umo)
+            session = MessageSession.from_str(session_str=umo)
             platform_id = get_platform_id(platform_id_map, session.platform_name)
             session.platform_id = platform_id
             await sp.put_async("umo", str(session), "session_variables", variables)
@@ -323,7 +323,7 @@ async def migration_preferences(
         if not umo or not perf:
             continue
         try:
-            session = MessageSesion.from_str(session_str=umo)
+            session = MessageSession.from_str(session_str=umo)
             platform_id = get_platform_id(platform_id_map, session.platform_name)
             session.platform_id = platform_id
 

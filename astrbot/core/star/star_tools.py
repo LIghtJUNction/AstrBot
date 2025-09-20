@@ -26,7 +26,7 @@ from typing import Union, Awaitable, List, Optional, ClassVar
 from astrbot.core.message.components import BaseMessageComponent
 from astrbot.core.message.message_event_result import MessageChain
 from astrbot.api.platform import MessageMember, AstrBotMessage, MessageType
-from astrbot.core.platform.astr_message_event import MessageSesion
+from astrbot.core.platform.astr_message_event import MessageSession
 from astrbot.core.star.context import Context
 from astrbot.core.star.star import star_map
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
@@ -58,7 +58,7 @@ class StarTools:
 
     @classmethod
     async def send_message(
-        cls, session: Union[str, MessageSesion], message_chain: MessageChain
+        cls, session: Union[str, MessageSession], message_chain: MessageChain
     ) -> bool:
         """
         根据session(unified_msg_origin)主动发送消息
