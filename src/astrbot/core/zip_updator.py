@@ -7,7 +7,6 @@ from .zip_updater import ReleaseInfo as _ReleaseInfo, RepoZipUpdater as _RepoZip
 # For backward compatibility - expose the original ReleaseInfo
 ReleaseInfo = _ReleaseInfo
 
-
 class RepoZipUpdator(_RepoZipUpdater):
     """
     [DEPRECATED] This class has been renamed to RepoZipUpdater.

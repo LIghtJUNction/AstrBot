@@ -168,7 +168,7 @@ class FunctionToolExecutor(BaseFunctionToolExecutor[AstrAgentContext]):
         # 检查 tool 下有没有 run 方法
         if not tool.handler and not hasattr(tool, "run"):
             raise ValueError("Tool must have a valid handler or 'run' method.")
-        awaitable = tool.handler or getattr(tool, "run")
+        awaitable = tool.handler or tool.run
 
         wrapper = call_handler(
             event=run_context.event,

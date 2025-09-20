@@ -353,8 +353,8 @@ class AstrMessageEvent(ABC):
         prompt: str,
         func_tool_manager=None,
         session_id: str = None,
-        image_urls: list[str] = [],
-        contexts: list[str] = [],
+        image_urls: list[str] = None,
+        contexts: list[str] = None,
         system_prompt: str = "",
         conversation: Conversation | None = None,
     ) -> ProviderRequest:
@@ -379,6 +379,11 @@ class AstrMessageEvent(ABC):
 
         conversation: 可选。如果指定，将在指定的对话中进行 LLM 请求。对话的人格会被用于 LLM 请求，并且结果将会被记录到对话中。
         """
+        # Initialize mutable default arguments to prevent bugs
+        if image_urls is None:
+            image_urls = []
+        if contexts is None:
+            contexts = []
 
         if len(contexts) > 0 and conversation:
             conversation = None
