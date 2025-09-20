@@ -8,14 +8,14 @@ def update(name: str, proxy: str | None):
     from ..utils import get_astrbot_root, build_plug_list, manage_plugin, PluginStatus
     base_path = get_astrbot_root()
     plug_path = base_path / "data" / "plugins"
-    plugins = build_plug_list(base_path / "data" / "plugins")
+    plugins: list[dict[str, str | PluginStatus]] = build_plug_list(base_path / "data" / "plugins")
 
     if name:
-        plugin = next(
+        plugin: dict[str, str | PluginStatus] | None = next(
             (
                 p
                 for p in plugins
-                if p["name"] == name and p["status"] == PluginStatus.NEED_UPDATE
+                if p["name"] == name and p["status"].value == PluginStatus.NEED_UPDATE
             ),
             None,
         )

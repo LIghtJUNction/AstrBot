@@ -97,7 +97,7 @@ def load_yaml_metadata(plugin_dir: Path) -> dict:
     return {}
 
 
-def build_plug_list(plugins_dir: Path) -> list[dict[str,str]]:
+def build_plug_list(plugins_dir: Path) -> list[dict[str,str | PluginStatus]]:
     """构建插件列表，包含本地和在线插件信息
 
     Args:
@@ -184,7 +184,7 @@ def build_plug_list(plugins_dir: Path) -> list[dict[str,str]]:
 
 
 def manage_plugin(
-    plugin: dict, plugins_dir: Path, is_update: bool = False, proxy: str | None = None
+    plugin: dict[str, str], plugins_dir: Path, is_update: bool = False, proxy: str | None = None
 ) -> None:
     """安装或更新插件
 

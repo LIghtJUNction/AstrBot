@@ -1,5 +1,7 @@
 import click
 
+from ..utils.plugin import PluginStatus
+
 @click.command()
 @click.argument("query")
 def search(query: str):
@@ -7,10 +9,10 @@ def search(query: str):
     from ..utils import get_astrbot_root, build_plug_list, display_plugins
 
     base_path = get_astrbot_root()
-    plugins: list[dict[str,str]] = build_plug_list(base_path / "plugins")    # 按优先级分类搜索结果：名称 > 描述 > 作者
-    name_matches: list[dict[str,str]] = []
-    desc_matches: list[dict[str,str]] = []
-    author_matches: list[dict[str,str]] = []
+    plugins: list[dict[str,str | PluginStatus]] = build_plug_list(base_path / "plugins")    # 按优先级分类搜索结果：名称 > 描述 > 作者
+    name_matches: list[dict[str,str | PluginStatus]] = []
+    desc_matches: list[dict[str,str | PluginStatus]] = []
+    author_matches: list[dict[str,str | PluginStatus]] = []
     # p dict[str,str]
     # p = {"name": "插件名", "desc": "插件描述", "author": "插件作者"}
     for p in plugins:
