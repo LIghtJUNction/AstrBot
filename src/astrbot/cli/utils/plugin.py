@@ -11,9 +11,8 @@ from pathlib import Path
 from zipfile import ZipFile
 
 import click
-from typing import Any,TypedDict
+from typing import Any
 from .version_comparator import VersionComparator
-
 
 class PluginStatus(str, Enum):
     INSTALLED = "已安装"
@@ -113,7 +112,7 @@ def build_plug_list(plugins_dir: Path) -> list[dict[str, str | PluginStatus]]:
         list: 包含插件信息的字典列表
     """
     # 获取本地插件信息
-    result: list[PluginDict] = []
+    result: list[dict[str, str | PluginStatus]] = []
     if plugins_dir.exists():
         for plugin_name in [d.name for d in plugins_dir.glob("*") if d.is_dir()]:
             plugin_dir = plugins_dir / plugin_name
@@ -141,7 +140,7 @@ def build_plug_list(plugins_dir: Path) -> list[dict[str, str | PluginStatus]]:
                 )
 
     # 获取在线插件列表
-    online_plugins: list[PluginDict] = []
+    online_plugins: list[dict[str, str | PluginStatus]] = []
     try:
         with httpx.Client() as client:
             resp = client.get("https://api.soulter.top/astrbot/plugins")
@@ -156,7 +155,7 @@ def build_plug_list(plugins_dir: Path) -> list[dict[str, str | PluginStatus]]:
                         "author": str(plugin_info.get("author", "")),
                         "repo": str(plugin_info.get("repo", "")),
                         "status": PluginStatus.NOT_INSTALLED,
-                        "local_path": None,
+                        "local_path": "",
                     }
                 )
     except Exception as e:
