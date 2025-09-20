@@ -438,15 +438,21 @@ class ProviderOpenAIOfficial(Provider):
         self,
         prompt: str,
         session_id: str = None,
-        image_urls: list[str] = [],
+        image_urls: list[str] = None,
         func_tool: FuncCall = None,
-        contexts=[],
+        contexts=None,
         system_prompt=None,
         tool_calls_result=None,
         model=None,
         **kwargs,
     ) -> AsyncGenerator[LLMResponse, None]:
         """流式对话，与服务商交互并逐步返回结果"""
+        # Initialize mutable default arguments to prevent bugs
+        if image_urls is None:
+            image_urls = []
+        if contexts is None:
+            contexts = []
+        
         payloads, context_query = await self._prepare_chat_payload(
             prompt,
             image_urls,
