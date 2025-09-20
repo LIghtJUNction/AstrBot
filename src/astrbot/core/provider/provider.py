@@ -209,7 +209,7 @@ class RerankProvider(AbstractProvider):
         self.provider_config = provider_config
         self.provider_settings = provider_settings
 
-    @abc.abstractmethod
+    @abstractmethod
     async def rerank(
         self, query: str, documents: list[str], top_n: int | None = None
     ) -> list[RerankResult]:

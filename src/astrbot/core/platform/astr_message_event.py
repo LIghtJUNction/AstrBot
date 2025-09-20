@@ -3,7 +3,6 @@ import asyncio
 import re
 import hashlib
 import uuid
-from dataclasses import dataclass
 from typing import AsyncGenerator
 
 from astrbot import logger

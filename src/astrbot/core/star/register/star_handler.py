@@ -59,7 +59,7 @@ def get_handler_or_create(
 
 
 def register_command(
-    command_name: str = None, sub_command: str = None, alias: set = None, **kwargs
+    command_name: str | None = None, sub_command: str | None = None, alias: set | None = None, **kwargs
 ):
     """注册一个 Command."""
     new_command = None

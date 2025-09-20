@@ -4,7 +4,6 @@ import json
 from astrbot.core.utils.io import download_image_by_url
 from astrbot import logger
 from dataclasses import dataclass, field
-from typing import Any
 from astrbot.core.agent.tool import ToolSet
 from openai.types.chat.chat_completion import ChatCompletion
 from google.genai.types import GenerateContentResponse

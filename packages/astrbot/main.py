@@ -738,8 +738,7 @@ UID: {user_id} 此 ID 可用于设置管理员。
             title = _titles.get(conv.cid, "新对话")
             ret += (
                 f"{global_index}. {title}({conv.cid[:4]})\n  人格情景: {persona_id}\n  "
-                f"上次更新: {datetime.datetime.fromtimestamp(conv.updated_at).\
-                         strftime('%m-%d %H:%M')}\n"
+                f"上次更新: {datetime.datetime.fromtimestamp(conv.updated_at).strftime('%m-%d %H:%M')}\n"
             )
             global_index += 1
 
@@ -1007,7 +1006,7 @@ UID: {user_id} 此 ID 可用于设置管理员。
     @filter.permission_type(filter.PermissionType.ADMIN)
     @filter.command("persona")
     async def persona(self, message: AstrMessageEvent):
-        l = message.message_str.split(" ") # type: ignore
+        cmd = message.message_str.split(" ") # type: ignore
         umo = message.unified_msg_origin
 
         curr_persona_name = "无"
@@ -1030,7 +1029,7 @@ UID: {user_id} 此 ID 可用于设置管理员。
             curr_cid_title = conversation.title if conversation.title else "新对话"
             curr_cid_title += f"({cid[:4]})"
 
-        if len(L) == 1:
+        if len(cmd) == 1:
             message.set_result(
                 MessageEventResult()
                 .message(
@@ -1049,17 +1048,17 @@ UID: {user_id} 此 ID 可用于设置管理员。
                 )
                 .use_t2i(False)
             )
-        elif L[1] == "list":
+        elif cmd[1] == "list":
             msg = "人格列表：\n"
             for persona in self.context.provider_manager.personas:
                 msg += f"- {persona['name']}\n"
             msg += "\n\n*输入 `/persona view 人格名` 查看人格详细信息"
             message.set_result(MessageEventResult().message(msg))
-        elif L[1] == "view":
-            if len(L) == 2:
+        elif cmd[1] == "view":
+            if len(cmd) == 2:
                 message.set_result(MessageEventResult().message("请输入人格情景名"))
                 return
-            ps = L[2].strip()
+            ps = cmd[2].strip()
             if persona := next(
                 builtins.filter(
                     lambda persona: persona["name"] == ps,
@@ -1072,7 +1071,7 @@ UID: {user_id} 此 ID 可用于设置管理员。
             else:
                 msg = f"人格{ps}不存在"
             message.set_result(MessageEventResult().message(msg))
-        elif L[1] == "unset":
+        elif cmd[1] == "unset":
             if not cid:
                 message.set_result(
                     MessageEventResult().message("当前没有对话，无法取消人格。")
@@ -1083,7 +1082,7 @@ UID: {user_id} 此 ID 可用于设置管理员。
             )
             message.set_result(MessageEventResult().message("取消人格成功。"))
         else:
-            ps = "".join(L[1:]).strip()
+            ps = "".join(cmd[1:]).strip()
             if not cid:
                 message.set_result(
                     MessageEventResult().message(
