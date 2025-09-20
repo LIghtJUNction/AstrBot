@@ -567,9 +567,10 @@ class Poke(BaseMessageComponent):
     id: int | None = 0
     qq: int | None = 0
 
-    def __init__(self, type: str, **_):
-        type = f"Poke:{type}"
-        super().__init__(type=type, **_)
+    def __init__(self, poke_type: str, **_):
+        super().__init__(type=ComponentType.Poke, **_)
+        # Store the poke type as an attribute instead of modifying the enum type
+        self.poke_type = poke_type
 
 
 class Forward(BaseMessageComponent):
@@ -588,42 +589,45 @@ class Node(BaseMessageComponent):
     name: str | None = ""  # qq昵称
     uin: str | None = "0"  # qq号
     content: list[BaseMessageComponent] | None = []
-    seq: str | list | None = ""  # 忽略
+    seq: str | list[str] | None = ""  # 忽略
     time: int | None = 0  # 忽略
 
     def __init__(self, content: list[BaseMessageComponent], **_):
         if isinstance(content, Node):
             # back
             content = [content]
-        super().__init__(content=content, **_)
+        super().__init__(type=ComponentType.Node, **_)
+        self.content = content
 
     async def to_dict(self):
         data_content = []
-        for comp in self.content:
-            if isinstance(comp, (Image, Record)):
-                # For Image and Record segments, we convert them to base64
-                bs64 = await comp.convert_to_base64()
-                data_content.append(
-                    {
-                        "type": comp.type.value.lower(),
-                        "data": {"file": f"base64://{bs64}"},
-                    }
-                )
-            elif isinstance(comp, Plain):
-                # For Plain segments, we need to handle the plain differently
-                d = await comp.to_dict()
-                data_content.append(d)
-            elif isinstance(comp, File):
-                # For File segments, we need to handle the file differently
-                d = await comp.to_dict()
-                data_content.append(d)
-            elif isinstance(comp, (Node, Nodes)):
-                # For Node segments, we recursively convert them to dict
-                d = await comp.to_dict()
-                data_content.append(d)
-            else:
-                d = comp.toDict()
-                data_content.append(d)
+        # Check if content is not None before iterating
+        if self.content:
+            for comp in self.content:
+                if isinstance(comp, (Image, Record)):
+                    # For Image and Record segments, we convert them to base64
+                    bs64 = await comp.convert_to_base64()
+                    data_content.append(
+                        {
+                            "type": comp.type.value.lower(),
+                            "data": {"file": f"base64://{bs64}"},
+                        }
+                    )
+                elif isinstance(comp, Plain):
+                    # For Plain segments, we need to handle the plain differently
+                    d = await comp.to_dict()
+                    data_content.append(d)
+                elif isinstance(comp, File):
+                    # For File segments, we need to handle the file differently
+                    d = await comp.to_dict()
+                    data_content.append(d)
+                elif isinstance(comp, (Node, Nodes)):
+                    # For Node segments, we recursively convert them to dict
+                    d = await comp.to_dict()
+                    data_content.append(d)
+                else:
+                    d = comp.toDict()
+                    data_content.append(d)
         return {
             "type": "node",
             "data": {
