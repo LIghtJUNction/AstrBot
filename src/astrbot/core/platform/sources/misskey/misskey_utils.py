@@ -1,11 +1,11 @@
 """Misskey 平台适配器通用工具函数"""
 
-from typing import Dict, Any, List, Tuple, Optional, Union
+from typing import Any
 import astrbot.api.message_components as Comp
 from astrbot.api.platform import AstrBotMessage, MessageMember, MessageType
 
 
-def serialize_message_chain(chain: List[Any]) -> Tuple[str, bool]:
+def serialize_message_chain(chain: list[Any]) -> tuple[str, bool]:
     """将消息链序列化为文本字符串"""
     text_parts = []
     has_at = False
@@ -43,11 +43,11 @@ def serialize_message_chain(chain: List[Any]) -> Tuple[str, bool]:
 
 
 def resolve_message_visibility(
-    user_id: Optional[str],
-    user_cache: Dict[str, Any],
-    self_id: Optional[str],
+    user_id: str | None,
+    user_cache: dict[str, Any],
+    self_id: str | None,
     default_visibility: str = "public",
-) -> Tuple[str, Optional[List[str]]]:
+) -> tuple[str, list[str | None]]:
     """解析 Misskey 消息的可见性设置"""
     visibility = default_visibility
     visible_user_ids = None
@@ -71,8 +71,8 @@ def resolve_message_visibility(
 
 
 def resolve_visibility_from_raw_message(
-    raw_message: Dict[str, Any], self_id: Optional[str] = None
-) -> Tuple[str, Optional[List[str]]]:
+    raw_message: dict[str, Any], self_id: str | None = None
+) -> tuple[str, list[str | None]]:
     """从原始消息数据中解析可见性设置"""
     visibility = "public"
     visible_user_ids = None
@@ -100,7 +100,7 @@ def resolve_visibility_from_raw_message(
     return visibility, visible_user_ids
 
 
-def is_valid_user_session_id(session_id: Union[str, Any]) -> bool:
+def is_valid_user_session_id(session_id: str | Any) -> bool:
     """检查 session_id 是否是有效的聊天用户 session_id (仅限chat%前缀)"""
     if not isinstance(session_id, str) or "%" not in session_id:
         return False
@@ -114,7 +114,7 @@ def is_valid_user_session_id(session_id: Union[str, Any]) -> bool:
     )
 
 
-def is_valid_room_session_id(session_id: Union[str, Any]) -> bool:
+def is_valid_room_session_id(session_id: str | Any) -> bool:
     """检查 session_id 是否是有效的房间 session_id (仅限room%前缀)"""
     if not isinstance(session_id, str) or "%" not in session_id:
         return False
@@ -147,7 +147,7 @@ def extract_room_id_from_session_id(session_id: str) -> str:
 
 
 def add_at_mention_if_needed(
-    text: str, user_info: Optional[Dict[str, Any]], has_at: bool = False
+    text: str, user_info: dict[str, Any | None], has_at: bool = False
 ) -> str:
     """如果需要且没有@用户，则添加@用户"""
     if has_at or not user_info:
@@ -168,7 +168,7 @@ def add_at_mention_if_needed(
     return text
 
 
-def create_file_component(file_info: Dict[str, Any]) -> Tuple[Any, str]:
+def create_file_component(file_info: dict[str, Any]) -> tuple[Any, str]:
     """创建文件组件和描述文本"""
     file_url = file_info.get("url", "")
     file_name = file_info.get("name", "未知文件")
@@ -198,8 +198,8 @@ def process_files(
 
 
 def extract_sender_info(
-    raw_data: Dict[str, Any], is_chat: bool = False
-) -> Dict[str, Any]:
+    raw_data: dict[str, Any], is_chat: bool = False
+) -> dict[str, Any]:
     """提取发送者信息"""
     if is_chat:
         sender = raw_data.get("fromUser", {})
@@ -217,11 +217,11 @@ def extract_sender_info(
 
 
 def create_base_message(
-    raw_data: Dict[str, Any],
-    sender_info: Dict[str, Any],
+    raw_data: dict[str, Any],
+    sender_info: dict[str, Any],
     client_self_id: str,
     is_chat: bool = False,
-    room_id: Optional[str] = None,
+    room_id: str | None = None,
     unique_session: bool = False,
 ) -> AstrBotMessage:
     """创建基础消息对象"""
@@ -261,7 +261,7 @@ def create_base_message(
 
 def process_at_mention(
     message: AstrBotMessage, raw_text: str, bot_username: str, client_self_id: str
-) -> Tuple[List[str], str]:
+) -> tuple[list[str], str]:
     """处理@提及逻辑，返回消息部分列表和处理后的文本"""
     message_parts = []
 
@@ -283,9 +283,9 @@ def process_at_mention(
 
 
 def cache_user_info(
-    user_cache: Dict[str, Any],
-    sender_info: Dict[str, Any],
-    raw_data: Dict[str, Any],
+    user_cache: dict[str, Any],
+    sender_info: dict[str, Any],
+    raw_data: dict[str, Any],
     client_self_id: str,
     is_chat: bool = False,
 ):
@@ -309,7 +309,7 @@ def cache_user_info(
 
 
 def cache_room_info(
-    user_cache: Dict[str, Any], raw_data: Dict[str, Any], client_self_id: str
+    user_cache: dict[str, Any], raw_data: dict[str, Any], client_self_id: str
 ):
     """缓存房间信息"""
     room_data = raw_data.get("toRoom")

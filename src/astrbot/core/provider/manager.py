@@ -1,6 +1,5 @@
 import asyncio
 import traceback
-from typing import List
 
 from astrbot.core import logger, sp
 from astrbot.core.astrbot_config_mgr import AstrBotConfigManager
@@ -22,7 +21,7 @@ class ProviderManager:
         self.persona_mgr = persona_mgr
         self.acm = acm
         config = acm.confs["default"]
-        self.providers_config: List = config["provider"]
+        self.providers_config: list = config["provider"]
         self.provider_settings: dict = config["provider_settings"]
         self.provider_stt_settings: dict = config.get("provider_stt_settings", {})
         self.provider_tts_settings: dict = config.get("provider_tts_settings", {})
@@ -30,13 +29,13 @@ class ProviderManager:
         # 人格相关属性，v4.0.0 版本后被废弃，推荐使用 PersonaManager
         self.default_persona_name = persona_mgr.default_persona
 
-        self.provider_insts: List[Provider] = []
+        self.provider_insts: list[Provider] = []
         """加载的 Provider 的实例"""
-        self.stt_provider_insts: List[STTProvider] = []
+        self.stt_provider_insts: list[STTProvider] = []
         """加载的 Speech To Text Provider 的实例"""
-        self.tts_provider_insts: List[TTSProvider] = []
+        self.tts_provider_insts: list[TTSProvider] = []
         """加载的 Text To Speech Provider 的实例"""
-        self.embedding_provider_insts: List[EmbeddingProvider] = []
+        self.embedding_provider_insts: list[EmbeddingProvider] = []
         """加载的 Embedding Provider 的实例"""
         self.inst_map: dict[str, Provider] = {}
         """Provider 实例映射. key: provider_id, value: Provider 实例"""

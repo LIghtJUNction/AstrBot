@@ -2,13 +2,12 @@
 此功能已过时，参考 https://astrbot.app/dev/plugin.html#%E6%B3%A8%E5%86%8C%E6%8F%92%E4%BB%B6%E9%85%8D%E7%BD%AE-beta
 """
 
-from typing import Union
 import os
 import json
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
 
-def load_config(namespace: str) -> Union[dict, bool]:
+def load_config(namespace: str) -> dict | bool:
     """
     从配置文件中加载配置。
     namespace: str, 配置的唯一识别符，也就是配置文件的名字。

@@ -2,10 +2,12 @@ from astrbot.core.config.astrbot_config import AstrBotConfig
 from dataclasses import dataclass
 from quart import Quart
 
+
 @dataclass
 class RouteContext:
     config: AstrBotConfig
     app: Quart
+
 
 class Route:
     def __init__(self, context: RouteContext):
@@ -31,6 +33,7 @@ class Route:
             else:
                 method, func = definition
                 _add_rule(route, method, func)
+
 
 @dataclass
 class Response:

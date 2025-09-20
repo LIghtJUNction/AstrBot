@@ -2,6 +2,7 @@ import click
 from astrbot.cli.conf.set import set_config
 from astrbot.cli.conf.get import get
 
+
 @click.group()
 def conf():
     """配置管理命令
@@ -23,8 +24,8 @@ def conf():
     pass
 
 
-conf.add_command(set_config) # conf set
-conf.add_command(get) # conf get
+conf.add_command(set_config)  # conf set
+conf.add_command(get)  # conf get
 
 if __name__ == "__main__":
     conf()

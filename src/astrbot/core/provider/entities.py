@@ -241,8 +241,8 @@ class LLMResponse:
             role (str): 角色, assistant, tool, err
             completion_text (str, optional): 返回的结果文本，已经过时，推荐使用 result_chain. Defaults to "".
             result_chain (MessageChain, optional): 返回的消息链. Defaults to None.
-            tools_call_args (List[Dict[str, any]], optional): 工具调用参数. Defaults to None.
-            tools_call_name (List[str], optional): 工具调用名称. Defaults to None.
+            tools_call_args (list[dict[str, any]], optional): 工具调用参数. Defaults to None.
+            tools_call_name (list[str], optional): 工具调用名称. Defaults to None.
             raw_completion (ChatCompletion, optional): 原始响应, OpenAI 格式. Defaults to None.
         """
         if tools_call_args is None:

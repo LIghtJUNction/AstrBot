@@ -3,18 +3,22 @@ import click
 import json
 import re
 
+
 @click.command("set")
 @click.argument("key")
 @click.argument("value")
-@click.option("--type", "-t",
-              type=click.Choice(["str", "int", "float", "bool", "json"]),
-              default="auto",
-              help="指定值的类型 (auto/str/int/float/bool/json)")
+@click.option(
+    "--type",
+    "-t",
+    type=click.Choice(["str", "int", "float", "bool", "json"]),
+    default="auto",
+    help="指定值的类型 (auto/str/int/float/bool/json)",
+)
 def set_config(key: str, value: str, type: str):
     """设置配置项的值
-    
+
     支持多种值类型和灵活的键路径：
-    
+
     示例:
     \b
     astrbot conf set log_level INFO\n
@@ -25,7 +29,13 @@ def set_config(key: str, value: str, type: str):
     \b
     astrbot conf set custom.data '{"key": "value"}' --type json\n
     """
-    from .utils import load_config, save_config, get_nested_item, set_nested_item, CONFIG_VALIDATORS
+    from .utils import (
+        load_config,
+        save_config,
+        get_nested_item,
+        set_nested_item,
+        CONFIG_VALIDATORS,
+    )
 
     # 避免与内置type函数冲突
     value_type = type
@@ -33,16 +43,14 @@ def set_config(key: str, value: str, type: str):
     # 解析和转换值
     parsed_value = _parse_value(value, value_type)
 
-    config = load_config()    # 检查是否为已知配置项
+    config = load_config()  # 检查是否为已知配置项
     if key in CONFIG_VALIDATORS.keys():
         # 使用验证器验证已知配置项
         try:
             validated_value = CONFIG_VALIDATORS[key](value)
             parsed_value = validated_value
         except Exception as e:
-            raise click.ClickException(
-                click.style(f"配置验证失败: {str(e)}", fg="red")
-            )
+            raise click.ClickException(click.style(f"配置验证失败: {str(e)}", fg="red"))
     else:
         # 处理未知配置项 - 检查键是否存在
         try:
@@ -50,8 +58,9 @@ def set_config(key: str, value: str, type: str):
         except KeyError:
             supported_keys = ", ".join(CONFIG_VALIDATORS.keys())
             raise click.ClickException(
-                click.style(f"未知的配置项: {key}", fg="red") + "\n" +
-                click.style(f"已知配置项: {supported_keys}", fg="cyan")
+                click.style(f"未知的配置项: {key}", fg="red")
+                + "\n"
+                + click.style(f"已知配置项: {supported_keys}", fg="cyan")
             )
 
     try:
@@ -66,7 +75,7 @@ def set_config(key: str, value: str, type: str):
         # 设置新值
         set_nested_item(config, key, parsed_value)
         save_config(config)
-          # 显示结果
+        # 显示结果
         if is_new_key:
             click.echo(click.style(f"✓ 新配置项已创建: {key}", fg="green", bold=True))
         else:
@@ -78,10 +87,20 @@ def set_config(key: str, value: str, type: str):
             click.echo(click.style("  新值: ********", fg="green"))
         else:
             if not is_new_key:
-                click.echo(click.style(f"  原值: {_format_display_value(old_value)}", fg="yellow"))
-            click.echo(click.style(f"  新值: {_format_display_value(parsed_value)}", fg="green"))
+                click.echo(
+                    click.style(
+                        f"  原值: {_format_display_value(old_value)}", fg="yellow"
+                    )
+                )
+            click.echo(
+                click.style(
+                    f"  新值: {_format_display_value(parsed_value)}", fg="green"
+                )
+            )
             # 使用__class__.__name__避免type函数名冲突
-            click.echo(click.style(f"  类型: {parsed_value.__class__.__name__}", fg="cyan"))
+            click.echo(
+                click.style(f"  类型: {parsed_value.__class__.__name__}", fg="cyan")
+            )
 
     except Exception as e:
         raise click.ClickException(click.style(f"设置配置失败: {str(e)}", fg="red"))
@@ -98,19 +117,25 @@ def _parse_value(value: str, value_type: str) -> Any:
         try:
             return int(value)
         except ValueError:
-            raise click.ClickException(click.style(f"无法将 '{value}' 转换为整数", fg="red"))
+            raise click.ClickException(
+                click.style(f"无法将 '{value}' 转换为整数", fg="red")
+            )
     elif value_type == "float":
         try:
             return float(value)
         except ValueError:
-            raise click.ClickException(click.style(f"无法将 '{value}' 转换为浮点数", fg="red"))
+            raise click.ClickException(
+                click.style(f"无法将 '{value}' 转换为浮点数", fg="red")
+            )
     elif value_type == "bool":
         return _parse_bool(value)
     elif value_type == "json":
         try:
             return json.loads(value)
         except json.JSONDecodeError as e:
-            raise click.ClickException(click.style(f"无效的JSON格式: {str(e)}", fg="red"))
+            raise click.ClickException(
+                click.style(f"无效的JSON格式: {str(e)}", fg="red")
+            )
     else:
         return value
 
@@ -152,9 +177,11 @@ def _parse_bool(value: str) -> bool:
         return False
     else:
         raise click.ClickException(
-            click.style(f"无法将 '{value}' 转换为布尔值", fg="red") + "\n" +
-            click.style(f"支持的true值: {', '.join(true_values)}", fg="cyan") + "\n" +
-            click.style(f"支持的false值: {', '.join(false_values)}", fg="cyan")
+            click.style(f"无法将 '{value}' 转换为布尔值", fg="red")
+            + "\n"
+            + click.style(f"支持的true值: {', '.join(true_values)}", fg="cyan")
+            + "\n"
+            + click.style(f"支持的false值: {', '.join(false_values)}", fg="cyan")
         )
 
 

@@ -113,7 +113,8 @@ class BaseMessageComponent(BaseModel):
     async def to_dict(self) -> dict[str, str | Any]:
         # 默认情况下，回退到旧的同步 toDict()
         return self.toDict()
-    
+
+
 class Plain(BaseMessageComponent):
     type: ComponentType = ComponentType.Plain
     text: str
@@ -144,6 +145,7 @@ class Face(BaseMessageComponent):
 
     def __init__(self, **kwargs: Any):
         super().__init__(type=ComponentType.Face, **kwargs)
+
 
 class Record(BaseMessageComponent):
     type: ComponentType = ComponentType.Record
@@ -245,6 +247,8 @@ class Record(BaseMessageComponent):
         logger.debug(f"已注册：{callback_host}/api/file/{token}")
 
         return f"{callback_host}/api/file/{token}"
+
+
 class Video(BaseMessageComponent):
     type: ComponentType = ComponentType.Video
     file: str
@@ -330,6 +334,8 @@ class Video(BaseMessageComponent):
                 "file": payload_file,
             },
         }
+
+
 class At(BaseMessageComponent):
     type: ComponentType = ComponentType.At
     qq: int | str  # 此处str为all时代表所有人
@@ -343,11 +349,14 @@ class At(BaseMessageComponent):
             "type": "at",
             "data": {"qq": str(self.qq)},
         }
+
+
 class AtAll(At):
-    qq : int | str = "all"
+    qq: int | str = "all"
 
     def __init__(self, **_):
         super().__init__(type=ComponentType.At, **_)
+
 
 class RPS(BaseMessageComponent):  # TODO
     type: ComponentType = ComponentType.RPS
@@ -355,17 +364,20 @@ class RPS(BaseMessageComponent):  # TODO
     def __init__(self, **_):
         super().__init__(type=ComponentType.RPS, **_)
 
+
 class Dice(BaseMessageComponent):  # TODO
     type: ComponentType = ComponentType.Dice
 
     def __init__(self, **_):
         super().__init__(type=ComponentType.Dice, **_)
 
+
 class Shake(BaseMessageComponent):  # TODO
     type: ComponentType = ComponentType.Shake
 
     def __init__(self, **_):
         super().__init__(type=ComponentType.Shake, **_)
+
 
 class Anonymous(BaseMessageComponent):  # TODO
     type: ComponentType = ComponentType.Anonymous
@@ -744,6 +756,7 @@ class File(BaseMessageComponent):
         self.name = name
         self.file_ = file
         self.url = url
+
     @property
     def file(self) -> str:
         """

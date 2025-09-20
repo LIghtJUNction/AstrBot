@@ -1,6 +1,6 @@
 import re
 import inspect
-from typing import List, Any, Type, Dict
+from typing import Any
 from . import HandlerFilter
 from astrbot.core.platform.astr_message_event import AstrMessageEvent
 from astrbot.core.config import AstrBotConfig
@@ -23,14 +23,14 @@ class CommandFilter(HandlerFilter):
         command_name: str,
         alias: set | None = None,
         handler_md: StarHandlerMetadata | None = None,
-        parent_command_names: List[str] = [""],
+        parent_command_names: list[str] = [""],
     ):
         self.command_name = command_name
         self.alias = alias if alias else set()
         self.parent_command_names = parent_command_names
         if handler_md:
             self.init_handler_md(handler_md)
-        self.custom_filter_list: List[CustomFilter] = []
+        self.custom_filter_list: list[CustomFilter] = []
 
     def print_types(self):
         result = ""
@@ -70,8 +70,8 @@ class CommandFilter(HandlerFilter):
         return True
 
     def validate_and_convert_params(
-        self, params: List[Any], param_type: Dict[str, Type]
-    ) -> Dict[str, Any]:
+        self, params: list[Any], param_type: dict[str, type]
+    ) -> dict[str, Any]:
         """将参数列表 params 根据 param_type 转换为参数字典。"""
         result = {}
         param_items = list(param_type.items())
@@ -92,7 +92,7 @@ class CommandFilter(HandlerFilter):
             # 没有 GreedyStr 的情况
             if i >= len(params):
                 if (
-                    isinstance(param_type_or_default_val, Type)
+                    isinstance(param_type_or_default_val, type)
                     or param_type_or_default_val is inspect.Parameter.empty
                 ):
                     # 是类型

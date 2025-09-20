@@ -3,7 +3,7 @@
 """
 
 from astrbot.core import sp, logger
-from typing import Dict, List
+
 from astrbot.core.platform.astr_message_event import AstrMessageEvent
 
 
@@ -95,14 +95,14 @@ class SessionPluginManager:
         )
 
     @staticmethod
-    def get_session_plugin_config(session_id: str) -> Dict[str, List[str]]:
+    def get_session_plugin_config(session_id: str) -> dict[str, list[str]]:
         """获取指定会话的插件配置
 
         Args:
             session_id: 会话ID (unified_msg_origin)
 
         Returns:
-            Dict[str, List[str]]: 包含enabled_plugins和disabled_plugins的字典
+            dict[str, list[str]]: 包含enabled_plugins和disabled_plugins的字典
         """
         session_plugin_config = sp.get(
             "session_plugin_config", {}, scope="umo", scope_id=session_id
@@ -112,7 +112,7 @@ class SessionPluginManager:
         )
 
     @staticmethod
-    def filter_handlers_by_session(event: AstrMessageEvent, handlers: List) -> List:
+    def filter_handlers_by_session(event: AstrMessageEvent, handlers: list) -> list:
         """根据会话配置过滤处理器列表
 
         Args:
@@ -120,7 +120,7 @@ class SessionPluginManager:
             handlers: 原始处理器列表
 
         Returns:
-            List: 过滤后的处理器列表
+            list: 过滤后的处理器列表
         """
         from astrbot.core.star.star import star_map
 

@@ -1,15 +1,12 @@
 import click
 
+
 @click.command("list")
-@click.option("--all", "-a" , "show_all" , is_flag=True, help="列出未安装的插件")
+@click.option("--all", "-a", "show_all", is_flag=True, help="列出未安装的插件")
 def list_impl(show_all: bool):
     """列出插件"""
-    from ..utils import (
-        get_astrbot_root,
-        build_plug_list,
-        display_plugins,
-        PluginStatus
-    )
+    from ..utils import get_astrbot_root, build_plug_list, display_plugins, PluginStatus
+
     base_path = get_astrbot_root()
     plugins = build_plug_list(base_path / "data" / "plugins")
 

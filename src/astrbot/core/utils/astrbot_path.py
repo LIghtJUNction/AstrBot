@@ -10,6 +10,7 @@ Astrbot统一路径获取
 
 import os
 
+
 def get_astrbot_path() -> str:
     """获取Astrbot项目路径"""
     return os.path.realpath(
@@ -23,6 +24,7 @@ def get_astrbot_root() -> str:
         return os.path.realpath(path)
     else:
         return os.path.realpath(os.getcwd())
+
 
 def get_astrbot_data_path() -> str:
     """获取Astrbot数据目录路径"""

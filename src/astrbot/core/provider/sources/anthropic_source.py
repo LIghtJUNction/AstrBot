@@ -1,7 +1,6 @@
 import json
 import anthropic
 import base64
-from typing import List
 from mimetypes import guess_type
 
 from anthropic import AsyncAnthropic
@@ -33,7 +32,7 @@ class ProviderAnthropic(Provider):
         )
 
         self.chosen_api_key: str = ""
-        self.api_keys: List = provider_config.get("key", [])
+        self.api_keys: list = provider_config.get("key", [])
         self.chosen_api_key = self.api_keys[0] if len(self.api_keys) > 0 else ""
         self.base_url = provider_config.get("api_base", "https://api.anthropic.com")
         self.timeout = provider_config.get("timeout", 120)
@@ -322,7 +321,7 @@ class ProviderAnthropic(Provider):
         async for llm_response in self._query_stream(payloads, func_tool):
             yield llm_response
 
-    async def assemble_context(self, text: str, image_urls: List[str] = None):
+    async def assemble_context(self, text: str, image_urls: list[str] = None):
         """组装上下文，支持文本和图片"""
         if not image_urls:
             return {"role": "user", "content": text}
@@ -378,7 +377,7 @@ class ProviderAnthropic(Provider):
     def get_current_key(self) -> str:
         return self.chosen_api_key
 
-    async def get_models(self) -> List[str]:
+    async def get_models(self) -> list[str]:
         models_str = []
         models = await self.client.models.list()
         models = sorted(models.data, key=lambda x: x.id)

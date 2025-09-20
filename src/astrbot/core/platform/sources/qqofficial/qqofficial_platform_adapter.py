@@ -19,7 +19,7 @@ from astrbot.api.platform import (
 )
 from astrbot import logger
 from astrbot.api.event import MessageChain
-from typing import Union, List
+
 from astrbot.api.message_components import Image, Plain, At
 from astrbot.core.platform.astr_message_event import MessageSession
 from .qqofficial_message_event import QQOfficialMessageEvent
@@ -133,7 +133,7 @@ class QQOfficialPlatformAdapter(Platform):
 
     @staticmethod
     def _parse_from_qqofficial(
-        message: Union[botpy.message.Message, botpy.message.GroupMessage],
+        message: botpy.message.Message | botpy.message.GroupMessage,
         message_type: MessageType,
     ):
         abm = AstrBotMessage()
@@ -142,7 +142,7 @@ class QQOfficialPlatformAdapter(Platform):
         abm.raw_message = message
         abm.message_id = message.id
         abm.tag = "qq_official"
-        msg: List[BaseMessageComponent] = []
+        msg: list[BaseMessageComponent] = []
 
         if isinstance(message, botpy.message.GroupMessage) or isinstance(
             message, botpy.message.C2CMessage

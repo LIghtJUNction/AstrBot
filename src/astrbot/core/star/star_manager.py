@@ -600,7 +600,7 @@ class PluginManager:
 
         if not fail_rec:
             return True, None
-        
+
         else:
             self.failed_plugin_info = fail_rec
             return False, fail_rec

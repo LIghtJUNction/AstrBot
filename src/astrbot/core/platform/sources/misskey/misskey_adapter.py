@@ -1,6 +1,6 @@
 import asyncio
 import json
-from typing import Dict, Any, Optional, Awaitable
+from typing import Any, Awaitable
 
 from astrbot.api import logger
 from astrbot.api.event import MessageChain
@@ -49,7 +49,7 @@ class MisskeyPlatformAdapter(Platform):
 
         self.unique_session = platform_settings["unique_session"]
 
-        self.api: Optional[MisskeyAPI] = None
+        self.api: MisskeyAPI | None = None
         self._running = False
         self.client_self_id = ""
         self._bot_username = ""
@@ -146,7 +146,7 @@ class MisskeyPlatformAdapter(Platform):
                 await asyncio.sleep(backoff_delay)
                 backoff_delay = min(backoff_delay * backoff_multiplier, max_backoff)
 
-    async def _handle_notification(self, data: Dict[str, Any]):
+    async def _handle_notification(self, data: dict[str, Any]):
         try:
             logger.debug(
                 f"[Misskey] 收到通知事件:\n{json.dumps(data, indent=2, ensure_ascii=False)}"
@@ -170,7 +170,7 @@ class MisskeyPlatformAdapter(Platform):
         except Exception as e:
             logger.error(f"[Misskey] 处理通知失败: {e}")
 
-    async def _handle_chat_message(self, data: Dict[str, Any]):
+    async def _handle_chat_message(self, data: dict[str, Any]):
         try:
             logger.debug(
                 f"[Misskey] 收到聊天事件数据:\n{json.dumps(data, indent=2, ensure_ascii=False)}"
@@ -206,12 +206,12 @@ class MisskeyPlatformAdapter(Platform):
         except Exception as e:
             logger.error(f"[Misskey] 处理聊天消息失败: {e}")
 
-    async def _debug_handler(self, data: Dict[str, Any]):
+    async def _debug_handler(self, data: dict[str, Any]):
         logger.debug(
             f"[Misskey] 收到未处理事件:\n{json.dumps(data, indent=2, ensure_ascii=False)}"
         )
 
-    def _is_bot_mentioned(self, note: Dict[str, Any]) -> bool:
+    def _is_bot_mentioned(self, note: dict[str, Any]) -> bool:
         text = note.get("text", "")
         if not text:
             return False
@@ -282,7 +282,7 @@ class MisskeyPlatformAdapter(Platform):
 
         return await super().send_by_session(session, message_chain)
 
-    async def convert_message(self, raw_data: Dict[str, Any]) -> AstrBotMessage:
+    async def convert_message(self, raw_data: dict[str, Any]) -> AstrBotMessage:
         """将 Misskey 贴文数据转换为 AstrBotMessage 对象"""
         sender_info = extract_sender_info(raw_data, is_chat=False)
         message = create_base_message(
@@ -316,7 +316,7 @@ class MisskeyPlatformAdapter(Platform):
         )
         return message
 
-    async def convert_chat_message(self, raw_data: Dict[str, Any]) -> AstrBotMessage:
+    async def convert_chat_message(self, raw_data: dict[str, Any]) -> AstrBotMessage:
         """将 Misskey 聊天消息数据转换为 AstrBotMessage 对象"""
         sender_info = extract_sender_info(raw_data, is_chat=True)
         message = create_base_message(
@@ -340,7 +340,7 @@ class MisskeyPlatformAdapter(Platform):
         message.message_str = raw_text if raw_text else ""
         return message
 
-    async def convert_room_message(self, raw_data: Dict[str, Any]) -> AstrBotMessage:
+    async def convert_room_message(self, raw_data: dict[str, Any]) -> AstrBotMessage:
         """将 Misskey 群聊消息数据转换为 AstrBotMessage 对象"""
         sender_info = extract_sender_info(raw_data, is_chat=True)
         room_id = raw_data.get("toRoomId", "")

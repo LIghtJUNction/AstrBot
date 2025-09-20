@@ -4,7 +4,7 @@ import json
 import os
 import traceback
 import time
-from typing import Optional
+
 
 import aiohttp
 import anyio
@@ -540,7 +540,7 @@ class WeChatPadProAdapter(Platform):
 
     async def _get_group_member_nickname(
         self, group_id: str, member_wxid: str
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         通过接口获取群成员的昵称。
         """
@@ -896,7 +896,7 @@ class WeChatPadProAdapter(Platform):
 
     async def get_contact_details_list(
         self, room_wx_id_list: list[str] = None, user_names: list[str] = None
-    ) -> Optional[dict]:
+    ) -> dict | None:
         """
         获取联系人详情列表。
         """

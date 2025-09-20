@@ -258,10 +258,8 @@ class Main(star.Star):
         if not path:
             yield event.plain_result(
                 f"当前 Docker 宿主机绝对路径: {
-                    self.config.get(
-                    'docker_host_astrbot_abs_path',
-                    ''
-                )}"
+                    self.config.get('docker_host_astrbot_abs_path', '')
+                }"
             )
         else:
             self.config["docker_host_astrbot_abs_path"] = path
@@ -408,11 +406,7 @@ class Main(star.Star):
             # 整理代码并保存
             code_clean = await self.tidy_code(llm_response.completion_text)
             async with await anyio.open_file(
-                os.path.join(
-                    workplace_path,
-                    "exec.py"
-                ),
-                "w"
+                os.path.join(workplace_path, "exec.py"), "w"
             ) as f:
                 await f.write(code_clean)
 

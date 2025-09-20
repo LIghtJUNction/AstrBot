@@ -1,7 +1,7 @@
 import re
 import time
 import traceback
-from typing import AsyncGenerator, Union
+from typing import AsyncGenerator
 
 from astrbot.core import file_token_service, html_renderer, logger
 from astrbot.core.message.components import At, File, Image, Node, Plain, Record, Reply
@@ -72,7 +72,7 @@ class ResultDecorateStage(Stage):
 
     async def process(
         self, event: AstrMessageEvent
-    ) -> Union[None, AsyncGenerator[None, None]]:
+    ) -> None | AsyncGenerator[None, None]:
         result = event.get_result()
         if result is None or not result.chain:
             return

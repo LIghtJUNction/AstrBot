@@ -76,7 +76,7 @@ class FaissVecDB(BaseVecDB):
             metadata_filters (dict): 元数据过滤器
 
         Returns:
-            List[Result]: 查询结果
+            list[Result]: 查询结果
         """
         embedding = await self.embedding_provider.get_embedding(query)
         scores, indices = await self.embedding_storage.search(

@@ -7,6 +7,7 @@ from .star import star_map
 
 T = TypeVar("T", bound="StarHandlerMetadata")
 
+
 class StarHandlerRegistry(Generic[T]):
     def __init__(self):
         self.star_handlers_map: dict[str, StarHandlerMetadata] = {}
@@ -141,5 +142,6 @@ class StarHandlerMetadata:
         return self.extras_configs.get("priority", 0) < other.extras_configs.get(
             "priority", 0
         )
+
 
 __all__ = ["EventType", "StarHandlerMetadata", "star_handlers_registry"]

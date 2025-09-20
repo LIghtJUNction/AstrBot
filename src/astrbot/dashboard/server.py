@@ -33,6 +33,7 @@ from .routes.route import Response, RouteContext
 from .routes.session_management import SessionManagementRoute
 from .routes.t2i import T2iRoute
 
+
 class AstrBotDashboard:
     def __init__(
         self,

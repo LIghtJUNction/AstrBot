@@ -1006,7 +1006,7 @@ UID: {user_id} 此 ID 可用于设置管理员。
     @filter.permission_type(filter.PermissionType.ADMIN)
     @filter.command("persona")
     async def persona(self, message: AstrMessageEvent):
-        cmd = message.message_str.split(" ") # type: ignore
+        cmd = message.message_str.split(" ")  # type: ignore
         umo = message.unified_msg_origin
 
         curr_persona_name = "无"
@@ -1176,8 +1176,7 @@ UID: {user_id} 此 ID 可用于设置管理员。
                 try:
                     conv = None
                     if provider.meta().type != "dify":
-                        session_curr_cid = await self.context.conversation_manager.\
-                            get_curr_conversation_id(
+                        session_curr_cid = await self.context.conversation_manager.get_curr_conversation_id(
                             event.unified_msg_origin
                         )
 

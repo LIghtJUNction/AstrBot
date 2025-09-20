@@ -179,9 +179,7 @@ class Context:
         return self._event_queue
 
     @deprecated(version="4.0.0", reason="Use get_platform_inst instead")
-    def get_platform(
-        self, platform_type: PlatformAdapterType | str
-    ) -> Platform | None:
+    def get_platform(self, platform_type: PlatformAdapterType | str) -> Platform | None:
         """
         获取指定类型的平台适配器。
 
@@ -214,7 +212,7 @@ class Context:
                 return platform
 
     async def send_message(
-        self, session: str | MessageSession , message_chain: MessageChain
+        self, session: str | MessageSession, message_chain: MessageChain
     ) -> bool:
         """
         根据 session(unified_msg_origin) 主动发送消息。

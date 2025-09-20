@@ -17,7 +17,7 @@ from astrbot.core.message.message_event_result import MessageChain
 from astrbot.api.provider import Provider
 from astrbot import logger
 from astrbot.core.provider.func_tool_manager import FuncCall
-from typing import List, AsyncGenerator
+from typing import AsyncGenerator
 from ..register import register_provider_adapter
 from astrbot.core.provider.entities import LLMResponse, ToolCallsResult
 
@@ -38,7 +38,7 @@ class ProviderOpenAIOfficial(Provider):
             default_persona,
         )
         self.chosen_api_key = None
-        self.api_keys: List = provider_config.get("key", [])
+        self.api_keys: list = provider_config.get("key", [])
         self.chosen_api_key = self.api_keys[0] if len(self.api_keys) > 0 else None
         self.timeout = provider_config.get("timeout", 120)
         if isinstance(self.timeout, str):
@@ -197,7 +197,10 @@ class ProviderOpenAIOfficial(Provider):
             # text completion
             completion_text = str(choice.message.content).strip()
             llm_response.result_chain = MessageChain().message(completion_text)
-        elif hasattr(choice.message, 'reasoning_content') and choice.message.reasoning_content:
+        elif (
+            hasattr(choice.message, "reasoning_content")
+            and choice.message.reasoning_content
+        ):
             # 处理推理内容（如豆包等模型的推理模式）
             completion_text = f"<thinking>{str(choice.message.reasoning_content).strip()}<thinking/>{choice.message.content}"
             llm_response.result_chain = MessageChain().message(completion_text)
@@ -283,7 +286,7 @@ class ProviderOpenAIOfficial(Provider):
         context_query: list,
         func_tool: FuncCall,
         chosen_key: str,
-        available_api_keys: List[str],
+        available_api_keys: list[str],
         retry_cnt: int,
         max_retries: int,
     ) -> tuple:
@@ -435,7 +438,7 @@ class ProviderOpenAIOfficial(Provider):
         self,
         prompt: str,
         session_id: str = None,
-        image_urls: List[str] = [],
+        image_urls: list[str] = [],
         func_tool: FuncCall = None,
         contexts=[],
         system_prompt=None,
@@ -500,7 +503,7 @@ class ProviderOpenAIOfficial(Provider):
                 raise Exception("未知错误")
             raise last_exception
 
-    async def _remove_image_from_context(self, contexts: List):
+    async def _remove_image_from_context(self, contexts: list):
         """
         从上下文中删除所有带有 image 的记录
         """
@@ -524,13 +527,13 @@ class ProviderOpenAIOfficial(Provider):
     def get_current_key(self) -> str:
         return self.client.api_key
 
-    def get_keys(self) -> List[str]:
+    def get_keys(self) -> list[str]:
         return self.api_keys
 
     def set_key(self, key):
         self.client.api_key = key
 
-    async def assemble_context(self, text: str, image_urls: List[str] = None) -> dict:
+    async def assemble_context(self, text: str, image_urls: list[str] = None) -> dict:
         """组装成符合 OpenAI 格式的 role 为 user 的消息段"""
         if image_urls:
             user_content = {

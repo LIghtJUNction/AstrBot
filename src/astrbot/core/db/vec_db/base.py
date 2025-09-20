@@ -30,7 +30,7 @@ class BaseVecDB:
             query (str): 查询文本
             top_k (int): 返回的最相似文档的数量
         Returns:
-            List[Result]: 查询结果
+            list[Result]: 查询结果
         """
         ...
 

@@ -5,6 +5,7 @@ import time
 from urllib.parse import urlparse, unquote
 import platform
 
+
 class FileTokenService:
     """维护一个简单的基于令牌的文件下载服务，支持超时和懒清除。"""
 

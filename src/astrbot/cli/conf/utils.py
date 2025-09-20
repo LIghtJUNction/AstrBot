@@ -20,6 +20,7 @@ CONFIG_VALIDATORS: dict[str, Callable[[str], Any]] = {
     "callback_api_base": validate_callback_api_base,
 }
 
+
 def load_config() -> dict[str, Any]:
     """加载或初始化配置文件"""
     from ..utils import get_astrbot_root, check_astrbot_root

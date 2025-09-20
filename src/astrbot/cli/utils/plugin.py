@@ -11,12 +11,14 @@ from zipfile import ZipFile
 import click
 from .version_comparator import VersionComparator
 
+
 class PluginStatus(str, Enum):
     INSTALLED = "已安装"
     NEED_UPDATE = "需更新"
     NOT_INSTALLED = "未安装"
     NOT_PUBLISHED = "未发布"
-    
+
+
 def get_git_repo(url: str, target_path: Path, proxy: str | None = None):
     """从 Git 仓库下载代码并解压到指定路径"""
     temp_dir = Path(tempfile.mkdtemp())
@@ -97,7 +99,7 @@ def load_yaml_metadata(plugin_dir: Path) -> dict:
     return {}
 
 
-def build_plug_list(plugins_dir: Path) -> list[dict[str,str | PluginStatus]]:
+def build_plug_list(plugins_dir: Path) -> list[dict[str, str | PluginStatus]]:
     """构建插件列表，包含本地和在线插件信息
 
     Args:
@@ -184,7 +186,10 @@ def build_plug_list(plugins_dir: Path) -> list[dict[str,str | PluginStatus]]:
 
 
 def manage_plugin(
-    plugin: dict[str, str], plugins_dir: Path, is_update: bool = False, proxy: str | None = None
+    plugin: dict[str, str],
+    plugins_dir: Path,
+    is_update: bool = False,
+    proxy: str | None = None,
 ) -> None:
     """安装或更新插件
 

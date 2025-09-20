@@ -3,7 +3,7 @@ import json
 import time
 import websockets
 from websockets.asyncio.client import connect
-from typing import Optional
+
 from aiohttp import ClientSession, ClientTimeout
 from websockets.asyncio.client import ClientConnection
 from astrbot.api import logger
@@ -44,12 +44,12 @@ class SatoriPlatformAdapter(Platform):
         self.heartbeat_interval = self.config.get("satori_heartbeat_interval", 10)
         self.reconnect_delay = self.config.get("satori_reconnect_delay", 5)
 
-        self.ws: Optional[ClientConnection] = None
-        self.session: Optional[ClientSession] = None
+        self.ws: ClientConnection | None = None
+        self.session: ClientSession | None = None
         self.sequence = 0
         self.logins = []
         self.running = False
-        self.heartbeat_task: Optional[asyncio.Task] = None
+        self.heartbeat_task: asyncio.Task | None = None
         self.ready_received = False
 
     async def send_by_session(
@@ -282,10 +282,10 @@ class SatoriPlatformAdapter(Platform):
         message: dict,
         user: dict,
         channel: dict,
-        guild: Optional[dict],
+        guild: dict | None,
         login: dict,
-        timestamp: Optional[int] = None,
-    ) -> Optional[AstrBotMessage]:
+        timestamp: int | None = None,
+    ) -> AstrBotMessage | None:
         try:
             abm = AstrBotMessage()
             abm.message_id = message.get("id", "")
