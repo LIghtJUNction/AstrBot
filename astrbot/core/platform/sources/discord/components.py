@@ -80,6 +80,7 @@ class DiscordButton(BaseMessageComponent):
         self.url = url
         self.disabled = disabled
 
+
 class DiscordReference(BaseMessageComponent):
     """Discord引用组件"""
     type: ComponentType = ComponentType.DiscordReference
@@ -98,7 +99,6 @@ class DiscordView(BaseMessageComponent):
     ):
         self.components = components or []
         self.timeout = timeout
-
 
     def to_discord_view(self) -> discord.ui.View:
         """转换为Discord View对象"""

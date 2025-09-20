@@ -4,9 +4,11 @@ import json
 from astrbot.core.utils.io import download_image_by_url
 from astrbot import logger
 from dataclasses import dataclass, field
-from typing import Type
-from .func_tool_manager import FuncCall
+from typing import Any
+from astrbot.core.agent.tool import ToolSet
 from openai.types.chat.chat_completion import ChatCompletion
+from google.genai.types import GenerateContentResponse
+from anthropic.types import Message
 from openai.types.chat.chat_completion_message_tool_call import (
     ChatCompletionMessageToolCall,
 )
@@ -20,6 +22,7 @@ class ProviderType(enum.Enum):
     SPEECH_TO_TEXT = "speech_to_text"
     TEXT_TO_SPEECH = "text_to_speech"
     EMBEDDING = "embedding"
+    RERANK = "rerank"
 
 
 @dataclass
@@ -29,7 +32,7 @@ class ProviderMetaData:
     desc: str = ""
     """提供商适配器描述."""
     provider_type: ProviderType = ProviderType.CHAT_COMPLETION
-    cls_type: Type | None = None
+    cls_type: type | None = None
 
     default_config_tmpl: dict | None = None
     """平台的默认配置模板"""
@@ -97,7 +100,7 @@ class ProviderRequest:
     """会话 ID"""
     image_urls: list[str] = field(default_factory=list)
     """图片 URL 列表"""
-    func_tool: FuncCall | None = None
+    func_tool: ToolSet | None = None
     """可用的函数工具"""
     contexts: list[dict] = field(default_factory=list)
     """上下文。格式与 openai 的上下文格式一致：
@@ -204,7 +207,7 @@ class ProviderRequest:
 class LLMResponse:
     role: str
     """角色, assistant, tool, err"""
-    result_chain: MessageChain = None
+    result_chain: MessageChain | None = None
     """返回的消息链"""
     tools_call_args: list[dict[str, any]] = field(default_factory=list)
     """工具调用参数"""
@@ -213,7 +216,7 @@ class LLMResponse:
     tools_call_ids: list[str] = field(default_factory=list)
     """工具调用 ID"""
 
-    raw_completion: ChatCompletion = None
+    raw_completion: ChatCompletion | GenerateContentResponse | Message | None = None
     _new_record: dict[str, any] = None
 
     _completion_text: str = ""
@@ -293,3 +296,11 @@ class LLMResponse:
                 }
             )
         return ret
+
+
+@dataclass
+class RerankResult:
+    index: int
+    """在候选列表中的索引位置"""
+    relevance_score: float
+    """相关性分数"""

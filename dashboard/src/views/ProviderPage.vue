@@ -12,9 +12,6 @@
           </p>
         </div>
         <div>
-          <v-btn color="success" prepend-icon="mdi-cog" variant="tonal" class="me-2" @click="showSettingsDialog = true" rounded="xl" size="x-large">
-            {{ tm('providers.settings') }}
-          </v-btn>
           <v-btn color="primary" prepend-icon="mdi-plus" variant="tonal" @click="showAddProviderDialog = true" rounded="xl" size="x-large">
             {{ tm('providers.addProvider') }}
           </v-btn>
@@ -44,6 +41,10 @@
             <v-icon start>mdi-code-json</v-icon>
             {{ tm('providers.tabs.embedding') }}
           </v-tab>
+          <v-tab value="rerank" class="font-weight-medium px-3">
+            <v-icon start>mdi-compare-vertical</v-icon>
+            {{ tm('providers.tabs.rerank') }}
+          </v-tab>
         </v-tabs>
 
         <v-row v-if="filteredProviders.length === 0">
@@ -55,14 +56,16 @@
 
         <v-row v-else>
           <v-col v-for="(provider, index) in filteredProviders" :key="index" cols="12" md="6" lg="4" xl="3">
-            <item-card 
-              :item="provider" 
-              title-field="id" 
+            <item-card
+              :item="provider"
+              title-field="id"
               enabled-field="enable"
               @toggle-enabled="providerStatusChange"
               :bglogo="getProviderIcon(provider.provider)"
-              @delete="deleteProvider" 
-              @edit="configExistingProvider">
+              @delete="deleteProvider"
+              @edit="configExistingProvider"
+              @copy="copyProvider"
+              :show-copy-button="true">
               <template v-slot:details="{ item }">
               </template>
             </item-card>
@@ -94,7 +97,7 @@
               <v-alert v-if="providerStatuses.length === 0" type="info" variant="tonal">
                 {{ tm('availability.noData') }}
               </v-alert>
-              
+
               <v-container v-else class="pa-0">
                 <v-row>
                   <v-col v-for="status in providerStatuses" :key="status.id" cols="12" sm="6" md="4">
@@ -112,7 +115,7 @@
                         ></v-progress-circular>
 
                         <span class="font-weight-bold">{{ status.id }}</span>
-                        
+
                         <v-chip :color="getStatusColor(status.status)" size="small" class="ml-2">
                           {{ getStatusText(status.status) }}
                         </v-chip>
@@ -181,10 +184,14 @@
               <v-icon start>mdi-code-json</v-icon>
               {{ tm('dialogs.addProvider.tabs.embedding') }}
             </v-tab>
+            <v-tab value="rerank" class="font-weight-medium px-3">
+              <v-icon start>mdi-compare-vertical</v-icon>
+              {{ tm('dialogs.addProvider.tabs.rerank') }}
+            </v-tab>
           </v-tabs>
 
           <v-window v-model="activeProviderTab" class="mt-4">
-            <v-window-item v-for="tabType in ['chat_completion', 'speech_to_text', 'text_to_speech', 'embedding']"
+            <v-window-item v-for="tabType in ['chat_completion', 'speech_to_text', 'text_to_speech', 'embedding', 'rerank']"
                           :key="tabType"
                           :value="tabType">
               <v-row class="mt-1">
@@ -233,6 +240,7 @@
             :iterable="newSelectedProviderConfig"
             :metadata="metadata['provider_group']?.metadata"
             metadataKey="provider"
+            :is-editing="updatingMode"
           />
         </v-card-text>
 
@@ -245,49 +253,6 @@
           </v-btn>
           <v-btn color="primary" @click="newProvider" :loading="loading">
             {{ tm('dialogs.config.save') }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- 设置对话框 -->
-    <v-dialog v-model="showSettingsDialog" max-width="600px">
-      <v-card>
-        <v-card-title class="bg-primary text-white py-3 px-4" style="display: flex; align-items: center;">
-          <v-icon color="white" class="me-2">mdi-cog</v-icon>
-          <span>{{ tm('dialogs.settings.title') }}</span>
-          <v-spacer></v-spacer>
-          <v-btn icon variant="text" color="white" @click="showSettingsDialog = false">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
-
-        <v-card-text class="pa-4">
-          <v-list>
-            <v-list-item>
-              <v-switch
-                style="padding: 12px;"
-                v-model="sessionSeparationEnabled"
-                color="primary"
-                :loading="sessionSettingLoading"
-                @change="updateSessionSeparation"
-                hide-details
-              >
-                <template v-slot:label>
-                  <div>
-                    <div class="text-subtitle-1">{{ tm('dialogs.settings.sessionSeparation.title') }}</div>
-                    <div class="text-caption text-medium-emphasis">{{ tm('dialogs.settings.sessionSeparation.description') }}</div>
-                  </div>
-                </template>
-              </v-switch>
-            </v-list-item>
-          </v-list>
-        </v-card-text>
-
-        <v-card-actions class="pa-4">
-          <v-spacer></v-spacer>
-          <v-btn variant="text" @click="showSettingsDialog = false">
-            {{ tm('dialogs.settings.close') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -365,11 +330,6 @@ export default {
       metadata: {},
       showProviderCfg: false,
 
-      // 设置对话框相关
-      showSettingsDialog: false,
-      sessionSeparationEnabled: false,
-      sessionSettingLoading: false,
-
       // ID冲突确认对话框
       showIdConflictDialog: false,
       conflictId: '',
@@ -390,10 +350,10 @@ export default {
       save_message_success: "success",
 
       showConsole: false,
-      
+
       // 显示状态部分
       showStatus: false,
-      
+
       // 供应商状态相关
       providerStatuses: [],
       loadingStatus: false,
@@ -457,17 +417,16 @@ export default {
           'chat_completion': this.tm('providers.tabs.chatCompletion'),
           'speech_to_text': this.tm('providers.tabs.speechToText'),
           'text_to_speech': this.tm('providers.tabs.textToSpeech'),
-          'embedding': this.tm('providers.tabs.embedding')
+          'embedding': this.tm('providers.tabs.embedding'),
+          'rerank': this.tm('providers.tabs.rerank')
         },
         success: {
           update: this.tm('messages.success.update'),
           add: this.tm('messages.success.add'),
           delete: this.tm('messages.success.delete'),
           statusUpdate: this.tm('messages.success.statusUpdate'),
-          sessionSeparation: this.tm('messages.success.sessionSeparation')
         },
         error: {
-          sessionSeparation: this.tm('messages.error.sessionSeparation'),
           fetchStatus: this.tm('messages.error.fetchStatus')
         },
         confirm: {
@@ -480,7 +439,7 @@ export default {
         }
       };
     },
-    
+
     // 根据选择的标签过滤提供商列表
     filteredProviders() {
       if (!this.config_data.provider || this.activeProviderTypeTab === 'all') {
@@ -492,7 +451,7 @@ export default {
         if (provider.provider_type) {
           return provider.provider_type === this.activeProviderTypeTab;
         }
-        
+
         // 否则使用映射关系
         const mappedType = this.oldVersionProviderTypeMapping[provider.type];
         return mappedType === this.activeProviderTypeTab;
@@ -502,7 +461,6 @@ export default {
 
   mounted() {
     this.getConfig();
-    this.getSessionSeparationStatus();
   },
 
   methods: {
@@ -549,6 +507,7 @@ export default {
         'ollama': 'https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/ollama.svg',
         'google': 'https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/gemini-color.svg',
         'deepseek': 'https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/deepseek.svg',
+        'modelscope': 'https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/modelscope.svg',
         'zhipu': 'https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/zhipu.svg',
         'siliconflow': 'https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/siliconcloud.svg',
         'moonshot': 'https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/kimi.svg',
@@ -561,6 +520,7 @@ export default {
         'minimax': 'https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/minimax.svg',
         '302ai': 'https://registry.npmmirror.com/@lobehub/icons-static-svg/1.53.0/files/icons/ai302-color.svg',
         'microsoft': 'https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/microsoft.svg',
+        'vllm': 'https://registry.npmmirror.com/@lobehub/icons-static-svg/latest/files/icons/vllm.svg',
       };
       return icons[type] || '';
     },
@@ -574,6 +534,8 @@ export default {
     getProviderDescription(template, name) {
       if (name == 'OpenAI') {
         return this.tm('providers.description.openai', { type: template.type });
+      } else if (name == 'vLLM Rerank') {
+        return this.tm('providers.description.vllm_rerank', { type: template.type });
       }
       return this.tm('providers.description.default', { type: template.type });
     },
@@ -587,11 +549,6 @@ export default {
         this.metadata['provider_group']?.metadata?.provider?.config_template[name] || {}
       ));
       this.showAddProviderDialog = false;
-    },
-
-    // 废弃旧方法，保留为兼容
-    addFromDefaultConfigTmpl(index) {
-      this.selectProviderTemplate(index[0]);
     },
 
     configExistingProvider(provider) {
@@ -626,15 +583,22 @@ export default {
         for (let key in reference) {
           if (typeof reference[key] === 'object' && reference[key] !== null) {
             if (!(key in target)) {
-              target[key] = Array.isArray(reference[key]) ? [] : {};
+              // 如果target中没有这个key
+              if (Array.isArray(reference[key])) {
+                // 复制
+                target[key] = [...reference[key]]
+              } else {
+                target[key] = {};
+              }
             }
-            mergeConfigWithOrder(
-              target[key],
-              source && source[key] ? source[key] : {},
-              reference[key]
-            );
+            if (!Array.isArray(reference[key])) {
+              mergeConfigWithOrder(
+                target[key],
+                source && source[key] ? source[key] : {},
+                reference[key]
+              );
+            }
           } else if (!(key in target)) {
-            // 只有当target中不存在该键时才从reference复制
             target[key] = reference[key];
           }
         }
@@ -695,6 +659,40 @@ export default {
       }
     },
 
+    async copyProvider(providerToCopy) {
+      console.log('copyProvider triggered for:', providerToCopy);
+      // 1. 创建深拷贝
+      const newProviderConfig = JSON.parse(JSON.stringify(providerToCopy));
+
+      // 2. 生成唯一的 ID
+      const generateUniqueId = (baseId) => {
+        let newId = `${baseId}_copy`;
+        let counter = 1;
+        const existingIds = this.config_data.provider.map(p => p.id);
+        while (existingIds.includes(newId)) {
+          newId = `${baseId}_copy_${counter}`;
+          counter++;
+        }
+        return newId;
+      };
+      newProviderConfig.id = generateUniqueId(providerToCopy.id);
+
+      // 3. 设置为禁用状态，等待用户手动开启
+      newProviderConfig.enable = false;
+
+      this.loading = true;
+      try {
+        // 4. 调用后端接口创建
+        const res = await axios.post('/api/config/provider/new', newProviderConfig);
+        this.showSuccess(res.data.message || `成功复制并创建了 ${newProviderConfig.id}`);
+        this.getConfig(); // 5. 刷新列表
+      } catch (err) {
+        this.showError(err.response?.data?.message || err.message);
+      } finally {
+        this.loading = false;
+      }
+    },
+
     deleteProvider(provider) {
       if (confirm(this.tm('messages.confirm.delete', { id: provider.id }))) {
         axios.post('/api/config/provider/delete', { id: provider.id }).then((res) => {
@@ -721,32 +719,6 @@ export default {
       });
     },
 
-    // 获取会话隔离配置状态
-    getSessionSeparationStatus() {
-      axios.get('/api/config/provider/get_session_seperate').then((res) => {
-        if (res.data && res.data.status === 'ok') {
-          this.sessionSeparationEnabled = res.data.data.enable;
-        }
-      }).catch((err) => {
-        this.showError(err.response?.data?.message || this.messages.error.sessionSeparation);
-      });
-    },
-
-    // 更新会话隔离配置
-    updateSessionSeparation() {
-      this.sessionSettingLoading = true;
-      axios.post('/api/config/provider/set_session_seperate', {
-        enable: this.sessionSeparationEnabled
-      }).then((res) => {
-        this.showSuccess(res.data.message || this.messages.success.sessionSeparation);
-        this.sessionSettingLoading = false;
-      }).catch((err) => {
-        this.sessionSeparationEnabled = !this.sessionSeparationEnabled; // 发生错误时回滚状态
-        this.showError(err.response?.data?.message || err.message);
-        this.sessionSettingLoading = false;
-      });
-    },
-
     showSuccess(message) {
       this.save_message = message;
       this.save_message_success = "success";
@@ -758,14 +730,14 @@ export default {
       this.save_message_success = "error";
       this.save_message_snack = true;
     },
-    
+
     // 获取供应商状态
     async fetchProviderStatus() {
       if (this.loadingStatus) return;
 
       this.loadingStatus = true;
       this.showStatus = true; // 自动展开状态部分
-      
+
       // 1. 立即初始化UI为pending状态
       this.providerStatuses = this.config_data.provider.map(p => ({
         id: p.id,
@@ -776,6 +748,19 @@ export default {
 
       // 2. 为每个provider创建一个并发的测试请求
       const promises = this.config_data.provider.map(p => {
+        if (!p.enable) {
+          const index = this.providerStatuses.findIndex(s => s.id === p.id);
+          if (index !== -1) {
+            const disabledStatus = {
+              ...this.providerStatuses[index],
+              status: 'unavailable',
+              error: '该提供商未被用户启用'
+            };
+            this.providerStatuses.splice(index, 1, disabledStatus);
+          }
+          return Promise.resolve();
+        }
+
         return axios.get(`/api/config/provider/check_one?id=${p.id}`)
           .then(res => {
             if (res.data && res.data.status === 'ok') {
@@ -950,5 +935,10 @@ export default {
 
 .v-window {
   border-radius: 4px;
+}
+
+.status-card {
+  height: 120px;
+  overflow-y: auto;
 }
 </style>

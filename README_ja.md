@@ -1,6 +1,6 @@
 <p align="center">
 
-![yjtp](https://github.com/user-attachments/assets/dcc74009-c57e-4b66-9ae3-0a81fc001255)
+![6e1279651f16d7fdf4727558b72bbaf1](https://github.com/user-attachments/assets/ead4c551-fc3c-48f7-a6f7-afbfdb820512)
 
 </p>
 
@@ -50,7 +50,7 @@ AstrBot は、疎結合、非同期、複数のメッセージプラットフォ
 ## ✨ 主な機能
 
 1. **大規模言語モデルの対話**。OpenAI API、Google Gemini、Llama、Deepseek、ChatGLM など、さまざまな大規模言語モデルをサポートし、Ollama、LLMTuner を介してローカルにデプロイされた大規模モデルをサポートします。多輪対話、人格シナリオ、多モーダル機能を備え、画像理解、音声からテキストへの変換（Whisper）をサポートします。
-2. **複数のメッセージプラットフォームの接続**。QQ（OneBot）、QQ チャンネル、WeChat（Gewechat）、Feishu、Telegram への接続をサポートします。今後、DingTalk、Discord、WhatsApp、Xiaoai 音響をサポートする予定です。レート制限、ホワイトリスト、キーワードフィルタリング、Baidu コンテンツ監査をサポートします。
+2. **複数のメッセージプラットフォームの接続**。QQ（OneBot）、QQ チャンネル、Feishu、Telegram への接続をサポートします。今後、DingTalk、Discord、WhatsApp、Xiaoai 音響をサポートする予定です。レート制限、ホワイトリスト、キーワードフィルタリング、Baidu コンテンツ監査をサポートします。
 3. **エージェント**。一部のエージェント機能をネイティブにサポートし、コードエグゼキューター、自然言語タスク、ウェブ検索などを提供します。[Dify プラットフォーム](https://dify.ai/)と連携し、Dify スマートアシスタント、ナレッジベース、Dify ワークフローを簡単に接続できます。
 4. **プラグインの拡張**。深く最適化されたプラグインメカニズムを備え、[プラグインの開発](https://astrbot.app/dev/plugin.html)をサポートし、機能を拡張できます。複数のプラグインのインストールをサポートします。
 5. **ビジュアル管理パネル**。設定の視覚的な変更、プラグイン管理、ログの表示などをサポートし、設定の難易度を低減します。WebChat を統合し、パネル上で大規模モデルと対話できます。
@@ -58,7 +58,7 @@ AstrBot は、疎結合、非同期、複数のメッセージプラットフォ
 
 > [!TIP]
 > 管理パネルのオンラインデモを体験する: [https://demo.astrbot.app/](https://demo.astrbot.app/)
-> 
+>
 > ユーザー名: `astrbot`, パスワード: `astrbot`。LLM が設定されていないため、チャットページで大規模モデルを使用することはできません。（デモのログインパスワードを変更しないでください 😭）
 
 ## ✨ 使用方法
@@ -159,11 +159,11 @@ _✨ 内蔵 Web Chat、オンラインでボットと対話 ✨_
 
 ## ⭐ Star History
 
-> [!TIP] 
+> [!TIP]
 > このプロジェクトがあなたの生活や仕事に役立った場合、またはこのプロジェクトの将来の発展に関心がある場合は、プロジェクトに Star を付けてください。これはこのオープンソースプロジェクトを維持するためのモチベーションです <3
 
 <div align="center">
-    
+
 [![Star History Chart](https://api.star-history.com/svg?repos=soulter/astrbot&type=Date)](https://star-history.com/#soulter/astrbot&Date)
 
 </div>
@@ -175,8 +175,7 @@ _✨ 内蔵 Web Chat、オンラインでボットと対話 ✨_
 ## 免責事項
 
 1. このプロジェクトは `AGPL-v3` オープンソースライセンスの下で保護されています。
-2. WeChat（個人アカウント）のデプロイメントには [Gewechat](https://github.com/Devo919/Gewechat) サービスを利用しています。AstrBot は Gewechat との接続を保証するだけであり、アカウントのリスク管理に関しては、このプロジェクトの著者は一切の責任を負いません。
-3. このプロジェクトを使用する際は、現地の法律および規制を遵守してください。
+2. このプロジェクトを使用する際は、現地の法律および規制を遵守してください。
 
 <!-- ## ✨ ATRI [ベータテスト]
 
@@ -188,6 +187,4 @@ _✨ 内蔵 Web Chat、オンラインでボットと対話 ✨_
 4. TTS
     -->
 
-
 _私は、高性能ですから!_
-

@@ -26,18 +26,35 @@ class StarHandlerRegistry(Generic[T]):
             print(handler.handler_full_name)
 
     def get_handlers_by_event_type(
-        self, event_type: EventType, only_activated=True, platform_id=None
+        self,
+        event_type: EventType,
+        only_activated=True,
+        plugins_name: list[str] | None = None,
     ) -> list[StarHandlerMetadata]:
         handlers = []
         for handler in self._handlers:
+            # 过滤事件类型
             if handler.event_type != event_type:
                 continue
+            # 过滤启用状态
             if only_activated:
                 plugin = star_map.get(handler.handler_module_path)
                 if not (plugin and plugin.activated):
                     continue
-            if platform_id and event_type != EventType.OnAstrBotLoadedEvent:
-                if not handler.is_enabled_for_platform(platform_id):
+            # 过滤插件白名单
+            if plugins_name is not None and plugins_name != ["*"]:
+                plugin = star_map.get(handler.handler_module_path)
+                if not plugin:
+                    continue
+                if (
+                    plugin.name not in plugins_name
+                    and event_type
+                    not in (
+                        EventType.OnAstrBotLoadedEvent,
+                        EventType.OnPlatformLoadedEvent,
+                    )
+                    and not plugin.reserved
+                ):
                     continue
             handlers.append(handler)
         return handlers
@@ -49,7 +66,8 @@ class StarHandlerRegistry(Generic[T]):
         self, module_name: str
     ) -> list[StarHandlerMetadata]:
         return [
-            handler for handler in self._handlers
+            handler
+            for handler in self._handlers
             if handler.handler_module_path == module_name
         ]
 
@@ -67,6 +85,7 @@ class StarHandlerRegistry(Generic[T]):
     def __len__(self):
         return len(self._handlers)
 
+
 star_handlers_registry = StarHandlerRegistry()
 
 
@@ -79,6 +98,7 @@ class EventType(enum.Enum):
     """
 
     OnAstrBotLoadedEvent = enum.auto()  # AstrBot 加载完成
+    OnPlatformLoadedEvent = enum.auto()  # 平台加载完成
 
     AdapterMessageEvent = enum.auto()  # 收到适配器发来的消息
     OnLLMRequestEvent = enum.auto()  # 收到 LLM 请求（可以是用户也可以是插件）
@@ -122,31 +142,4 @@ class StarHandlerMetadata:
             "priority", 0
         )
 
-    def is_enabled_for_platform(self, platform_id: str) -> bool:
-        """检查插件是否在指定平台启用
-
-        Args:
-            platform_id: 平台ID，这是从event.get_platform_id()获取的，用于唯一标识平台实例
-
-        Returns:
-            bool: 是否启用，True表示启用，False表示禁用
-        """
-        plugin = star_map.get(self.handler_module_path)
-
-        # 如果插件元数据不存在，默认允许执行
-        if not plugin or not plugin.name:
-            return True
-
-        # 先检查插件是否被激活
-        if not plugin.activated:
-            return False
-
-        # 直接使用StarMetadata中缓存的supported_platforms判断平台兼容性
-        if (
-            hasattr(plugin, "supported_platforms")
-            and platform_id in plugin.supported_platforms
-        ):
-            return plugin.supported_platforms[platform_id]
-
-        # 如果没有缓存数据，默认允许执行
-        return True
+__all__ = ["EventType", "StarHandlerMetadata", "star_handlers_registry"]

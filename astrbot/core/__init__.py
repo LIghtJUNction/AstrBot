@@ -1,5 +1,5 @@
 import os
-import asyncio
+
 from .log import LogManager, LogBroker  
 from astrbot.core.utils.t2i.renderer import HtmlRenderer
 from astrbot.core.utils.shared_preferences import SharedPreferences
@@ -21,15 +21,13 @@ html_renderer = HtmlRenderer(t2i_base_url)
 logger = LogManager.GetLogger(log_name="astrbot")
 db_helper = SQLiteDatabase(DB_PATH)
 # 简单的偏好设置存储, 这里后续应该存储到数据库中, 一些部分可以存储到配置中
-sp = SharedPreferences()
+sp = SharedPreferences(db_helper=db_helper)
 # 文件令牌服务
 file_token_service = FileTokenService()
 pip_installer = PipInstaller(
     astrbot_config.get("pip_install_arg", ""),
     astrbot_config.get("pypi_index_url", None),
 )
-web_chat_queue = asyncio.Queue(maxsize=32)
-web_chat_back_queue = asyncio.Queue(maxsize=32)
 
 __all__ = [
     "logger",
