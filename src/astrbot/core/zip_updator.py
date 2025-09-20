@@ -117,7 +117,13 @@ class RepoZipUpdator:
     ) -> ReleaseInfo | None:
         update_data = await self.fetch_release_info(url)
 
+        # Check if update_data is empty to prevent IndexError
+        if not update_data:
+            logger.error("未获取到任何发布版本信息")
+            return None
+
         sel_release_data = None
+        tag_name = None  # Initialize tag_name to prevent undefined variable error
         if consider_prerelease:
             tag_name = update_data[0]["tag_name"]
             sel_release_data = update_data[0]

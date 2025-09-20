@@ -63,13 +63,15 @@ class ProviderDashscope(ProviderOpenAIOfficial):
         self,
         prompt: str,
         session_id: str = None,
-        image_urls: list[str] = [],
+        image_urls: list[str] = None,
         func_tool: FuncCall = None,
         contexts: list = None,
         system_prompt: str = None,
         model=None,
         **kwargs,
     ) -> LLMResponse:
+        if image_urls is None:
+            image_urls = []
         if contexts is None:
             contexts = []
         # 获得会话变量
