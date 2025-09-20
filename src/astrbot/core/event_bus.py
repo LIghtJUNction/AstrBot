@@ -18,7 +18,6 @@ from astrbot.core import logger
 from .platform import AstrMessageEvent
 from astrbot.core.astrbot_config_mgr import AstrBotConfigManager
 
-
 class EventBus:
     """用于处理事件的分发和处理"""
 
@@ -26,7 +25,7 @@ class EventBus:
         self,
         event_queue: Queue,
         pipeline_scheduler_mapping: dict[str, PipelineScheduler],
-        astrbot_config_mgr: AstrBotConfigManager = None,
+        astrbot_config_mgr: AstrBotConfigManager | None = None,
     ):
         self.event_queue = event_queue  # 事件队列
         # abconf uuid -> scheduler

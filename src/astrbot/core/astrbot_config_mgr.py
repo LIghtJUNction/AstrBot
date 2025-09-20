@@ -6,10 +6,9 @@ from astrbot.core.config.astrbot_config import ASTRBOT_CONFIG_PATH
 from astrbot.core.config.default import DEFAULT_CONFIG
 from astrbot.core.platform.message_session import MessageSession
 from astrbot.core.utils.astrbot_path import get_astrbot_config_path
-from typing import TypeVar, TypedDict
+from typing import TypeVar, TypedDict, Any
 
 _VT = TypeVar("_VT")
-
 
 class ConfInfo(TypedDict):
     """Configuration information for a specific session or platform."""
@@ -39,7 +38,7 @@ class AstrBotConfigManager:
         self.abconf_data = None
         self._load_all_configs()
 
-    def _get_abconf_data(self) -> dict:
+    def _get_abconf_data(self) -> dict[str, Any]:
         """获取所有的 abconf 数据"""
         if self.abconf_data is None:
             self.abconf_data = self.sp.get(
@@ -162,7 +161,7 @@ class AstrBotConfigManager:
     def create_conf(
         self,
         umo_parts: list[str] | list[MessageSession],
-        config: dict = DEFAULT_CONFIG,
+        config: dict[str, Any] = DEFAULT_CONFIG,
         name: str | None = None,
     ) -> str:
         """
@@ -274,7 +273,10 @@ class AstrBotConfigManager:
         return True
 
     def g(
-        self, umo: str | None = None, key: str | None = None, default: _VT = None
+        self,
+        umo: str | None = None,
+        key: str | None = None,
+        default: _VT = None,
     ) -> _VT:
         """获取配置项。umo 为 None 时使用默认配置"""
         if umo is None:

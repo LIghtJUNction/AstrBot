@@ -12,14 +12,13 @@ import logging
 
 import certifi
 
-
 from PIL import Image
 from .astrbot_path import get_astrbot_data_path
 
 logger = logging.getLogger("astrbot")
 
 
-def on_error(func, path, exc_info):
+def on_error(func: Any, path: str, exc_info: Any) -> None:
     """
     a callback of the rmtree function.
     """
@@ -77,7 +76,7 @@ def save_temp_img(img: Image.Image | str) -> str:
 
 
 async def download_image_by_url(
-    url: str, post: bool = False, post_data: dict = None, path=None
+    url: str, post: bool = False, post_data: dict | None = None, path=None
 ) -> str:
     """
     下载图片, 返回 path

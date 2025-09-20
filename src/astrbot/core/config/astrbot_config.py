@@ -3,6 +3,7 @@ import json
 import logging
 import enum
 from .default import DEFAULT_CONFIG, DEFAULT_VALUE_MAP
+from typing import Any
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
 ASTRBOT_CONFIG_PATH = os.path.join(get_astrbot_data_path(), "cmd_config.json")
@@ -14,7 +15,7 @@ class RateLimitStrategy(enum.Enum):
     DISCARD = "discard"
 
 
-class AstrBotConfig(dict):
+class AstrBotConfig(dict[str, Any]):
     """从配置文件中加载的配置，支持直接通过点号操作符访问根配置项。
 
     - 初始化时会将传入的 default_config 与配置文件进行比对，如果配置文件中缺少配置项则会自动插入默认值并进行一次写入操作。会递归检查配置项。
@@ -25,9 +26,9 @@ class AstrBotConfig(dict):
     def __init__(
         self,
         config_path: str = ASTRBOT_CONFIG_PATH,
-        default_config: dict = DEFAULT_CONFIG,
-        schema: dict = None,
-    ):
+        default_config: dict[str, Any] = DEFAULT_CONFIG,
+        schema: dict[str, Any] | None = None,
+    ) -> None:
         super().__init__()
 
         # 调用父类的 __setattr__ 方法，防止保存配置时将此属性写入配置文件
@@ -56,11 +57,11 @@ class AstrBotConfig(dict):
 
         self.update(conf)
 
-    def _config_schema_to_default_config(self, schema: dict) -> dict:
+    def _config_schema_to_default_config(self, schema: dict[str, Any]) -> dict[str, Any]:
         """将 Schema 转换成 Config"""
         conf = {}
 
-        def _parse_schema(schema: dict, conf: dict):
+        def _parse_schema(schema: dict[str, Any], conf: dict[str, Any]) -> None:
             for k, v in schema.items():
                 if v["type"] not in DEFAULT_VALUE_MAP:
                     raise TypeError(
@@ -81,7 +82,12 @@ class AstrBotConfig(dict):
 
         return conf
 
-    def check_config_integrity(self, refer_conf: dict, conf: dict, path=""):
+    def check_config_integrity(
+        self,
+        refer_conf: dict[str, Any],
+        conf: dict[str, Any],
+        path: str = "",
+    ) -> bool:
         """检查配置完整性，如果有新的配置项或顺序不一致则返回 True"""
         has_new = False
 
@@ -139,7 +145,7 @@ class AstrBotConfig(dict):
 
         return has_new
 
-    def save_config(self, replace_config: dict | None = None):
+    def save_config(self, replace_config: dict[str, Any] | None = None) -> None:
         """将配置写入文件
 
         如果传入 replace_config，则将配置替换为 replace_config
@@ -149,20 +155,20 @@ class AstrBotConfig(dict):
         with open(self.config_path, "w", encoding="utf-8-sig") as f:
             json.dump(self, f, indent=2, ensure_ascii=False)
 
-    def __getattr__(self, item):
+    def __getattr__(self, item: str) -> Any:
         try:
             return self[item]
         except KeyError:
             return None
 
-    def __delattr__(self, key):
+    def __delattr__(self, key: str) -> None:
         try:
             del self[key]
             self.save_config()
         except KeyError:
             raise AttributeError(f"没有找到 Key: '{key}'")
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: str, value: Any) -> None:
         self[key] = value
 
     def check_exist(self) -> bool:

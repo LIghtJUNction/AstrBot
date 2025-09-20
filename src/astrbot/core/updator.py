@@ -5,6 +5,7 @@ import time
 from .zip_updator import ReleaseInfo, RepoZipUpdator
 from astrbot.core import logger
 from astrbot.core.config.default import VERSION
+from typing import Any
 from astrbot.core.utils.io import download_file
 from astrbot.core.utils.astrbot_path import get_astrbot_path
 
@@ -67,17 +68,26 @@ class AstrBotUpdator(RepoZipUpdator):
             raise e
 
     async def check_update(
-        self, url: str, current_version: str, consider_prerelease: bool = True
-    ) -> ReleaseInfo:
+        self,
+        url: str,
+        current_version: str,
+        consider_prerelease: bool = True,
+    ) -> ReleaseInfo | None:
         """检查更新"""
         return await super().check_update(
             self.ASTRBOT_RELEASE_API, VERSION, consider_prerelease
         )
 
-    async def get_releases(self) -> list:
+    async def get_releases(self) -> list[dict[str, Any]]:
         return await self.fetch_release_info(self.ASTRBOT_RELEASE_API)
 
-    async def update(self, reboot=False, latest=True, version=None, proxy=""):
+    async def update(
+        self,
+        reboot: bool = False,
+        latest: bool = True,
+        version: str | None = None,
+        proxy: str = "",
+    ) -> None:
         update_data = await self.fetch_release_info(self.ASTRBOT_RELEASE_API, latest)
         file_url = None
 
